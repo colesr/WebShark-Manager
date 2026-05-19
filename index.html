@@ -860,11 +860,11 @@
   .toasts {
     position: fixed;
     bottom: 1rem;
-    right: 1rem;
+    left: 1rem;
     display: flex;
     flex-direction: column-reverse;
     gap: 0.45rem;
-    z-index: 100;
+    z-index: 300;
     pointer-events: none;
     max-width: calc(100% - 2rem);
   }
@@ -882,6 +882,202 @@
   .toast.out { animation: toastOut 180ms var(--ease) forwards; }
   @keyframes toastIn  { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
   @keyframes toastOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(6px); } }
+
+  /* AI button */
+  .ai-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.18rem 0.7rem 0.18rem 0.55rem;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: color var(--t-fast) var(--ease),
+                background var(--t-fast) var(--ease),
+                border-color var(--t-fast) var(--ease),
+                transform var(--t-fast) var(--ease);
+  }
+  .ai-link:hover { background: var(--subtle); border-color: var(--border-strong); }
+  .ai-link:active { transform: scale(0.96); }
+  .ai-link.open {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: #dbeafe;
+  }
+  .ai-link .ai-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: aiPulseRing 2.4s ease-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes aiPulseRing {
+    0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); }
+    60%  { box-shadow: 0 0 0 5px rgba(37, 99, 235, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+  }
+
+  /* chat panel */
+  .chat-panel {
+    position: fixed;
+    right: 1rem;
+    bottom: 1rem;
+    width: 360px;
+    max-width: calc(100vw - 1.5rem);
+    height: 540px;
+    max-height: calc(100vh - 2rem);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    z-index: 200;
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    overflow: hidden;
+    animation: chatIn 240ms var(--ease);
+  }
+  .chat-panel.closing { animation: chatOut 180ms var(--ease) forwards; }
+  @keyframes chatIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes chatOut {
+    from { opacity: 1; transform: none; }
+    to   { opacity: 0; transform: translateY(8px) scale(0.98); }
+  }
+
+  .chat-header {
+    display: flex; align-items: center; gap: 0.65rem;
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+  }
+  .chat-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .chat-avatar svg { width: 22px; height: 22px; display: block; }
+  .chat-title-block { flex: 1; min-width: 0; }
+  .chat-title { font-weight: 600; font-size: 0.94rem; line-height: 1.2; }
+  .chat-sub { font-size: 0.75rem; color: var(--muted); margin-top: 1px; }
+  .chat-close {
+    background: none; border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.1rem 0.4rem;
+    border-radius: 6px;
+    transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  }
+  .chat-close:hover { background: var(--subtle); color: var(--text); }
+  .chat-close:active { transform: scale(0.92); }
+
+  .chat-body {
+    overflow-y: auto;
+    padding: 0.85rem;
+    display: flex; flex-direction: column;
+    gap: 0.55rem;
+    background: var(--bg);
+    scroll-behavior: smooth;
+  }
+  .chat-msg {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.45rem;
+    animation: fadeUp var(--t-base) var(--ease);
+  }
+  .chat-msg.user { justify-content: flex-end; }
+  .chat-msg .msg-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .chat-msg .msg-avatar svg { width: 14px; height: 14px; display: block; }
+  .chat-msg .bubble {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 0.55rem 0.7rem;
+    border-radius: 12px;
+    border-bottom-left-radius: 4px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    max-width: 78%;
+    word-wrap: break-word;
+  }
+  .chat-msg.user .bubble {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-msg .bubble strong { font-weight: 600; }
+  .chat-msg .bubble a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: rgba(37, 99, 235, 0.4);
+    text-underline-offset: 2px;
+  }
+  .chat-msg .bubble ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+  .chat-msg .bubble li { margin: 0.1rem 0; }
+
+  .typing {
+    display: inline-flex; gap: 4px;
+    align-items: center;
+    padding: 0.05rem 0.1rem;
+  }
+  .typing span {
+    width: 6px; height: 6px;
+    background: var(--muted);
+    border-radius: 50%;
+    animation: typingDot 1.1s ease-in-out infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.18s; }
+  .typing span:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes typingDot {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30%           { opacity: 1; transform: translateY(-2px); }
+  }
+
+  .chat-suggestions {
+    display: flex; flex-wrap: wrap; gap: 0.3rem;
+    padding: 0.5rem 0.85rem 0.1rem;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+  }
+  .chat-suggestions .chip-btn {
+    font-size: 0.78rem;
+    padding: 0.2rem 0.6rem;
+  }
+
+  .chat-input {
+    display: flex; gap: 0.4rem;
+    padding: 0.65rem 0.85rem 0.85rem;
+    background: var(--card);
+  }
+  .chat-input input { flex: 1; }
+  .chat-input button { white-space: nowrap; }
+
+  @media (max-width: 480px) {
+    .chat-panel {
+      width: calc(100vw - 1rem);
+      right: 0.5rem;
+      bottom: 0.5rem;
+      height: min(540px, calc(100vh - 4rem));
+    }
+  }
 
   /* keyboard hint */
   .kbd {
@@ -920,6 +1116,9 @@
     <div class="brand-row">
       <a class="brand" href="#/" id="brandLink">TimePlanner.AI</a>
       <div class="header-right">
+        <button class="ai-link" id="aiLink" type="button" title="Ask the planning guru">
+          <span class="ai-dot"></span>AI
+        </button>
         <a class="header-link" id="reportsLink" href="#/reports">Reports</a>
         <div class="date" id="todayDate"></div>
       </div>
@@ -2899,14 +3098,553 @@
   }
 
   // -------------------------------------------------------------------------
+  // AI planning guru — chat UI + local heuristics engine
+  // -------------------------------------------------------------------------
+  const CHAT_KEY = "timeplanner.chat.v1";
+  let chatHistory = loadChatHistory();
+  let chatOpen = false;
+
+  function loadChatHistory() {
+    try {
+      const raw = localStorage.getItem(CHAT_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr.slice(-50) : [];
+    } catch { return []; }
+  }
+  function saveChatHistory() {
+    try { localStorage.setItem(CHAT_KEY, JSON.stringify(chatHistory.slice(-50))); } catch {}
+  }
+
+  function guruAvatarSvg() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9.25" stroke-width="1.5"/>
+      <line x1="12" y1="4.5" x2="12" y2="8.5" stroke-width="2.2"/>
+      <circle cx="12" cy="10.4" r="1.05" fill="currentColor" stroke="none"/>
+      <circle cx="12" cy="12" r="0.7" fill="currentColor" stroke="none"/>
+    </svg>`;
+  }
+
+  function ensureChatPanel() {
+    let panel = document.getElementById("chatPanel");
+    if (panel) return panel;
+    panel = document.createElement("div");
+    panel.id = "chatPanel";
+    panel.className = "chat-panel";
+    panel.innerHTML = `
+      <div class="chat-header">
+        <span class="chat-avatar" id="chatAvatar"></span>
+        <div class="chat-title-block">
+          <div class="chat-title">Planning Guru</div>
+          <div class="chat-sub">Time &amp; project advisor</div>
+        </div>
+        <button class="chat-close" id="chatClose" aria-label="Close chat">&times;</button>
+      </div>
+      <div class="chat-body" id="chatBody" role="log" aria-live="polite"></div>
+      <div class="chat-suggestions" id="chatSuggestions"></div>
+      <form class="chat-input" id="chatForm">
+        <input id="chatInput" type="text" placeholder="Ask anything…" autocomplete="off" />
+        <button type="submit" class="primary">Send</button>
+      </form>
+    `;
+    document.body.appendChild(panel);
+    document.getElementById("chatAvatar").innerHTML = guruAvatarSvg();
+    document.getElementById("chatClose").addEventListener("click", closeChat);
+    document.getElementById("chatForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const inp = document.getElementById("chatInput");
+      const text = inp.value.trim();
+      if (!text) return;
+      inp.value = "";
+      sendUserMessage(text);
+    });
+
+    // render persisted history (or seed greeting on first open)
+    if (chatHistory.length === 0) {
+      const greet = greetingMessage();
+      chatHistory.push({ role: "guru", text: greet, ts: Date.now() });
+      saveChatHistory();
+    }
+    for (const m of chatHistory) appendChatMessage(m.role, m.text, false);
+
+    renderChatSuggestions();
+    return panel;
+  }
+
+  function renderChatSuggestions() {
+    const root = document.getElementById("chatSuggestions");
+    if (!root) return;
+    root.innerHTML = "";
+    const items = [
+      "What should I focus on?",
+      "Plan my week",
+      "How am I doing?",
+      "What's at risk?",
+    ];
+    for (const s of items) {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip-btn";
+      chip.textContent = s;
+      chip.addEventListener("click", () => sendUserMessage(s));
+      root.appendChild(chip);
+    }
+  }
+
+  function openChat() {
+    const panel = ensureChatPanel();
+    panel.classList.remove("closing");
+    panel.style.display = "";
+    chatOpen = true;
+    const ai = document.getElementById("aiLink");
+    if (ai) ai.classList.add("open");
+    const body = document.getElementById("chatBody");
+    if (body) body.scrollTop = body.scrollHeight;
+    setTimeout(() => document.getElementById("chatInput")?.focus(), 60);
+  }
+  function closeChat() {
+    const panel = document.getElementById("chatPanel");
+    if (!panel) { chatOpen = false; return; }
+    panel.classList.add("closing");
+    document.getElementById("typingIndicator")?.remove();
+    setTimeout(() => {
+      panel.style.display = "none";
+      panel.classList.remove("closing");
+    }, 180);
+    chatOpen = false;
+    const ai = document.getElementById("aiLink");
+    if (ai) ai.classList.remove("open");
+  }
+  function toggleChat() { chatOpen ? closeChat() : openChat(); }
+
+  function sendUserMessage(text) {
+    if (!text) return;
+    appendChatMessage("user", text, true);
+    chatHistory.push({ role: "user", text, ts: Date.now() });
+    saveChatHistory();
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      const reply = guruRespond(text);
+      appendChatMessage("guru", reply, true);
+      chatHistory.push({ role: "guru", text: reply, ts: Date.now() });
+      saveChatHistory();
+    }, 380 + Math.random() * 280);
+  }
+
+  function appendChatMessage(role, text, animate) {
+    const body = document.getElementById("chatBody");
+    if (!body) return;
+    const row = document.createElement("div");
+    row.className = "chat-msg " + role;
+    if (!animate) row.style.animation = "none";
+    if (role === "guru") {
+      const av = document.createElement("span");
+      av.className = "msg-avatar";
+      av.innerHTML = guruAvatarSvg();
+      row.appendChild(av);
+    }
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = formatGuruMessage(text);
+    row.appendChild(bubble);
+    body.appendChild(row);
+    body.scrollTop = body.scrollHeight;
+  }
+  function showTyping() {
+    const body = document.getElementById("chatBody");
+    if (!body) return;
+    const row = document.createElement("div");
+    row.className = "chat-msg guru";
+    row.id = "typingIndicator";
+    row.innerHTML = `<span class="msg-avatar">${guruAvatarSvg()}</span>
+      <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+    body.appendChild(row);
+    body.scrollTop = body.scrollHeight;
+  }
+  function hideTyping() { document.getElementById("typingIndicator")?.remove(); }
+
+  function formatGuruMessage(text) {
+    let h = escapeHtml(text);
+    h = h.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    // bullet lines starting with "- " or "• "
+    const lines = h.split("\n");
+    let inList = false, out = [];
+    for (const line of lines) {
+      const m = line.match(/^\s*(?:[-•])\s+(.*)$/);
+      if (m) {
+        if (!inList) { out.push("<ul>"); inList = true; }
+        out.push(`<li>${m[1]}</li>`);
+      } else {
+        if (inList) { out.push("</ul>"); inList = false; }
+        out.push(line);
+      }
+    }
+    if (inList) out.push("</ul>");
+    h = out.join("\n").replace(/\n+/g, "<br>");
+    h = h.replace(/<br><ul>/g, "<ul>").replace(/<\/ul><br>/g, "</ul>");
+    return h;
+  }
+
+  // ----- guru engine ------------------------------------------------------
+
+  function greetingMessage() {
+    return [
+      "Hi! I'm your planning guru. I read your portfolios, projects, and time entries to give specific, data-grounded advice.",
+      "",
+      "Try one of the chips below, or ask me things like:",
+      "- What should I focus on?",
+      "- Plan my week",
+      "- How am I doing?",
+      "- What's at risk?",
+      "- How do I plan a new project?",
+    ].join("\n");
+  }
+
+  function guruRespond(text) {
+    const t = (text || "").toLowerCase().trim();
+    if (!t) return "What would you like help with?";
+
+    // greetings
+    if (/^(hi|hey|hello|yo|sup|howdy)\b/.test(t) || /^good (morning|afternoon|evening)\b/.test(t)) {
+      return greetingMessage();
+    }
+    if (/\b(thanks|thank you|ty|cool|nice|awesome|got it|sweet)\b/.test(t)) {
+      return "Anytime. Let me know when you want to plan, prioritize, or review.";
+    }
+    if (/\b(help|menu|what can you|capabilities|commands)\b/.test(t)) {
+      return greetingMessage();
+    }
+
+    // intent routing — order matters: more specific keywords first
+    if (/\b(at risk|risk|risks|behind|overcommit|overload|trouble|stuck|red flag|concern)\b/.test(t)) return findRisks();
+    if (/\b(plan|allocate|schedule|distribute|week|weekly|days? a week|hours? a day)\b/.test(t)) {
+      if (/\b(week|weekly|days? a week|hours? a day|allocate|distribute|schedule)\b/.test(t)) return planWeek();
+      // "plan a project" / "how do i plan" → wisdom
+      if (/\bproject\b/.test(t) || /\bhow (do|should) i plan\b/.test(t)) return planningWisdom();
+      return planWeek();
+    }
+    if (/\b(focus|priorit|important|most important|first|where (to|should) (i )?start|what (should|do) i (do|work)|next)\b/.test(t)) {
+      return suggestPriorities();
+    }
+    if (/\b(how am i|doing|review|summary|status|progress|recap|this week|last week)\b/.test(t)) {
+      return diagnose();
+    }
+    if (/\boverwhelm|too much|stress|panic|burn(ed|t)? out\b/.test(t)) {
+      return overwhelmedAdvice();
+    }
+    if (/\b(new project|start a project|create a project|add a project)\b/.test(t) || /\bhow (do|should) i (plan|set up)\b/.test(t)) {
+      return planningWisdom();
+    }
+    if (/\b(estimat|how many hours|how long)\b/.test(t)) {
+      return estimationWisdom();
+    }
+    if (/\b(deadline|due date)\b/.test(t)) {
+      return deadlineWisdom();
+    }
+    if (/\b(activit(y|ies)|track what)\b/.test(t)) {
+      return activitiesWisdom();
+    }
+    if (/\b(portfolio|portfolios|group)\b/.test(t)) {
+      return portfolioWisdom();
+    }
+
+    // fallback: give them their snapshot + nudge
+    return diagnose() + "\n\nIf you want something more specific, try **\"what should I focus on?\"**, **\"plan my week\"**, or **\"what's at risk?\"**.";
+  }
+
+  // ----- guru analyses (data-grounded) -----
+
+  function activeProjects() { return state.projects.filter(p => (p.status || "active") === "active"); }
+  function projectActivityIds(p) { return new Set(activitiesOfProject(p.id).map(a => a.id)); }
+  function projectTotalHours(p) {
+    const ids = projectActivityIds(p);
+    return totalForFilterInRange(e => ids.has(e.activityId), 0, Date.now() + MS_DAY) / MS_HOUR;
+  }
+  function projectHoursInRange(p, fromMs, toMs) {
+    const ids = projectActivityIds(p);
+    return totalForFilterInRange(e => ids.has(e.activityId), fromMs, toMs) / MS_HOUR;
+  }
+
+  function suggestPriorities() {
+    const active = activeProjects();
+    if (state.projects.length === 0) {
+      return "You don't have any projects yet. Start by creating a **portfolio** (e.g. \"Work\" or \"Personal\"), then add a project inside it with a clear name, a deadline, and an estimated hours value. I'll give you real priority advice as soon as data is there.";
+    }
+    if (active.length === 0) {
+      return "Nothing is marked **Active** right now. Open a project, click **Edit**, and set its status to Active for the things you actually want to work on this week. Then ask me again.";
+    }
+
+    const now = Date.now();
+    const scored = active.map(p => {
+      const totalH = projectTotalHours(p);
+      const last7H = projectHoursInRange(p, now - 7 * MS_DAY, now + MS_DAY);
+      let urgency = 0;
+      const reasons = [];
+      if (p.deadline) {
+        const d = daysUntil(p.deadline);
+        if (d < 0)        { urgency += 100; reasons.push(`overdue by ${Math.abs(d)}d`); }
+        else if (d === 0) { urgency += 75;  reasons.push("due today"); }
+        else if (d <= 3)  { urgency += 50;  reasons.push(`due in ${d}d`); }
+        else if (d <= 7)  { urgency += 25;  reasons.push(`due in ${d}d`); }
+      }
+      if (p.estimatedHours != null && p.estimatedHours > 0) {
+        const remaining = p.estimatedHours - totalH;
+        if (remaining < 0) {
+          urgency += 8;
+          reasons.push(`already ${(-remaining).toFixed(1)}h over estimate`);
+        } else if (p.deadline) {
+          const d = Math.max(1, daysUntil(p.deadline) + 1);
+          const pace = remaining / d;
+          if (pace > 5)      { urgency += 35; reasons.push(`needs ~${pace.toFixed(1)}h/day to finish in time`); }
+          else if (pace > 3) { urgency += 20; reasons.push(`~${pace.toFixed(1)}h/day pace required`); }
+        }
+      }
+      if (last7H === 0) { urgency += 6; reasons.push("no time logged in 7 days"); }
+      return { p, urgency, reasons, totalH, last7H };
+    }).sort((a, b) => b.urgency - a.urgency);
+
+    const top = scored.slice(0, 3);
+    if (top.every(s => s.urgency === 0)) {
+      return "Everything is on pace — no project is over its estimate, behind a deadline, or being neglected.\n\nPick whichever feels most energizing right now. Momentum matters more than perfect ordering once the fundamentals are healthy.";
+    }
+    const lines = ["Here's what I'd focus on, in order:", ""];
+    top.forEach((s, i) => {
+      const why = s.reasons.length ? ` — ${s.reasons.join("; ")}` : "";
+      lines.push(`${i + 1}. **${s.p.name}**${why}`);
+    });
+    lines.push("");
+    lines.push("Want me to draft a **week plan** that hits these?");
+    return lines.join("\n");
+  }
+
+  function planWeek() {
+    const active = activeProjects().filter(p => p.estimatedHours != null && p.estimatedHours > 0 && p.deadline);
+    if (active.length === 0) {
+      const missing = activeProjects().length === 0
+        ? "set a project to **Active** first"
+        : "give your active projects both an **estimated hours** value and a **deadline** (Edit on the project hero)";
+      return `To draft a week plan I need projects with hours and dates to anchor against. Right now I can't — ${missing}.`;
+    }
+
+    const now = Date.now();
+    const items = active.map(p => {
+      const totalH = projectTotalHours(p);
+      const remaining = Math.max(0, p.estimatedHours - totalH);
+      const daysLeft = Math.max(1, daysUntil(p.deadline) + 1);
+      const weekDaysToUse = Math.min(daysLeft, 7);
+      const perDay = remaining / daysLeft;
+      const weekTotal = perDay * weekDaysToUse;
+      return { p, remaining, daysLeft, perDay, weekTotal };
+    }).sort((a, b) => b.perDay - a.perDay);
+
+    const sumPerDay = items.reduce((s, i) => s + i.perDay, 0);
+    const sumWeek = items.reduce((s, i) => s + i.weekTotal, 0);
+
+    const lines = ["Here's a target allocation based on your estimates and deadlines:", ""];
+    items.forEach(i => {
+      lines.push(`- **${i.p.name}** — ~${i.perDay.toFixed(1)}h/day (${i.remaining.toFixed(1)}h left over ${i.daysLeft}d)`);
+    });
+    lines.push("");
+    lines.push(`**Daily total:** ~${sumPerDay.toFixed(1)}h · **This week:** ~${sumWeek.toFixed(1)}h`);
+    if (sumPerDay > 6.5) {
+      lines.push("");
+      lines.push("That's a heavy daily load. Realistic options:");
+      lines.push("- Push one deadline out by a few days");
+      lines.push("- Move a lower-impact project to **On hold**");
+      lines.push("- Trim scope on the project with the largest remaining hours");
+    } else if (sumPerDay < 1) {
+      lines.push("");
+      lines.push("This is light — you have room to add a stretch goal or take a recovery week.");
+    }
+    return lines.join("\n");
+  }
+
+  function findRisks() {
+    const active = activeProjects();
+    if (active.length === 0) {
+      return "Nothing is marked **Active**, so there's nothing at risk by definition. If something actually is at risk, set its status to Active so I can track it.";
+    }
+    const risks = [];
+    const now = Date.now();
+    for (const p of active) {
+      const totalH = projectTotalHours(p);
+      const last7H = projectHoursInRange(p, now - 7 * MS_DAY, now + MS_DAY);
+      if (p.deadline) {
+        const d = daysUntil(p.deadline);
+        if (d < 0)        risks.push(`**${p.name}** — overdue by ${Math.abs(d)} day${Math.abs(d) === 1 ? "" : "s"}`);
+        else if (d <= 3)  risks.push(`**${p.name}** — due in ${d === 0 ? "0 days (today)" : d + " day" + (d === 1 ? "" : "s")}`);
+      }
+      if (p.estimatedHours != null && p.estimatedHours > 0) {
+        if (totalH > p.estimatedHours * 1.1) {
+          risks.push(`**${p.name}** — ${totalH.toFixed(1)}h spent vs ${p.estimatedHours}h estimate (over by ${(totalH - p.estimatedHours).toFixed(1)}h)`);
+        }
+        if (p.deadline) {
+          const remaining = p.estimatedHours - totalH;
+          const d = Math.max(1, daysUntil(p.deadline) + 1);
+          if (remaining > 0 && remaining / d > 5) {
+            risks.push(`**${p.name}** — needs ${(remaining/d).toFixed(1)}h/day to finish on time`);
+          }
+        }
+      }
+      if (last7H === 0 && (p.deadline ? daysUntil(p.deadline) > 0 : true)) {
+        risks.push(`**${p.name}** — no time logged in the last 7 days`);
+      }
+    }
+    if (risks.length === 0) {
+      return "Nothing is flashing red. All your active projects are within their estimates, ahead of their deadlines, and getting attention.\n\nGood place to be — keep going.";
+    }
+    // dedupe while preserving order
+    const seen = new Set();
+    const unique = risks.filter(r => seen.has(r) ? false : (seen.add(r), true));
+    return ["Here's what I'd watch:", "", ...unique.map(r => `- ${r}`)].join("\n");
+  }
+
+  function diagnose() {
+    if (state.entries.length === 0) {
+      return state.projects.length === 0
+        ? "No projects yet. Once you've created a portfolio + project and tracked a session, I can give you a real progress report."
+        : "Projects exist but no time has been tracked yet. Start a timer on any activity and come back — I'll have something to say.";
+    }
+    const now = Date.now();
+    const last7Ms = totalForFilterInRange(() => true, now - 7 * MS_DAY, now);
+    const prev7Ms = totalForFilterInRange(() => true, now - 14 * MS_DAY, now - 7 * MS_DAY);
+    const dayKeys = new Set();
+    for (const e of state.entries) {
+      const t = new Date(e.start).getTime();
+      if (t >= now - 7 * MS_DAY && t < now) dayKeys.add(startOfDay(new Date(e.start)).toDateString());
+    }
+    let trendText = "";
+    if (prev7Ms > 0) {
+      const delta = ((last7Ms - prev7Ms) / prev7Ms) * 100;
+      if (delta >= 5)       trendText = ` — up ${Math.round(delta)}% from the week before`;
+      else if (delta <= -5) trendText = ` — down ${Math.round(Math.abs(delta))}% from the week before`;
+    } else if (last7Ms > 0) {
+      trendText = " — first week of tracked time";
+    }
+
+    // top project last 7d
+    const projMs = new Map();
+    for (const e of state.entries) {
+      const a = activityById(e.activityId);
+      if (!a) continue;
+      const ms = entryDurationClipped(e, now - 7 * MS_DAY, now);
+      if (ms > 0) projMs.set(a.projectId, (projMs.get(a.projectId) || 0) + ms);
+    }
+    let topProj = null, topProjMs = 0;
+    for (const [pid, ms] of projMs.entries()) {
+      if (ms > topProjMs) { topProjMs = ms; topProj = projectById(pid); }
+    }
+
+    const statusCounts = { planning: 0, active: 0, "on-hold": 0, done: 0 };
+    for (const p of state.projects) statusCounts[p.status || "active"]++;
+
+    const lines = [];
+    lines.push(`Over the last **7 days**: **${fmtHours(last7Ms)}** across **${dayKeys.size} active day${dayKeys.size === 1 ? "" : "s"}**${trendText}.`);
+    if (topProj) {
+      const pct = last7Ms > 0 ? Math.round((topProjMs / last7Ms) * 100) : 0;
+      lines.push("");
+      lines.push(`Biggest focus was **${topProj.name}** (${fmtHours(topProjMs)}, ${pct}% of the week).`);
+    }
+    const statusParts = STATUSES.map(s => `${statusCounts[s.value]} ${s.label}`).filter(p => !p.startsWith("0 ")).join(" · ");
+    if (statusParts) {
+      lines.push("");
+      lines.push(`Pipeline: ${statusParts}.`);
+    }
+    return lines.join("\n");
+  }
+
+  // ----- guru wisdom (general advice for non-specific questions) -----
+
+  function planningWisdom() {
+    return [
+      "A useful project plan has four parts:",
+      "",
+      "- **Clear outcome.** What does *done* look like in one sentence? If you can't say it, scope is too vague.",
+      "- **Real deadline.** Without one, work fills all available time. Pick a date you'd actually defend.",
+      "- **Honest estimate.** Your gut + 30%. Set it *before* you start, then track against it.",
+      "- **First concrete step.** The smallest action you can take today. Inertia kills more projects than complexity.",
+      "",
+      "Want me to suggest activities and an estimate for a specific project? Tell me its name.",
+    ].join("\n");
+  }
+  function overwhelmedAdvice() {
+    return [
+      "When everything feels urgent, nothing actually is. Try this:",
+      "",
+      "1. Pick **one** project for the next 25 minutes.",
+      "2. Start its timer. Don't switch.",
+      "3. When 25 minutes is up, decide if you want to continue — but only then.",
+      "",
+      "Want me to suggest **which one** to start with?",
+    ].join("\n");
+  }
+  function estimationWisdom() {
+    return [
+      "Good estimating is about calibration, not precision. A few rules:",
+      "",
+      "- **Estimate before you start**, not after. Past-you is honest; mid-flow-you is optimistic.",
+      "- **Add 30%.** Most plans underestimate hidden coordination, edits, and meetings.",
+      "- **Track the actual** and compare. Over a few projects, you'll see your personal multiplier — most people land between 1.3× and 1.8×.",
+      "",
+      "I can show you your current actual-vs-estimate ratios — just ask **\"what's at risk?\"**",
+    ].join("\n");
+  }
+  function deadlineWisdom() {
+    return [
+      "A deadline you wouldn't defend in a meeting isn't a deadline.",
+      "",
+      "Two questions to pressure-test one:",
+      "- If I miss this, what concretely happens?",
+      "- If I had to deliver in half the time, what would I cut?",
+      "",
+      "Both answers shape scope. Set the deadline on a project (Edit on its hero), and I'll factor it into your priority and week-plan suggestions.",
+    ].join("\n");
+  }
+  function activitiesWisdom() {
+    return [
+      "Activities are how you slice a project into trackable buckets. Good ones are:",
+      "",
+      "- **2–5 per project.** Fewer and you can't see where time goes; more and you'll forget which is which.",
+      "- **Verb-shaped.** \"Design\", \"Write\", \"Review\", \"Meetings\" beat \"Stuff\" or \"Misc\".",
+      "- **Reusable concepts, project-specific names.** Same \"Meetings\" pattern across projects is fine — tag entries with **#Meetings** to roll up across.",
+      "",
+      "If you can't name 2 activities for a project, the project scope is probably too vague.",
+    ].join("\n");
+  }
+  function portfolioWisdom() {
+    return [
+      "Portfolios are how you group projects that share context, stakeholders, or rhythm. Useful splits:",
+      "",
+      "- **Client A / Client B / Personal** — when context-switching has a cost.",
+      "- **Income / Learning / Side projects** — when you want to budget time across modes of work.",
+      "- **Q1 / Q2 / ...** — if you plan in cycles.",
+      "",
+      "Two or three portfolios is usually enough. More than five and the rollups stop being useful.",
+    ].join("\n");
+  }
+
+  // ----- AI button wiring -----
+  function bindAiButton() {
+    const btn = document.getElementById("aiLink");
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", toggleChat);
+  }
+  bindAiButton();
+
+  // -------------------------------------------------------------------------
   // keyboard shortcuts
   // -------------------------------------------------------------------------
   document.addEventListener("keydown", (e) => {
     const tag = (e.target.tagName || "").toLowerCase();
-    if (tag === "input" || tag === "textarea" || tag === "select") {
-      if (e.key === "Escape") e.target.blur();
+    const isInput = tag === "input" || tag === "textarea" || tag === "select";
+    if (e.key === "Escape") {
+      if (isInput) { e.target.blur(); return; }
+      if (chatOpen) { closeChat(); return; }
       return;
     }
+    if (isInput) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === "n" || e.key === "N") {
       const inp = document.querySelector("section .add-row input[type=text]");
