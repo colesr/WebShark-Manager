@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Time Tracker</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #ececec;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --danger: #b91c1c;
+    --danger-hover: #991b1b;
+    --shadow: 0 1px 2px rgba(0,0,0,0.04);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 4rem;
+  }
+  header.app {
+    margin-bottom: 2rem;
+  }
+  header.app h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem;
+    letter-spacing: -0.01em;
+  }
+  header.app .date {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.25rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+  section h2 {
+    margin: 0 0 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .empty {
+    color: var(--muted);
+    font-size: 0.9rem;
+    padding: 0.5rem 0 0.75rem;
+  }
+
+  /* activities */
+  .activity {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .activity:first-child { border-top: none; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .activity .name {
+    flex: 1;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .activity .today {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .activity.running .today { color: var(--accent); font-weight: 500; }
+  .activity .actions { display: flex; gap: 0.35rem; }
+  .icon-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+  }
+  .icon-btn:hover { color: var(--text); background: #f3f4f6; }
+  .icon-btn.danger:hover { color: var(--danger); }
+
+  .add-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .add-row input {
+    flex: 1;
+  }
+  input[type="text"], input[type="time"], input[type="date"], input[type="number"], select {
+    font: inherit;
+    color: var(--text);
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.45rem 0.65rem;
+    outline: none;
+    transition: border-color 0.12s;
+  }
+  input:focus, select:focus { border-color: var(--accent); }
+
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text);
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  button:hover { background: #f3f4f6; }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  button.stop {
+    background: #fff;
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  button.stop:hover { background: #eff6ff; }
+  button.subtle {
+    background: none;
+    border: 1px dashed var(--border);
+    color: var(--muted);
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  button.subtle:hover { color: var(--text); border-color: var(--muted); }
+
+  /* entries */
+  .entry {
+    display: grid;
+    grid-template-columns: 12px 1fr auto auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+  .entry:first-child { border-top: none; }
+  .entry .meta { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .entry .dur { font-variant-numeric: tabular-nums; font-weight: 500; }
+  .entry .name { font-weight: 500; }
+  .entry-edit {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .entry-edit:first-child { border-top: none; }
+  .entry-edit .row-actions { display: flex; gap: 0.35rem; }
+
+  .err {
+    color: var(--danger);
+    font-size: 0.82rem;
+    padding: 0.35rem 0 0;
+  }
+
+  /* weekly */
+  .week-row {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .week-row:first-child { border-top: none; }
+  .week-row .name { font-weight: 500; }
+  .week-row .bars {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    align-items: end;
+    height: 44px;
+    margin-top: 4px;
+  }
+  .week-row .bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    height: 100%;
+  }
+  .week-row .bar {
+    width: 100%;
+    background: var(--accent);
+    border-radius: 3px 3px 0 0;
+    min-height: 0;
+    opacity: 0.85;
+  }
+  .week-row .bar.zero { background: var(--border); height: 2px !important; opacity: 1; }
+  .week-row .day-label {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .week-row .total {
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+    color: var(--text);
+    align-self: start;
+    padding-top: 2px;
+  }
+  .week-grid {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
+    padding: 0.25rem 0 0.5rem;
+  }
+  .week-grid .axis {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  @media (max-width: 460px) {
+    .wrap { padding: 1.5rem 1rem 3rem; }
+    .activity { flex-wrap: wrap; }
+    .activity .actions { width: 100%; justify-content: flex-end; }
+    .entry { grid-template-columns: 12px 1fr auto; }
+    .entry .dur { grid-column: 2 / 3; }
+    .entry-edit { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <h1>Time Tracker</h1>
+    <div class="date" id="todayDate"></div>
+  </header>
+
+  <section id="activitiesSection">
+    <h2>Activities</h2>
+    <div id="activitiesList"></div>
+    <div class="add-row">
+      <input id="newActivityName" type="text" placeholder="New activity name…" maxlength="40" />
+      <button class="primary" id="addActivityBtn">Add</button>
+    </div>
+  </section>
+
+  <section id="entriesSection">
+    <h2>Today's entries</h2>
+    <div id="entriesList"></div>
+    <button class="subtle" id="addEntryBtn">+ Add manual entry</button>
+  </section>
+
+  <section id="weekSection">
+    <h2>This week</h2>
+    <div id="weekContent"></div>
+  </section>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "timetrack.v1";
+  const PALETTE = ["#2563eb","#16a34a","#dc2626","#ea580c","#9333ea","#0891b2","#ca8a04","#db2777"];
+
+  const $ = (id) => document.getElementById(id);
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  // ----- state -----
+  let state = load();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { activities: [], entries: [] };
+      const s = JSON.parse(raw);
+      if (!s.activities) s.activities = [];
+      if (!s.entries) s.entries = [];
+      return s;
+    } catch {
+      return { activities: [], entries: [] };
+    }
+  }
+  function save() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  // ----- time helpers -----
+  const MS_HOUR = 3600000, MS_MIN = 60000, MS_SEC = 1000;
+  const pad = (n) => String(n).padStart(2, "0");
+
+  function fmtDuration(ms) {
+    if (ms < 0) ms = 0;
+    const h = Math.floor(ms / MS_HOUR);
+    const m = Math.floor((ms % MS_HOUR) / MS_MIN);
+    const s = Math.floor((ms % MS_MIN) / MS_SEC);
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  }
+  function fmtHours(ms) {
+    const h = ms / MS_HOUR;
+    if (h < 0.01) return "0h";
+    if (h < 1) return `${Math.round(h * 60)}m`;
+    return `${h.toFixed(h < 10 ? 1 : 0)}h`;
+  }
+  function fmtClock(iso) {
+    const d = new Date(iso);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function startOfDay(d) {
+    const x = new Date(d);
+    x.setHours(0, 0, 0, 0);
+    return x;
+  }
+  function startOfWeek(d) {
+    // Monday as week start
+    const x = startOfDay(d);
+    const day = (x.getDay() + 6) % 7; // 0 = Mon
+    x.setDate(x.getDate() - day);
+    return x;
+  }
+  function isoToDateInput(iso) {
+    const d = new Date(iso);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  }
+  function combineDateTime(dateStr, timeStr) {
+    // returns ISO; treats inputs as local
+    const [y, mo, d] = dateStr.split("-").map(Number);
+    const [h, mi] = timeStr.split(":").map(Number);
+    return new Date(y, mo - 1, d, h, mi, 0, 0).toISOString();
+  }
+  function fmtDateLong(d) {
+    return d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+  }
+
+  // ----- domain helpers -----
+  function getRunning() {
+    return state.entries.find(e => e.end === null) || null;
+  }
+  function durationOf(e, nowMs = Date.now()) {
+    const startMs = new Date(e.start).getTime();
+    const endMs = e.end ? new Date(e.end).getTime() : nowMs;
+    return Math.max(0, endMs - startMs);
+  }
+  function overlapsWithRunning(entry, runningId) {
+    // For a new/edited closed entry, ensure it doesn't conflict with the running one.
+    const running = getRunning();
+    if (!running || running.id === runningId) return false;
+    const aS = new Date(entry.start).getTime();
+    const aE = new Date(entry.end).getTime();
+    const bS = new Date(running.start).getTime();
+    return aE > bS && aS < Date.now(); // closed entry ending after running started is the main concern
+  }
+  function entriesOnDay(date) {
+    const dayStart = startOfDay(date).getTime();
+    const dayEnd = dayStart + 24 * MS_HOUR;
+    return state.entries.filter(e => {
+      const s = new Date(e.start).getTime();
+      return s >= dayStart && s < dayEnd;
+    }).sort((a, b) => new Date(a.start) - new Date(b.start));
+  }
+  function totalForActivityOnDay(activityId, date) {
+    const dayStart = startOfDay(date).getTime();
+    const dayEnd = dayStart + 24 * MS_HOUR;
+    const now = Date.now();
+    let total = 0;
+    for (const e of state.entries) {
+      if (e.activityId !== activityId) continue;
+      const s = new Date(e.start).getTime();
+      const en = e.end ? new Date(e.end).getTime() : now;
+      const clipS = Math.max(s, dayStart);
+      const clipE = Math.min(en, dayEnd);
+      if (clipE > clipS) total += clipE - clipS;
+    }
+    return total;
+  }
+
+  // ----- actions -----
+  function addActivity(name) {
+    name = (name || "").trim();
+    if (!name) return;
+    const used = new Set(state.activities.map(a => a.color));
+    const color = PALETTE.find(c => !used.has(c)) || PALETTE[state.activities.length % PALETTE.length];
+    state.activities.push({ id: uid(), name, color });
+    save(); render();
+  }
+  function renameActivity(id, name) {
+    const a = state.activities.find(x => x.id === id);
+    if (!a) return;
+    a.name = name.trim() || a.name;
+    save(); render();
+  }
+  function deleteActivity(id) {
+    const a = state.activities.find(x => x.id === id);
+    if (!a) return;
+    const hasEntries = state.entries.some(e => e.activityId === id);
+    const msg = hasEntries
+      ? `Delete "${a.name}" and all its time entries? This can't be undone.`
+      : `Delete "${a.name}"?`;
+    if (!confirm(msg)) return;
+    state.entries = state.entries.filter(e => e.activityId !== id);
+    state.activities = state.activities.filter(x => x.id !== id);
+    save(); render();
+  }
+  function startActivity(id) {
+    const now = new Date().toISOString();
+    const running = getRunning();
+    if (running) {
+      if (running.activityId === id) return; // already running this one
+      running.end = now;
+    }
+    state.entries.push({ id: uid(), activityId: id, start: now, end: null });
+    save(); render();
+  }
+  function stopRunning() {
+    const r = getRunning();
+    if (!r) return;
+    r.end = new Date().toISOString();
+    save(); render();
+  }
+  function deleteEntry(id) {
+    state.entries = state.entries.filter(e => e.id !== id);
+    save(); render();
+  }
+  function updateEntry(id, patch) {
+    const e = state.entries.find(x => x.id === id);
+    if (!e) return { ok: false, err: "Entry not found." };
+    const next = { ...e, ...patch };
+    if (next.end !== null) {
+      const s = new Date(next.start).getTime();
+      const en = new Date(next.end).getTime();
+      if (!(en >= s)) return { ok: false, err: "End must be at or after start." };
+      if (overlapsWithRunning(next, id)) return { ok: false, err: "Conflicts with the running timer." };
+    }
+    Object.assign(e, patch);
+    save(); render();
+    return { ok: true };
+  }
+  function addManualEntry({ activityId, dateStr, startTime, endTime }) {
+    if (!activityId) return { ok: false, err: "Pick an activity." };
+    if (!dateStr || !startTime || !endTime) return { ok: false, err: "All fields required." };
+    const start = combineDateTime(dateStr, startTime);
+    const end = combineDateTime(dateStr, endTime);
+    if (new Date(end).getTime() < new Date(start).getTime())
+      return { ok: false, err: "End must be at or after start." };
+    const entry = { id: uid(), activityId, start, end };
+    if (overlapsWithRunning(entry)) return { ok: false, err: "Conflicts with the running timer." };
+    state.entries.push(entry);
+    save(); render();
+    return { ok: true };
+  }
+
+  // ----- rendering -----
+  function render() {
+    renderHeader();
+    renderActivities();
+    renderEntries();
+    renderWeek();
+  }
+
+  function renderHeader() {
+    $("todayDate").textContent = fmtDateLong(new Date());
+  }
+
+  function renderActivities() {
+    const list = $("activitiesList");
+    list.innerHTML = "";
+    if (state.activities.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No activities yet — add one below to start tracking.";
+      list.appendChild(empty);
+      return;
+    }
+    const running = getRunning();
+    const today = new Date();
+    for (const a of state.activities) {
+      const row = document.createElement("div");
+      row.className = "activity" + (running && running.activityId === a.id ? " running" : "");
+      const isRunning = running && running.activityId === a.id;
+      const todayMs = totalForActivityOnDay(a.id, today);
+
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = a.color;
+
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = a.name;
+      name.title = "Click to rename";
+      name.style.cursor = "pointer";
+      name.addEventListener("click", () => {
+        const next = prompt("Rename activity:", a.name);
+        if (next !== null) renameActivity(a.id, next);
+      });
+
+      const today_ = document.createElement("div");
+      today_.className = "today";
+      today_.dataset.activityId = a.id;
+      today_.textContent = fmtDuration(todayMs);
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      const toggle = document.createElement("button");
+      if (isRunning) {
+        toggle.className = "stop";
+        toggle.textContent = "Stop";
+        toggle.addEventListener("click", stopRunning);
+      } else {
+        toggle.className = "primary";
+        toggle.textContent = "Start";
+        toggle.addEventListener("click", () => startActivity(a.id));
+      }
+
+      const del = document.createElement("button");
+      del.className = "icon-btn danger";
+      del.title = "Delete activity";
+      del.innerHTML = "&times;";
+      del.style.fontSize = "1.1rem";
+      del.addEventListener("click", () => deleteActivity(a.id));
+
+      actions.append(toggle, del);
+      row.append(dot, name, today_, actions);
+      list.appendChild(row);
+    }
+  }
+
+  function renderEntries() {
+    const list = $("entriesList");
+    list.innerHTML = "";
+    const today = new Date();
+    const todayEntries = entriesOnDay(today);
+
+    if (todayEntries.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No entries today yet.";
+      list.appendChild(empty);
+    } else {
+      for (const e of todayEntries) {
+        list.appendChild(renderEntryRow(e));
+      }
+    }
+  }
+
+  function renderEntryRow(e) {
+    const a = state.activities.find(x => x.id === e.activityId);
+    if (!a) {
+      const row = document.createElement("div");
+      row.className = "entry";
+      row.innerHTML = `<span class="dot" style="background:#ccc"></span><span class="name">(deleted activity)</span><span></span><span></span>`;
+      return row;
+    }
+    const row = document.createElement("div");
+    row.className = "entry";
+    row.dataset.entryId = e.id;
+
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.style.background = a.color;
+
+    const center = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = a.name;
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const endLabel = e.end ? fmtClock(e.end) : "now";
+    meta.textContent = `${fmtClock(e.start)} – ${endLabel}`;
+    center.append(name, meta);
+
+    const dur = document.createElement("div");
+    dur.className = "dur";
+    if (e.end === null) dur.dataset.live = "1";
+    dur.dataset.entryId = e.id;
+    dur.textContent = fmtDuration(durationOf(e));
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "icon-btn";
+    editBtn.title = "Edit";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => openEditEntry(e.id));
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "icon-btn danger";
+    delBtn.title = "Delete entry";
+    delBtn.innerHTML = "&times;";
+    delBtn.style.fontSize = "1.1rem";
+    delBtn.addEventListener("click", () => {
+      if (confirm("Delete this entry?")) deleteEntry(e.id);
+    });
+
+    if (e.end !== null) actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
+    row.append(dot, center, dur, actions);
+    return row;
+  }
+
+  function openEditEntry(id) {
+    const e = state.entries.find(x => x.id === id);
+    if (!e || e.end === null) return;
+    const row = document.querySelector(`.entry[data-entry-id="${id}"]`);
+    if (!row) return;
+    const editor = buildEntryEditor({
+      activityId: e.activityId,
+      dateStr: isoToDateInput(e.start),
+      startTime: fmtClock(e.start),
+      endTime: fmtClock(e.end),
+      onCancel: () => render(),
+      onSave: ({ activityId, dateStr, startTime, endTime }) => {
+        const start = combineDateTime(dateStr, startTime);
+        const end = combineDateTime(dateStr, endTime);
+        return updateEntry(id, { activityId, start, end });
+      }
+    });
+    row.replaceWith(editor);
+  }
+
+  function buildEntryEditor({ activityId, dateStr, startTime, endTime, onSave, onCancel }) {
+    const wrap = document.createElement("div");
+    wrap.className = "entry-edit";
+
+    const actSel = document.createElement("select");
+    for (const a of state.activities) {
+      const opt = document.createElement("option");
+      opt.value = a.id;
+      opt.textContent = a.name;
+      if (a.id === activityId) opt.selected = true;
+      actSel.appendChild(opt);
+    }
+
+    const dateInp = document.createElement("input");
+    dateInp.type = "date";
+    dateInp.value = dateStr;
+
+    const timeWrap = document.createElement("div");
+    timeWrap.style.display = "flex";
+    timeWrap.style.gap = "0.35rem";
+    timeWrap.style.alignItems = "center";
+    const startInp = document.createElement("input");
+    startInp.type = "time";
+    startInp.value = startTime;
+    const dash = document.createElement("span");
+    dash.textContent = "–";
+    dash.style.color = "var(--muted)";
+    const endInp = document.createElement("input");
+    endInp.type = "time";
+    endInp.value = endTime;
+    timeWrap.append(startInp, dash, endInp);
+
+    const actions = document.createElement("div");
+    actions.className = "row-actions";
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "primary";
+    saveBtn.textContent = "Save";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+
+    const err = document.createElement("div");
+    err.className = "err";
+
+    saveBtn.addEventListener("click", () => {
+      const res = onSave({
+        activityId: actSel.value,
+        dateStr: dateInp.value,
+        startTime: startInp.value,
+        endTime: endInp.value
+      });
+      if (res && !res.ok) err.textContent = res.err;
+    });
+    cancelBtn.addEventListener("click", onCancel);
+
+    actions.append(saveBtn, cancelBtn);
+    wrap.append(actSel, dateInp, timeWrap, actions);
+
+    // err sits on its own visual row beneath the editor
+    const container = document.createElement("div");
+    container.appendChild(wrap);
+    container.appendChild(err);
+    return container;
+  }
+
+  $("addEntryBtn").addEventListener("click", () => {
+    if (state.activities.length === 0) {
+      alert("Add an activity first.");
+      return;
+    }
+    const btn = $("addEntryBtn");
+    const editor = buildEntryEditor({
+      activityId: state.activities[0].id,
+      dateStr: isoToDateInput(new Date().toISOString()),
+      startTime: "09:00",
+      endTime: "10:00",
+      onCancel: () => render(),
+      onSave: (vals) => addManualEntry(vals)
+    });
+    btn.replaceWith(editor);
+  });
+
+  // ----- weekly view -----
+  function renderWeek() {
+    const root = $("weekContent");
+    root.innerHTML = "";
+    if (state.activities.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "Add activities to see your week.";
+      root.appendChild(empty);
+      return;
+    }
+
+    const weekStart = startOfWeek(new Date());
+    const days = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      return d;
+    });
+
+    // axis row (day labels) at top
+    const header = document.createElement("div");
+    header.className = "week-grid";
+    const sp1 = document.createElement("div");
+    const axis = document.createElement("div");
+    axis.className = "axis";
+    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const today = startOfDay(new Date()).getTime();
+    days.forEach((d, i) => {
+      const cell = document.createElement("div");
+      cell.textContent = dayNames[i];
+      if (d.getTime() === today) {
+        cell.style.color = "var(--text)";
+        cell.style.fontWeight = "600";
+      }
+      axis.appendChild(cell);
+    });
+    const sp2 = document.createElement("div");
+    sp2.textContent = "Week";
+    sp2.style.color = "var(--muted)";
+    sp2.style.fontSize = "0.75rem";
+    sp2.style.textTransform = "uppercase";
+    sp2.style.letterSpacing = "0.06em";
+    header.append(sp1, axis, sp2);
+    root.appendChild(header);
+
+    // find max for scaling
+    let max = 1;
+    const totalsByAct = state.activities.map(a => {
+      const dayMs = days.map(d => totalForActivityOnDay(a.id, d));
+      const m = Math.max(...dayMs);
+      if (m > max) max = m;
+      return { activity: a, dayMs, weekMs: dayMs.reduce((s, x) => s + x, 0) };
+    });
+
+    for (const t of totalsByAct) {
+      const row = document.createElement("div");
+      row.className = "week-row";
+
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = t.activity.color;
+
+      const center = document.createElement("div");
+      const name = document.createElement("div");
+      name.className = "name";
+      name.textContent = t.activity.name;
+      const bars = document.createElement("div");
+      bars.className = "bars";
+      t.dayMs.forEach((ms) => {
+        const col = document.createElement("div");
+        col.className = "bar-col";
+        const bar = document.createElement("div");
+        bar.className = "bar";
+        if (ms <= 0) {
+          bar.classList.add("zero");
+        } else {
+          const pct = Math.max(6, Math.round((ms / max) * 100));
+          bar.style.height = pct + "%";
+        }
+        bar.style.background = t.activity.color;
+        bar.title = `${fmtHours(ms)}`;
+        col.appendChild(bar);
+        bars.appendChild(col);
+      });
+      center.append(name, bars);
+
+      const total = document.createElement("div");
+      total.className = "total";
+      total.textContent = fmtHours(t.weekMs);
+
+      row.append(dot, center, total);
+      root.appendChild(row);
+    }
+  }
+
+  // ----- live tick -----
+  function tick() {
+    const running = getRunning();
+    if (!running) return;
+    // Update today's total for the running activity
+    const total = document.querySelector(`.today[data-activity-id="${running.activityId}"]`);
+    if (total) {
+      total.textContent = fmtDuration(totalForActivityOnDay(running.activityId, new Date()));
+    }
+    // Update the live entry duration
+    const live = document.querySelector(`.dur[data-live="1"][data-entry-id="${running.id}"]`);
+    if (live) {
+      live.textContent = fmtDuration(durationOf(running));
+    }
+  }
+  setInterval(tick, 1000);
+
+  // re-render at midnight so date/today buckets stay correct
+  function scheduleMidnightRender() {
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(24, 0, 5, 0);
+    setTimeout(() => { render(); scheduleMidnightRender(); }, next - now);
+  }
+  scheduleMidnightRender();
+
+  // ----- add-activity wiring -----
+  $("addActivityBtn").addEventListener("click", () => {
+    const name = $("newActivityName").value;
+    $("newActivityName").value = "";
+    addActivity(name);
+  });
+  $("newActivityName").addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter") $("addActivityBtn").click();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
