@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Time Tracker</title>
+<title>TimePlanner.AI</title>
 <style>
   :root {
     --bg: #fafafa;
@@ -59,6 +59,34 @@
     font-size: 1.35rem;
     font-weight: 600;
     letter-spacing: -0.01em;
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: opacity var(--t-fast) var(--ease);
+  }
+  .brand:hover { opacity: 0.65; }
+  .header-right {
+    display: flex; align-items: baseline; gap: 0.85rem;
+  }
+  .header-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.18rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #fff;
+    transition: color var(--t-fast) var(--ease),
+                background var(--t-fast) var(--ease),
+                border-color var(--t-fast) var(--ease),
+                transform var(--t-fast) var(--ease);
+  }
+  .header-link:hover { color: var(--text); background: var(--subtle); border-color: var(--border-strong); }
+  .header-link:active { transform: scale(0.96); }
+  .header-link.active {
+    color: var(--accent);
+    border-color: #dbeafe;
+    background: var(--accent-soft);
   }
   .date {
     color: var(--muted);
@@ -593,6 +621,285 @@
     }
   }
 
+  /* reports — stat cards */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.55rem;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.7rem 0.85rem;
+    animation: fadeUp var(--t-base) var(--ease) both;
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  }
+  .stat-card:hover { transform: translateY(-1px); border-color: var(--border-strong); }
+  .stat-card .label {
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .stat-card .value {
+    font-size: 1.35rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.15rem;
+    letter-spacing: -0.01em;
+  }
+  .stat-card .sub {
+    font-size: 0.74rem;
+    color: var(--muted);
+    margin-top: 0.05rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* reports — horizontal bars */
+  .hbar-list { display: flex; flex-direction: column; gap: 0.55rem; }
+  .hbar {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    gap: 0.65rem;
+    align-items: center;
+    animation: fadeUp var(--t-base) var(--ease) both;
+    border-radius: 6px;
+    padding: 0.15rem;
+    margin: -0.15rem;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .hbar:hover { background: var(--subtle); }
+  .hbar .label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hbar .bar-wrap {
+    height: 6px;
+    background: var(--subtle);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.3rem;
+  }
+  .hbar .bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    width: 0;
+    transition: width 600ms var(--ease);
+  }
+  .hbar .value {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* reports — donut */
+  .donut-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.1rem;
+    align-items: center;
+  }
+  .donut {
+    width: 92px; height: 92px;
+    transform: rotate(-90deg);
+  }
+  .donut circle.track {
+    fill: none;
+    stroke: var(--subtle);
+    stroke-width: 14;
+  }
+  .donut circle.slice {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: butt;
+    transition: stroke-dasharray 600ms var(--ease);
+  }
+  .donut-legend {
+    display: grid;
+    gap: 0.32rem;
+  }
+  .donut-legend .item {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    gap: 0.5rem;
+    font-size: 0.86rem;
+    align-items: center;
+  }
+  .donut-legend .swatch {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+  }
+  .donut-legend .pct {
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    font-size: 0.8rem;
+  }
+
+  /* reports — daily chart */
+  .daily-chart {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 30), 1fr);
+    gap: 3px;
+    align-items: end;
+    height: 84px;
+    margin-top: 0.3rem;
+  }
+  .daily-chart .bar {
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+    min-height: 0;
+    opacity: 0.88;
+    transition: height 600ms var(--ease), opacity var(--t-fast) var(--ease);
+    height: 0;
+  }
+  .daily-chart .bar:hover { opacity: 1; }
+  .daily-chart .bar.zero {
+    background: var(--border);
+    height: 2px;
+    opacity: 1;
+  }
+  .daily-chart .bar.today-bar {
+    box-shadow: 0 -2px 0 0 var(--accent) inset;
+  }
+  .daily-axis {
+    display: flex; justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+
+  /* reports — range chips */
+  .range-row {
+    display: flex; flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.7rem;
+  }
+  .chip-btn {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+    color: var(--muted);
+    transition: color var(--t-fast) var(--ease),
+                background var(--t-fast) var(--ease),
+                border-color var(--t-fast) var(--ease),
+                transform var(--t-fast) var(--ease);
+  }
+  .chip-btn:hover { color: var(--text); background: var(--subtle); }
+  .chip-btn:active { transform: scale(0.96); }
+  .chip-btn.active {
+    color: var(--accent);
+    border-color: #dbeafe;
+    background: var(--accent-soft);
+    font-weight: 500;
+  }
+
+  /* reports — filter row */
+  .filter-row {
+    display: flex; align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .filter-row .lbl {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  /* reports — export buttons */
+  .export-row {
+    display: flex; flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.2rem;
+  }
+  .file-btn {
+    display: inline-flex;
+    align-items: center;
+    font: inherit;
+    cursor: pointer;
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.45rem 0.85rem;
+    transition: background var(--t-fast) var(--ease),
+                transform var(--t-fast) var(--ease),
+                border-color var(--t-fast) var(--ease);
+  }
+  .file-btn:hover { background: var(--subtle); }
+  .file-btn:active { transform: scale(0.97); }
+
+  /* tag cloud */
+  .cloud {
+    display: flex; flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+  .cloud .chip {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--subtle);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    animation: fadeUp var(--t-base) var(--ease) both;
+  }
+
+  /* toasts */
+  .toasts {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.45rem;
+    z-index: 100;
+    pointer-events: none;
+    max-width: calc(100% - 2rem);
+  }
+  .toast {
+    pointer-events: auto;
+    background: #1f2937;
+    color: #fff;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.86rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    animation: toastIn 220ms var(--ease);
+    max-width: 320px;
+  }
+  .toast.out { animation: toastOut 180ms var(--ease) forwards; }
+  @keyframes toastIn  { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes toastOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(6px); } }
+
+  /* keyboard hint */
+  .kbd {
+    display: inline-block;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 4px;
+    padding: 0 0.3rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 600px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .donut-row { grid-template-columns: 1fr; justify-items: center; }
+  }
   @media (max-width: 480px) {
     .wrap { padding: 1.5rem 1rem 3rem; }
     .activity { flex-wrap: wrap; }
@@ -602,7 +909,8 @@
     .entry-edit { grid-template-columns: 1fr 1fr; }
     .meta-form { grid-template-columns: 1fr; }
     .hero h1 { font-size: 1.2rem; }
-    .brand-row { flex-direction: column; align-items: flex-start; gap: 0.1rem; }
+    .brand-row { flex-direction: column; align-items: flex-start; gap: 0.35rem; }
+    .header-right { align-items: center; }
   }
 </style>
 </head>
@@ -610,8 +918,11 @@
 <div class="wrap">
   <header class="app">
     <div class="brand-row">
-      <div class="brand">Time Tracker</div>
-      <div class="date" id="todayDate"></div>
+      <a class="brand" href="#/" id="brandLink">TimePlanner.AI</a>
+      <div class="header-right">
+        <a class="header-link" id="reportsLink" href="#/reports">Reports</a>
+        <div class="date" id="todayDate"></div>
+      </div>
     </div>
     <nav class="crumbs" id="crumbs"></nav>
     <div id="runningBar"></div>
@@ -991,6 +1302,7 @@
   function parseHash() {
     const h = location.hash.replace(/^#\/?/, "");
     if (!h) return { name: "home" };
+    if (h === "reports") return { name: "reports" };
     const parts = h.split("/");
     if (parts[0] === "p" && parts[1]) {
       if (parts[2] === "proj" && parts[3]) return { name: "project", id: parts[3], portfolioId: parts[1] };
@@ -1000,6 +1312,7 @@
   }
   function viewHref(v) {
     if (v.name === "home") return "#/";
+    if (v.name === "reports") return "#/reports";
     if (v.name === "portfolio") return `#/p/${v.id}`;
     if (v.name === "project") {
       const p = projectById(v.id);
@@ -1037,12 +1350,20 @@
     const next = document.createElement("div");
     next.className = "view";
     if (view.name === "home") renderHome(next);
+    else if (view.name === "reports") renderReportsView(next);
     else if (view.name === "portfolio") renderPortfolioView(next, view.id);
     else if (view.name === "project") renderProjectView(next, view.id);
     swap(root, next);
 
-    // clear highlight set after this paint
-    requestAnimationFrame(() => highlightIds.clear());
+    // toggle Reports link state
+    const rl = $("reportsLink");
+    if (rl) rl.classList.toggle("active", view.name === "reports");
+
+    // clear highlight set after this paint; scroll to any new row first
+    requestAnimationFrame(() => {
+      scrollToHighlighted();
+      highlightIds.clear();
+    });
   }
 
   function swap(root, next) {
@@ -1066,6 +1387,9 @@
     const parts = [];
     if (view.name === "home") {
       parts.push({ label: "Home", current: true });
+    } else if (view.name === "reports") {
+      parts.push({ label: "Home", href: "#/" });
+      parts.push({ label: "Reports", current: true });
     } else if (view.name === "portfolio") {
       parts.push({ label: "Home", href: "#/" });
       const pf = portfolioById(view.id);
@@ -1990,6 +2314,605 @@
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
   }
+
+  // -------------------------------------------------------------------------
+  // reports view
+  // -------------------------------------------------------------------------
+  const reportsState = { range: "7d", portfolioId: "" };
+
+  function rangeBounds(key) {
+    const now = new Date();
+    const dayEnd = startOfDay(now).getTime() + MS_DAY;
+    if (key === "7d") {
+      const from = startOfDay(new Date(now.getTime() - 6 * MS_DAY)).getTime();
+      return { from, to: dayEnd, days: 7, label: "Last 7 days" };
+    }
+    if (key === "30d") {
+      const from = startOfDay(new Date(now.getTime() - 29 * MS_DAY)).getTime();
+      return { from, to: dayEnd, days: 30, label: "Last 30 days" };
+    }
+    if (key === "month") {
+      const from = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+      const days = Math.max(1, Math.ceil((dayEnd - from) / MS_DAY));
+      return { from, to: dayEnd, days, label: now.toLocaleDateString(undefined, { month: "long", year: "numeric" }) };
+    }
+    // all time
+    let minStart = dayEnd - MS_DAY;
+    for (const e of state.entries) {
+      const t = new Date(e.start).getTime();
+      if (t < minStart) minStart = t;
+    }
+    const from = startOfDay(new Date(minStart)).getTime();
+    const days = Math.max(1, Math.ceil((dayEnd - from) / MS_DAY));
+    return { from, to: dayEnd, days, label: "All time" };
+  }
+
+  function reportEntryFilter() {
+    const pid = reportsState.portfolioId;
+    if (!pid) return () => true;
+    return (e) => isActivityInPortfolio(e.activityId, pid);
+  }
+
+  function entryDurationClipped(e, fromMs, toMs) {
+    const s = new Date(e.start).getTime();
+    const en = e.end ? new Date(e.end).getTime() : Date.now();
+    const cS = Math.max(s, fromMs);
+    const cE = Math.min(en, toMs);
+    return cE > cS ? cE - cS : 0;
+  }
+
+  function renderReportsView(root) {
+    if (reportsState.portfolioId && !portfolioById(reportsState.portfolioId)) reportsState.portfolioId = "";
+    const bounds = rangeBounds(reportsState.range);
+    const filt = reportEntryFilter();
+    const totalMs = totalForFilterInRange(filt, bounds.from, bounds.to);
+    const entries = state.entries.filter(e => {
+      if (!filt(e)) return false;
+      const s = new Date(e.start).getTime();
+      return s >= bounds.from && s < bounds.to;
+    });
+    const dayKeys = new Set(entries.map(e => startOfDay(new Date(e.start)).toDateString()));
+
+    // hero
+    const hero = document.createElement("div");
+    hero.className = "hero";
+    const top = document.createElement("div");
+    top.className = "hero-top";
+    const title = document.createElement("h1");
+    title.textContent = "Reports";
+    title.style.cursor = "default";
+    title.style.flex = "1";
+    top.appendChild(title);
+    hero.appendChild(top);
+
+    const meta = document.createElement("div");
+    meta.className = "meta-row";
+    meta.innerHTML = `<span>${escapeHtml(bounds.label)}</span><span>${entries.length} entr${entries.length === 1 ? "y" : "ies"}</span><span>${fmtHours(totalMs)} total</span>`;
+    hero.appendChild(meta);
+
+    // range chips
+    const chips = document.createElement("div");
+    chips.className = "range-row";
+    [["7d","7 days"],["30d","30 days"],["month","This month"],["all","All time"]].forEach(([k, label]) => {
+      const b = document.createElement("button");
+      b.className = "chip-btn" + (reportsState.range === k ? " active" : "");
+      b.textContent = label;
+      b.addEventListener("click", () => { reportsState.range = k; render(); });
+      chips.appendChild(b);
+    });
+    hero.appendChild(chips);
+
+    // portfolio filter
+    if (state.portfolios.length > 0) {
+      const filtRow = document.createElement("div");
+      filtRow.className = "filter-row";
+      const lbl = document.createElement("span");
+      lbl.className = "lbl";
+      lbl.textContent = "Portfolio:";
+      const sel = document.createElement("select");
+      const optAll = document.createElement("option");
+      optAll.value = ""; optAll.textContent = "All portfolios";
+      sel.appendChild(optAll);
+      for (const pf of state.portfolios) {
+        const o = document.createElement("option");
+        o.value = pf.id; o.textContent = pf.name;
+        if (pf.id === reportsState.portfolioId) o.selected = true;
+        sel.appendChild(o);
+      }
+      sel.addEventListener("change", () => { reportsState.portfolioId = sel.value; render(); });
+      filtRow.append(lbl, sel);
+      hero.appendChild(filtRow);
+    }
+    root.appendChild(hero);
+
+    // KPI cards
+    const allActsInRange = new Map();
+    for (const e of entries) {
+      const ms = entryDurationClipped(e, bounds.from, bounds.to);
+      allActsInRange.set(e.activityId, (allActsInRange.get(e.activityId) || 0) + ms);
+    }
+    let topActivity = null, topActMs = 0;
+    for (const [aid, ms] of allActsInRange.entries()) {
+      if (ms > topActMs) { topActMs = ms; topActivity = activityById(aid); }
+    }
+
+    const kpiSec = document.createElement("section");
+    const kpiGrid = document.createElement("div");
+    kpiGrid.className = "stat-grid";
+    appendStatCard(kpiGrid, "Total time", fmtHours(totalMs), entries.length + " entr" + (entries.length === 1 ? "y" : "ies"));
+    appendStatCard(kpiGrid, "Days active", String(dayKeys.size), bounds.days + " day" + (bounds.days === 1 ? "" : "s") + " in range");
+    appendStatCard(kpiGrid, "Daily avg", dayKeys.size > 0 ? fmtHours(totalMs / dayKeys.size) : "0h", "on tracked days");
+    appendStatCard(kpiGrid, "Top activity", topActivity ? topActivity.name : "—", topActivity ? fmtHours(topActMs) : "no data");
+    kpiSec.appendChild(kpiGrid);
+    root.appendChild(kpiSec);
+
+    // daily bars
+    if (bounds.days > 0) {
+      const chartSec = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = "Daily hours";
+      chartSec.appendChild(h);
+      renderDailyChart(chartSec, bounds, filt);
+      root.appendChild(chartSec);
+    }
+
+    // by activity
+    if (allActsInRange.size > 0) {
+      const sec = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = "By activity";
+      sec.appendChild(h);
+      const items = [...allActsInRange.entries()]
+        .map(([aid, ms]) => ({ a: activityById(aid), ms }))
+        .filter(x => x.a)
+        .sort((a, b) => b.ms - a.ms)
+        .slice(0, 10);
+      const maxMs = items[0]?.ms || 1;
+      renderHorizontalBars(sec, items.map(it => ({
+        color: it.a.color, label: it.a.name, value: fmtHours(it.ms),
+        pct: Math.round((it.ms / maxMs) * 100),
+        onClick: () => { const p = projectById(it.a.projectId); if (p) navigate({ name: "project", id: p.id }); }
+      })));
+      root.appendChild(sec);
+    }
+
+    // by project
+    const projTotals = new Map();
+    for (const e of entries) {
+      const a = activityById(e.activityId);
+      if (!a) continue;
+      projTotals.set(a.projectId, (projTotals.get(a.projectId) || 0) + entryDurationClipped(e, bounds.from, bounds.to));
+    }
+    if (projTotals.size > 0) {
+      const sec = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = "By project";
+      sec.appendChild(h);
+      const items = [...projTotals.entries()]
+        .map(([pid, ms]) => ({ p: projectById(pid), ms }))
+        .filter(x => x.p)
+        .sort((a, b) => b.ms - a.ms)
+        .slice(0, 10);
+      const maxMs = items[0]?.ms || 1;
+      renderHorizontalBars(sec, items.map(it => ({
+        color: it.p.color, label: it.p.name, value: fmtHours(it.ms),
+        pct: Math.round((it.ms / maxMs) * 100),
+        onClick: () => navigate({ name: "project", id: it.p.id }),
+      })));
+      root.appendChild(sec);
+    }
+
+    // project status donut
+    const inScopeProjects = reportsState.portfolioId
+      ? projectsOfPortfolio(reportsState.portfolioId)
+      : state.projects;
+    if (inScopeProjects.length > 0) {
+      const sec = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = "Project status";
+      sec.appendChild(h);
+      renderStatusDonut(sec, inScopeProjects);
+      root.appendChild(sec);
+    }
+
+    // top tags
+    const tagMs = new Map();
+    for (const e of entries) {
+      const ms = entryDurationClipped(e, bounds.from, bounds.to);
+      for (const t of (e.tags || [])) tagMs.set(t, (tagMs.get(t) || 0) + ms);
+    }
+    if (tagMs.size > 0) {
+      const sec = document.createElement("section");
+      const h = document.createElement("h2");
+      h.textContent = "Top tags";
+      sec.appendChild(h);
+      const cloud = document.createElement("div");
+      cloud.className = "cloud";
+      [...tagMs.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).forEach(([t, ms], idx) => {
+        const c = document.createElement("span");
+        c.className = "chip";
+        c.style.animationDelay = (idx * 18) + "ms";
+        c.textContent = `#${t} · ${fmtHours(ms)}`;
+        cloud.appendChild(c);
+      });
+      sec.appendChild(cloud);
+      root.appendChild(sec);
+    }
+
+    // export & import
+    const exSec = document.createElement("section");
+    const h = document.createElement("h2");
+    h.textContent = "Export & import";
+    exSec.appendChild(h);
+    const row = document.createElement("div");
+    row.className = "export-row";
+
+    const bJson = document.createElement("button");
+    bJson.className = "file-btn";
+    bJson.textContent = "Export JSON (full backup)";
+    bJson.addEventListener("click", () => exportJson());
+
+    const bCsv = document.createElement("button");
+    bCsv.className = "file-btn";
+    bCsv.textContent = "Export CSV (range)";
+    bCsv.addEventListener("click", () => exportCsv(bounds, filt));
+
+    const bMd = document.createElement("button");
+    bMd.className = "file-btn";
+    bMd.textContent = "Export Markdown (range)";
+    bMd.addEventListener("click", () => exportMarkdown(bounds, filt, entries));
+
+    const importLabel = document.createElement("label");
+    importLabel.className = "file-btn";
+    importLabel.textContent = "Import JSON…";
+    const fileInp = document.createElement("input");
+    fileInp.type = "file";
+    fileInp.accept = "application/json,.json";
+    fileInp.style.display = "none";
+    fileInp.addEventListener("change", () => {
+      if (fileInp.files[0]) importJsonFile(fileInp.files[0]);
+      fileInp.value = "";
+    });
+    importLabel.appendChild(fileInp);
+
+    row.append(bJson, bCsv, bMd, importLabel);
+    exSec.appendChild(row);
+    const note = document.createElement("div");
+    note.className = "empty";
+    note.innerHTML = `JSON is a full backup of everything. CSV and Markdown are scoped to the current filter and date range.`;
+    exSec.appendChild(note);
+    root.appendChild(exSec);
+
+    // empty-state hint when nothing recorded
+    if (entries.length === 0) {
+      const hint = document.createElement("section");
+      const inner = document.createElement("div");
+      inner.className = "empty";
+      inner.textContent = "No time recorded in this range yet.";
+      hint.appendChild(inner);
+      root.insertBefore(hint, kpiSec.nextSibling);
+    }
+  }
+
+  function appendStatCard(parent, label, value, sub) {
+    const c = document.createElement("div");
+    c.className = "stat-card";
+    const l = document.createElement("div"); l.className = "label"; l.textContent = label;
+    const v = document.createElement("div"); v.className = "value"; v.textContent = value;
+    const s = document.createElement("div"); s.className = "sub"; s.textContent = sub || "";
+    c.append(l, v, s);
+    parent.appendChild(c);
+  }
+
+  function renderHorizontalBars(parent, items) {
+    const list = document.createElement("div");
+    list.className = "hbar-list";
+    items.forEach((it, idx) => {
+      const row = document.createElement("div");
+      row.className = "hbar";
+      row.style.animationDelay = (idx * 30) + "ms";
+      if (it.onClick) { row.style.cursor = "pointer"; row.addEventListener("click", it.onClick); }
+      const dot = document.createElement("span");
+      dot.className = "dot"; dot.style.background = it.color;
+      const middle = document.createElement("div");
+      const lbl = document.createElement("div");
+      lbl.className = "label"; lbl.textContent = it.label;
+      const wrap = document.createElement("div");
+      wrap.className = "bar-wrap";
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.style.background = it.color;
+      requestAnimationFrame(() => { bar.style.width = it.pct + "%"; });
+      wrap.appendChild(bar);
+      middle.append(lbl, wrap);
+      const val = document.createElement("div");
+      val.className = "value"; val.textContent = it.value;
+      row.append(dot, middle, val);
+      list.appendChild(row);
+    });
+    parent.appendChild(list);
+  }
+
+  function renderDailyChart(parent, bounds, filt) {
+    const days = [];
+    for (let t = bounds.from; t < bounds.to; t += MS_DAY) {
+      const dStart = t;
+      const dEnd = Math.min(t + MS_DAY, bounds.to);
+      const ms = totalForFilterInRange(filt, dStart, dEnd);
+      days.push({ date: new Date(dStart), ms });
+    }
+    let max = 1;
+    for (const d of days) if (d.ms > max) max = d.ms;
+
+    const chart = document.createElement("div");
+    chart.className = "daily-chart";
+    chart.style.setProperty("--cols", days.length);
+    const todayKey = startOfDay(new Date()).toDateString();
+    days.forEach((d) => {
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      bar.title = `${d.date.toLocaleDateString(undefined, { month: "short", day: "numeric" })} · ${fmtHours(d.ms)}`;
+      if (d.date.toDateString() === todayKey) bar.classList.add("today-bar");
+      if (d.ms <= 0) {
+        bar.classList.add("zero");
+      } else {
+        const pct = Math.max(6, Math.round((d.ms / max) * 100));
+        requestAnimationFrame(() => { bar.style.height = pct + "%"; });
+      }
+      chart.appendChild(bar);
+    });
+    parent.appendChild(chart);
+
+    const axis = document.createElement("div");
+    axis.className = "daily-axis";
+    if (days.length > 0) {
+      const left = document.createElement("span");
+      left.textContent = days[0].date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      const right = document.createElement("span");
+      right.textContent = days[days.length - 1].date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      axis.append(left, right);
+    }
+    parent.appendChild(axis);
+  }
+
+  function renderStatusDonut(parent, projects) {
+    const counts = { planning: 0, active: 0, "on-hold": 0, done: 0 };
+    for (const p of projects) {
+      const k = p.status || "active";
+      counts[k] = (counts[k] || 0) + 1;
+    }
+    const total = projects.length;
+    const colorOf = { planning: "#9ca3af", active: "#16a34a", "on-hold": "#ca8a04", done: "#6b7280" };
+
+    const row = document.createElement("div");
+    row.className = "donut-row";
+
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("class", "donut");
+    svg.setAttribute("viewBox", "0 0 100 100");
+    const cx = 50, cy = 50, r = 40;
+    const circ = 2 * Math.PI * r;
+    const track = document.createElementNS(ns, "circle");
+    track.setAttribute("class", "track");
+    track.setAttribute("cx", cx); track.setAttribute("cy", cy); track.setAttribute("r", r);
+    svg.appendChild(track);
+
+    let offset = 0;
+    for (const s of STATUSES) {
+      const c = counts[s.value] || 0;
+      if (c === 0 || total === 0) continue;
+      const frac = c / total;
+      const slice = document.createElementNS(ns, "circle");
+      slice.setAttribute("class", "slice");
+      slice.setAttribute("cx", cx); slice.setAttribute("cy", cy); slice.setAttribute("r", r);
+      slice.setAttribute("stroke", colorOf[s.value]);
+      slice.setAttribute("stroke-dasharray", `0 ${circ}`);
+      slice.setAttribute("stroke-dashoffset", -offset);
+      svg.appendChild(slice);
+      const targetDash = `${frac * circ} ${circ}`;
+      requestAnimationFrame(() => slice.setAttribute("stroke-dasharray", targetDash));
+      offset += frac * circ;
+    }
+    row.appendChild(svg);
+
+    const legend = document.createElement("div");
+    legend.className = "donut-legend";
+    for (const s of STATUSES) {
+      const c = counts[s.value] || 0;
+      const item = document.createElement("div");
+      item.className = "item";
+      const sw = document.createElement("span");
+      sw.className = "swatch"; sw.style.background = colorOf[s.value];
+      const lbl = document.createElement("span");
+      lbl.textContent = `${s.label} · ${c}`;
+      const pct = document.createElement("span");
+      pct.className = "pct";
+      pct.textContent = total > 0 ? `${Math.round((c / total) * 100)}%` : "0%";
+      item.append(sw, lbl, pct);
+      legend.appendChild(item);
+    }
+    row.appendChild(legend);
+    parent.appendChild(row);
+  }
+
+  // -------------------------------------------------------------------------
+  // export / import
+  // -------------------------------------------------------------------------
+  function download(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a);
+    a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function dateStampForFile() {
+    const d = new Date();
+    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
+  }
+  function exportJson() {
+    const data = JSON.stringify(state, null, 2);
+    download(new Blob([data], { type: "application/json" }), `timeplanner-backup-${dateStampForFile()}.json`);
+    toast("Exported JSON backup");
+  }
+  function csvQuote(s) {
+    s = String(s == null ? "" : s);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  }
+  function exportCsv(bounds, filt) {
+    const rows = [["start","end","duration_hours","activity","project","portfolio","tags"]];
+    const inRange = state.entries.filter(e => {
+      if (filt && !filt(e)) return false;
+      const s = new Date(e.start).getTime();
+      return s >= bounds.from && s < bounds.to;
+    }).sort((a, b) => new Date(a.start) - new Date(b.start));
+    for (const e of inRange) {
+      const a = activityById(e.activityId);
+      const proj = a ? projectById(a.projectId) : null;
+      const pf = proj ? portfolioById(proj.portfolioId) : null;
+      const endIso = e.end || new Date().toISOString();
+      const durH = ((new Date(endIso) - new Date(e.start)) / MS_HOUR).toFixed(2);
+      rows.push([
+        e.start, endIso, durH,
+        a ? a.name : "(deleted)",
+        proj ? proj.name : "(deleted)",
+        pf ? pf.name : "(deleted)",
+        (e.tags || []).join("; "),
+      ]);
+    }
+    const text = rows.map(r => r.map(csvQuote).join(",")).join("\n");
+    download(new Blob([text], { type: "text/csv" }), `timeplanner-entries-${dateStampForFile()}.csv`);
+    toast(`Exported ${inRange.length} entr${inRange.length === 1 ? "y" : "ies"}`);
+  }
+  function exportMarkdown(bounds, filt, entries) {
+    const lines = [];
+    lines.push(`# TimePlanner.AI — ${bounds.label}`);
+    const totalMs = entries.reduce((s, e) => s + entryDurationClipped(e, bounds.from, bounds.to), 0);
+    const dayKeys = new Set(entries.map(e => startOfDay(new Date(e.start)).toDateString()));
+    lines.push("");
+    lines.push(`**Total time:** ${fmtHours(totalMs)} across ${entries.length} entries · ${dayKeys.size} active day${dayKeys.size === 1 ? "" : "s"}`);
+
+    function bucket(keyFn, nameFn) {
+      const m = new Map();
+      for (const e of entries) {
+        const k = keyFn(e); if (k == null) continue;
+        m.set(k, (m.get(k) || 0) + entryDurationClipped(e, bounds.from, bounds.to));
+      }
+      return [...m.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([k, ms]) => `- ${nameFn(k)} — ${fmtHours(ms)}`);
+    }
+
+    const byPort = bucket(
+      e => { const a = activityById(e.activityId); if (!a) return null; const p = projectById(a.projectId); return p ? p.portfolioId : null; },
+      id => (portfolioById(id)?.name) || "(unknown)"
+    );
+    if (byPort.length) { lines.push("", "## By Portfolio", ...byPort); }
+    const byProj = bucket(
+      e => { const a = activityById(e.activityId); return a ? a.projectId : null; },
+      id => (projectById(id)?.name) || "(unknown)"
+    );
+    if (byProj.length) { lines.push("", "## By Project", ...byProj); }
+    const byAct = bucket(
+      e => e.activityId,
+      id => (activityById(id)?.name) || "(unknown)"
+    );
+    if (byAct.length) { lines.push("", "## By Activity", ...byAct); }
+
+    const tagMs = new Map();
+    for (const e of entries) {
+      const ms = entryDurationClipped(e, bounds.from, bounds.to);
+      for (const t of (e.tags || [])) tagMs.set(t, (tagMs.get(t) || 0) + ms);
+    }
+    if (tagMs.size) {
+      const tags = [...tagMs.entries()].sort((a, b) => b[1] - a[1]).map(([t, ms]) => `- #${t} — ${fmtHours(ms)}`);
+      lines.push("", "## By Tag", ...tags);
+    }
+
+    const inScope = reportsState.portfolioId ? projectsOfPortfolio(reportsState.portfolioId) : state.projects;
+    if (inScope.length) {
+      const counts = { planning: 0, active: 0, "on-hold": 0, done: 0 };
+      for (const p of inScope) counts[p.status || "active"] = (counts[p.status || "active"] || 0) + 1;
+      const parts = STATUSES.map(s => `${counts[s.value] || 0} ${s.label}`).join(" · ");
+      lines.push("", "## Project Status", `- ${parts}`);
+    }
+
+    lines.push("", `_Generated ${new Date().toLocaleString()}_`);
+    download(new Blob([lines.join("\n")], { type: "text/markdown" }), `timeplanner-report-${dateStampForFile()}.md`);
+    toast("Exported Markdown report");
+  }
+  function importJsonFile(file) {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      let parsed;
+      try { parsed = JSON.parse(ev.target.result); }
+      catch { toast("Couldn't parse JSON file"); return; }
+      if (!parsed || typeof parsed !== "object" ||
+          !Array.isArray(parsed.portfolios) ||
+          !Array.isArray(parsed.projects) ||
+          !Array.isArray(parsed.activities) ||
+          !Array.isArray(parsed.entries)) {
+        toast("Not a TimePlanner backup");
+        return;
+      }
+      if (!confirm("Replace all current data with the imported file? This can't be undone.")) return;
+      state = parsed;
+      for (const e of state.entries) if (!Array.isArray(e.tags)) e.tags = [];
+      save();
+      render();
+      toast("Imported backup");
+    };
+    reader.readAsText(file);
+  }
+
+  // -------------------------------------------------------------------------
+  // toasts
+  // -------------------------------------------------------------------------
+  function toast(message, opts = {}) {
+    let container = document.querySelector(".toasts");
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "toasts";
+      document.body.appendChild(container);
+    }
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = message;
+    container.appendChild(t);
+    const dur = opts.duration || 2200;
+    setTimeout(() => {
+      t.classList.add("out");
+      setTimeout(() => t.remove(), 200);
+    }, dur);
+  }
+
+  // -------------------------------------------------------------------------
+  // smooth scroll for newly-added items
+  // -------------------------------------------------------------------------
+  function scrollToHighlighted() {
+    if (highlightIds.size === 0) return;
+    const el = document.querySelector(".new-row");
+    if (el && typeof el.scrollIntoView === "function") {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // keyboard shortcuts
+  // -------------------------------------------------------------------------
+  document.addEventListener("keydown", (e) => {
+    const tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea" || tag === "select") {
+      if (e.key === "Escape") e.target.blur();
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === "n" || e.key === "N") {
+      const inp = document.querySelector("section .add-row input[type=text]");
+      if (inp) { e.preventDefault(); inp.focus(); }
+    }
+  });
 
   // -------------------------------------------------------------------------
   // live tick
