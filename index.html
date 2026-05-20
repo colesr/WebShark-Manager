@@ -3766,14 +3766,11 @@
       alert("Cloud sync isn't configured.\n\nEdit index.html and set SUPABASE_URL and SUPABASE_ANON_KEY near the top of the script.");
       return;
     }
-    const email = prompt("Enter your email — we'll send a sign-in link:");
-    if (!email) return;
-    const { error } = await sb.auth.signInWithOtp({
-      email: email.trim(),
-      options: { emailRedirectTo: window.location.href },
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "github",
+      options: { redirectTo: window.location.href },
     });
     if (error) alert("Sign-in failed: " + error.message);
-    else toast("Check your email for the sign-in link");
   }
 
   async function signOut() {
