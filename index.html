@@ -1194,8 +1194,103 @@
   }
   .refine-btn:hover { color: var(--accent); background: var(--accent-soft); }
   .refine-btn:active { transform: scale(0.9); }
+
+  /* notes preview under activity name */
+  .activity-center { flex: 1; min-width: 0; }
+  .activity-center .activity-notes {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.05rem;
+    padding: 0 0.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* theme toggle button */
+  .theme-toggle {
+    padding: 0.18rem 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .theme-toggle svg { display: block; width: 14px; height: 14px; }
+
+  /* dark theme variables + overrides for surfaces with hardcoded white */
+  :root[data-theme="dark"] {
+    --bg: #0b0b0e;
+    --card: #18181c;
+    --card-hover: #1f1f24;
+    --border: #2a2a31;
+    --border-strong: #3a3a43;
+    --text: #f1f1f3;
+    --muted: #9ca3af;
+    --subtle: #232329;
+    --accent: #60a5fa;
+    --accent-soft: rgba(96, 165, 250, 0.13);
+    --accent-hover: #93c5fd;
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, 0.12);
+    --warn: #fbbf24;
+    --ok: #4ade80;
+    --planning: #9ca3af;
+    --active: #4ade80;
+    --hold: #fbbf24;
+    --done: #9ca3af;
+  }
+  [data-theme="dark"] input[type="text"],
+  [data-theme="dark"] input[type="time"],
+  [data-theme="dark"] input[type="date"],
+  [data-theme="dark"] input[type="number"],
+  [data-theme="dark"] textarea,
+  [data-theme="dark"] select,
+  [data-theme="dark"] button,
+  [data-theme="dark"] .header-link,
+  [data-theme="dark"] .chip-btn,
+  [data-theme="dark"] .file-btn,
+  [data-theme="dark"] .ai-link,
+  [data-theme="dark"] .running-bar .stop-btn,
+  [data-theme="dark"] .chat-msg .bubble,
+  [data-theme="dark"] .badge {
+    background: var(--card);
+    color: var(--text);
+  }
+  [data-theme="dark"] .badge { color: var(--muted); }
+  [data-theme="dark"] .badge.s-active { background: rgba(74, 222, 128, 0.12); border-color: rgba(74, 222, 128, 0.25); color: var(--ok); }
+  [data-theme="dark"] .badge.s-hold   { background: rgba(251, 191, 36, 0.12); border-color: rgba(251, 191, 36, 0.25); color: var(--warn); }
+  [data-theme="dark"] .badge.s-done   { background: var(--subtle); border-color: var(--border); color: var(--muted); }
+  [data-theme="dark"] button.primary       { background: var(--accent); color: #0b0b0e; border-color: var(--accent); }
+  [data-theme="dark"] button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  [data-theme="dark"] .chat-msg.user .bubble { background: var(--accent); color: #0b0b0e; border-color: var(--accent); }
+  [data-theme="dark"] .header-link.active,
+  [data-theme="dark"] .chip-btn.active,
+  [data-theme="dark"] .ai-link.open {
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-color: rgba(96, 165, 250, 0.32);
+  }
+  [data-theme="dark"] .running-bar { border-color: rgba(96, 165, 250, 0.3); }
+  [data-theme="dark"] .brand-ai {
+    background: linear-gradient(120deg, var(--accent), #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  [data-theme="dark"] .toast { background: #2a2a31; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  // Apply theme synchronously to avoid a flash of light theme on load
+  (function () {
+    try {
+      var t = localStorage.getItem("timeplanner.theme");
+      if (!t) {
+        t = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+      }
+      document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -1213,6 +1308,7 @@
         <span class="brand-text">TimePlanner<span class="brand-dot">.</span><span class="brand-ai">AI</span></span>
       </a>
       <div class="header-right">
+        <button class="header-link theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme"></button>
         <span id="syncIndicator" class="sync-indicator" aria-hidden="true" title=""></span>
         <button class="header-link" id="authLink" type="button" title="Sign in to sync your data">Sign in</button>
         <button class="ai-link" id="aiLink" type="button" title="Ask the planning guru">
@@ -1286,6 +1382,9 @@
       }
       // backfill missing tags
       for (const e of s.entries) if (!Array.isArray(e.tags)) e.tags = [];
+      // backfill missing notes on portfolios + activities
+      for (const p of s.portfolios) if (typeof p.notes !== "string") p.notes = "";
+      for (const a of s.activities) if (typeof a.notes !== "string") a.notes = "";
       return s;
     } catch {
       return freshState();
@@ -1444,7 +1543,7 @@
     if (!name) return null;
     const color = pickColor(PORTFOLIO_PALETTE, state.portfolios.map(p => p.color));
     const id = uid();
-    state.portfolios.push({ id, name, color });
+    state.portfolios.push({ id, name, color, notes: "" });
     highlight(id);
     save();
     return id;
@@ -1453,6 +1552,12 @@
     const p = portfolioById(id);
     if (!p) return;
     p.name = (name || "").trim() || p.name;
+    save();
+  }
+  function updatePortfolio(id, patch) {
+    const p = portfolioById(id);
+    if (!p) return;
+    Object.assign(p, patch);
     save();
   }
   function deletePortfolio(id) {
@@ -1521,7 +1626,7 @@
     const used = activitiesOfProject(projectId).map(a => a.color);
     const color = pickColor(ACTIVITY_PALETTE, used);
     const id = uid();
-    state.activities.push({ id, projectId, name, color });
+    state.activities.push({ id, projectId, name, color, notes: "" });
     highlight(id);
     save();
     return id;
@@ -1530,6 +1635,12 @@
     const a = activityById(id);
     if (!a) return;
     a.name = (name || "").trim() || a.name;
+    save();
+  }
+  function updateActivity(id, patch) {
+    const a = activityById(id);
+    if (!a) return;
+    Object.assign(a, patch);
     save();
   }
   function deleteActivity(id) {
@@ -1858,13 +1969,17 @@
     });
     const actions = document.createElement("div");
     actions.className = "hero-actions";
+    const editBtn = document.createElement("button");
+    editBtn.className = "icon-btn";
+    editBtn.textContent = "Edit";
+    editBtn.addEventListener("click", () => openPortfolioMetaEditor(pf.id, hero));
     const del = document.createElement("button");
     del.className = "icon-btn danger";
     del.title = "Delete portfolio";
     del.innerHTML = "&times;";
     del.style.fontSize = "1.1rem";
     del.addEventListener("click", () => deletePortfolio(pf.id));
-    actions.appendChild(del);
+    actions.append(editBtn, del);
     top.append(dot, title, actions);
     hero.appendChild(top);
 
@@ -1872,6 +1987,20 @@
     meta.className = "meta-row";
     meta.innerHTML = `<span>${projs.length} project${projs.length === 1 ? "" : "s"}</span><span>${fmtHours(weekMs)} this week</span>`;
     hero.appendChild(meta);
+
+    if (pf.notes) {
+      const d = document.createElement("div");
+      d.className = "desc";
+      d.textContent = pf.notes;
+      hero.appendChild(d);
+    } else {
+      const d = document.createElement("div");
+      d.className = "desc empty-desc";
+      d.textContent = "Add notes…";
+      d.addEventListener("click", () => openPortfolioMetaEditor(pf.id, hero));
+      hero.appendChild(d);
+    }
+
     root.appendChild(hero);
 
     // projects
@@ -2167,6 +2296,9 @@
     const dot = document.createElement("span");
     dot.className = "dot"; dot.style.background = a.color;
 
+    const center = document.createElement("div");
+    center.className = "activity-center";
+
     const name = document.createElement("div");
     name.className = "name";
     name.textContent = a.name;
@@ -2175,6 +2307,15 @@
       const next = prompt("Rename activity:", a.name);
       if (next !== null) { renameActivity(a.id, next); render(); }
     });
+    center.appendChild(name);
+
+    if (a.notes) {
+      const notes = document.createElement("div");
+      notes.className = "activity-notes";
+      notes.textContent = a.notes;
+      notes.title = a.notes;
+      center.appendChild(notes);
+    }
 
     const today = document.createElement("div");
     today.className = "today";
@@ -2195,6 +2336,12 @@
       toggle.addEventListener("click", () => startActivity(a.id));
     }
 
+    const editBtn = document.createElement("button");
+    editBtn.className = "icon-btn";
+    editBtn.textContent = "Edit";
+    editBtn.title = "Edit name and notes";
+    editBtn.addEventListener("click", () => openActivityEditor(a.id, row));
+
     const del = document.createElement("button");
     del.className = "icon-btn danger";
     del.title = "Delete activity";
@@ -2202,9 +2349,52 @@
     del.style.fontSize = "1.1rem";
     del.addEventListener("click", () => deleteActivity(a.id));
 
-    actions.append(toggle, del);
-    row.append(dot, name, today, actions);
+    actions.append(toggle, editBtn, del);
+    row.append(dot, center, today, actions);
     return row;
+  }
+
+  function openActivityEditor(activityId, rowEl) {
+    const a = activityById(activityId);
+    if (!a) return;
+
+    const form = document.createElement("div");
+    form.className = "meta-form";
+
+    const nameL = document.createElement("label");
+    nameL.textContent = "Name";
+    const nameI = document.createElement("input");
+    nameI.type = "text"; nameI.value = a.name;
+    nameL.appendChild(nameI);
+
+    const notesL = document.createElement("label");
+    notesL.className = "full";
+    notesL.textContent = "Notes";
+    const notesI = document.createElement("textarea");
+    notesI.value = a.notes || "";
+    notesI.placeholder = "Context, links, what counts toward this activity…";
+    notesL.appendChild(notesI);
+
+    const rowActs = document.createElement("div");
+    rowActs.className = "row-actions";
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "primary"; saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", () => {
+      updateActivity(a.id, {
+        name: (nameI.value || "").trim() || a.name,
+        notes: notesI.value,
+      });
+      render();
+    });
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", () => render());
+    rowActs.append(saveBtn, cancelBtn);
+
+    form.append(nameL, notesL, rowActs);
+    rowEl.insertAdjacentElement("afterend", form);
+    nameI.focus();
+    nameI.select();
   }
 
   function buildEntryRow(e, idx) {
@@ -2356,6 +2546,53 @@
     container.appendChild(wrap);
     container.appendChild(err);
     return container;
+  }
+
+  // -------- portfolio meta editor (inline within hero)
+  function openPortfolioMetaEditor(portfolioId, heroEl) {
+    const p = portfolioById(portfolioId);
+    if (!p) return;
+
+    const form = document.createElement("div");
+    form.className = "meta-form";
+
+    const nameL = document.createElement("label");
+    nameL.textContent = "Name";
+    const nameI = document.createElement("input");
+    nameI.type = "text"; nameI.value = p.name;
+    nameL.appendChild(nameI);
+
+    const notesL = document.createElement("label");
+    notesL.className = "full";
+    notesL.textContent = "Notes";
+    const notesI = document.createElement("textarea");
+    notesI.value = p.notes || "";
+    notesI.placeholder = "Context, goals, links…";
+    notesL.appendChild(notesI);
+
+    const rowActs = document.createElement("div");
+    rowActs.className = "row-actions";
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "primary"; saveBtn.textContent = "Save";
+    saveBtn.addEventListener("click", () => {
+      updatePortfolio(p.id, {
+        name: (nameI.value || "").trim() || p.name,
+        notes: notesI.value,
+      });
+      render();
+    });
+    const cancelBtn = document.createElement("button");
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.addEventListener("click", () => render());
+    rowActs.append(saveBtn, cancelBtn);
+
+    form.append(nameL, notesL, rowActs);
+
+    const existing = heroEl.querySelector(".meta-form");
+    if (existing) existing.remove();
+    heroEl.appendChild(form);
+    nameI.focus();
+    nameI.select();
   }
 
   // -------- project meta editor (inline within hero)
@@ -3858,6 +4095,45 @@
   scheduleMidnightRender();
 
   // -------------------------------------------------------------------------
+  // theme toggle (light / dark) — initial value set inline in <head>
+  // -------------------------------------------------------------------------
+  const THEME_KEY = "timeplanner.theme";
+  function sunIconSvg() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>`;
+  }
+  function moonIconSvg() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
+  }
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    const btn = document.getElementById("themeToggle");
+    if (btn) {
+      btn.innerHTML = theme === "dark" ? sunIconSvg() : moonIconSvg();
+      btn.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+    }
+  }
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute("data-theme") || "light";
+    const next = current === "dark" ? "light" : "dark";
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    applyTheme(next);
+  }
+  applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+  const themeToggleBtn = document.getElementById("themeToggle");
+  if (themeToggleBtn) themeToggleBtn.addEventListener("click", toggleTheme);
+
+  // follow system changes only if user hasn't picked a theme themselves
+  if (window.matchMedia) {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e) => {
+      try { if (localStorage.getItem(THEME_KEY)) return; } catch (err) {}
+      applyTheme(e.matches ? "dark" : "light");
+    };
+    if (mq.addEventListener) mq.addEventListener("change", onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+  }
+
+  // -------------------------------------------------------------------------
   // cloud sync (Supabase) — auth + debounced state push, pull on sign-in
   // -------------------------------------------------------------------------
   const cloudEnabled = !SUPABASE_URL.startsWith("YOUR_") && !SUPABASE_ANON_KEY.startsWith("YOUR_");
@@ -3939,6 +4215,8 @@
           if (!Array.isArray(state[k])) state[k] = [];
         }
         for (const e of state.entries) if (!Array.isArray(e.tags)) e.tags = [];
+        for (const p of state.portfolios) if (typeof p.notes !== "string") p.notes = "";
+        for (const a of state.activities) if (typeof a.notes !== "string") a.notes = "";
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         render();
         setSyncStatus("synced", "Synced");
