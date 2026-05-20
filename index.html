@@ -1277,6 +1277,190 @@
     color: transparent;
   }
   [data-theme="dark"] .toast { background: #2a2a31; }
+
+  /* dependency UI — chips for display, picker for editing */
+  .dep-list { display: flex; flex-direction: column; gap: 0.3rem; }
+  .dep-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: var(--subtle);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.18rem 0.45rem;
+    font-size: 0.82rem;
+  }
+  .dep-chip.dep-missing { opacity: 0.55; }
+  .dep-kind {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .dep-name { font-weight: 500; }
+  .dep-rm {
+    background: none; border: none;
+    color: var(--muted); cursor: pointer;
+    font-size: 1rem; line-height: 1;
+    padding: 0 0.2rem; border-radius: 4px;
+    margin-left: 0.1rem;
+  }
+  .dep-rm:hover { color: var(--danger); background: var(--danger-soft); }
+  .dep-empty {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-style: italic;
+  }
+  .dep-adder {
+    display: flex; gap: 0.4rem;
+    margin-top: 0.4rem;
+    align-items: center;
+  }
+  .dep-adder select { flex: 1; }
+  .deps-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+    align-items: center;
+  }
+  .deps-display .deps-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+  .deps-display .dep-chip {
+    font-size: 0.78rem;
+    cursor: default;
+    transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  }
+  .deps-display .dep-chip.clickable { cursor: pointer; }
+  .deps-display .dep-chip.clickable:hover { background: var(--card-hover); border-color: var(--border-strong); }
+  .activity .deps-display {
+    margin-top: 0.2rem;
+    padding: 0 0.3rem;
+  }
+  .activity .deps-display .dep-chip { font-size: 0.7rem; padding: 0.05rem 0.35rem; }
+  .activity .deps-display .deps-label { font-size: 0.72rem; }
+
+  /* plan view */
+  .plan-scope {
+    display: flex; align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.65rem;
+    flex-wrap: wrap;
+  }
+  .plan-scope .lbl { font-size: 0.82rem; color: var(--muted); }
+  .plan-row {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    gap: 0.65rem;
+    align-items: start;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--border);
+    animation: fadeUp var(--t-base) var(--ease) both;
+  }
+  .plan-row:first-child { border-top: none; }
+  .plan-row .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 0.4rem; }
+  .plan-row.level-0 .plan-name { font-size: 1.02rem; font-weight: 600; }
+  .plan-row.level-1 { padding-left: 1.25rem; }
+  .plan-row.level-1 .plan-name { font-weight: 500; }
+  .plan-row.level-2 { padding-left: 2.5rem; }
+  .plan-row.level-2 .plan-name { font-weight: 400; color: var(--text); }
+  .plan-center { min-width: 0; }
+  .plan-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0.05rem 0.3rem;
+    margin-left: -0.3rem;
+    display: inline-block;
+    max-width: 100%;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .plan-name:hover { background: var(--subtle); }
+  .plan-meta {
+    margin-top: 0.2rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+    display: flex; flex-wrap: wrap; gap: 0.3rem 0.7rem;
+    align-items: center;
+  }
+  .plan-meta .meta-pill { font-variant-numeric: tabular-nums; }
+  .plan-row .plan-hours {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.1rem;
+  }
+  .plan-notes {
+    margin-top: 0.3rem;
+    font-size: 0.84rem;
+    color: var(--muted);
+    white-space: pre-wrap;
+    line-height: 1.45;
+  }
+
+  /* plan timeline (projects with deadlines) */
+  .timeline-row {
+    display: grid;
+    grid-template-columns: 1fr 55%;
+    gap: 0.75rem; align-items: center;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--border);
+    animation: fadeUp var(--t-base) var(--ease) both;
+  }
+  .timeline-row:first-child { border-top: none; }
+  .timeline-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 4px;
+    padding: 0.05rem 0.3rem;
+    margin-left: -0.3rem;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .timeline-label:hover { background: var(--subtle); }
+  .timeline-bar-wrap {
+    position: relative;
+    height: 18px;
+    background: var(--subtle);
+    border-radius: 4px;
+    overflow: visible;
+  }
+  .timeline-now {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    width: 2px;
+    background: var(--border-strong);
+    z-index: 1;
+  }
+  .timeline-marker {
+    position: absolute;
+    top: -2px; bottom: -2px;
+    width: 8px;
+    border-radius: 2px;
+    transform: translateX(-4px);
+    z-index: 2;
+  }
+  .timeline-marker.overdue { background: var(--danger); }
+  .timeline-marker.due-soon { background: var(--warn); }
+  .timeline-marker.normal { background: var(--accent); }
+  .timeline-axis {
+    display: grid;
+    grid-template-columns: 1fr 55%;
+    gap: 0.75rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+  }
+  .timeline-axis .axis-dates {
+    display: flex; justify-content: space-between;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -1315,7 +1499,7 @@
           <span class="ai-dot"></span>AI
         </button>
         <a class="header-link" id="reportsLink" href="#/reports">Reports</a>
-        <div class="date" id="todayDate"></div>
+        <a class="header-link" id="planLink" href="#/plan">Plan</a>
       </div>
     </div>
     <nav class="crumbs" id="crumbs"></nav>
@@ -1385,6 +1569,10 @@
       // backfill missing notes on portfolios + activities
       for (const p of s.portfolios) if (typeof p.notes !== "string") p.notes = "";
       for (const a of s.activities) if (typeof a.notes !== "string") a.notes = "";
+      // backfill dependencies arrays
+      for (const p of s.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
+      for (const p of s.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
+      for (const a of s.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
       return s;
     } catch {
       return freshState();
@@ -1543,7 +1731,7 @@
     if (!name) return null;
     const color = pickColor(PORTFOLIO_PALETTE, state.portfolios.map(p => p.color));
     const id = uid();
-    state.portfolios.push({ id, name, color, notes: "" });
+    state.portfolios.push({ id, name, color, notes: "", dependencies: [] });
     highlight(id);
     save();
     return id;
@@ -1590,6 +1778,7 @@
       deadline: fields.deadline || null,
       estimatedHours: fields.estimatedHours == null ? null : Number(fields.estimatedHours),
       color,
+      dependencies: [],
     });
     highlight(id);
     save();
@@ -1626,7 +1815,7 @@
     const used = activitiesOfProject(projectId).map(a => a.color);
     const color = pickColor(ACTIVITY_PALETTE, used);
     const id = uid();
-    state.activities.push({ id, projectId, name, color, notes: "" });
+    state.activities.push({ id, projectId, name, color, notes: "", dependencies: [] });
     highlight(id);
     save();
     return id;
@@ -1729,6 +1918,7 @@
     const h = location.hash.replace(/^#\/?/, "");
     if (!h) return { name: "home" };
     if (h === "reports") return { name: "reports" };
+    if (h === "plan") return { name: "plan" };
     const parts = h.split("/");
     if (parts[0] === "p" && parts[1]) {
       if (parts[2] === "proj" && parts[3]) return { name: "project", id: parts[3], portfolioId: parts[1] };
@@ -1739,6 +1929,7 @@
   function viewHref(v) {
     if (v.name === "home") return "#/";
     if (v.name === "reports") return "#/reports";
+    if (v.name === "plan") return "#/plan";
     if (v.name === "portfolio") return `#/p/${v.id}`;
     if (v.name === "project") {
       const p = projectById(v.id);
@@ -1756,11 +1947,182 @@
   });
 
   // -------------------------------------------------------------------------
+  // dependencies — cross-hierarchy references
+  // -------------------------------------------------------------------------
+  function resolveDep(dep) {
+    if (!dep) return null;
+    if (dep.kind === "portfolio") return portfolioById(dep.id);
+    if (dep.kind === "project")   return projectById(dep.id);
+    if (dep.kind === "activity")  return activityById(dep.id);
+    return null;
+  }
+  function depDisplayName(dep) {
+    const item = resolveDep(dep);
+    if (!item) return `(deleted ${dep.kind})`;
+    if (dep.kind === "activity") {
+      const proj = projectById(item.projectId);
+      return proj ? `${item.name} · ${proj.name}` : item.name;
+    }
+    return item.name;
+  }
+  function dependencyOptions(excludeKind, excludeId, alreadyHave) {
+    const have = new Set((alreadyHave || []).map(d => `${d.kind}:${d.id}`));
+    const opts = [];
+    for (const pf of state.portfolios) {
+      if (excludeKind === "portfolio" && pf.id === excludeId) continue;
+      if (have.has(`portfolio:${pf.id}`)) continue;
+      opts.push({ kind: "portfolio", id: pf.id, label: `Portfolio · ${pf.name}` });
+    }
+    for (const p of state.projects) {
+      if (excludeKind === "project" && p.id === excludeId) continue;
+      if (have.has(`project:${p.id}`)) continue;
+      opts.push({ kind: "project", id: p.id, label: `Project · ${p.name}` });
+    }
+    for (const a of state.activities) {
+      if (excludeKind === "activity" && a.id === excludeId) continue;
+      if (have.has(`activity:${a.id}`)) continue;
+      const proj = projectById(a.projectId);
+      opts.push({ kind: "activity", id: a.id, label: `Activity · ${a.name}${proj ? " (" + proj.name + ")" : ""}` });
+    }
+    return opts;
+  }
+  function navigateToDep(dep) {
+    if (dep.kind === "portfolio") navigate({ name: "portfolio", id: dep.id });
+    else if (dep.kind === "project") navigate({ name: "project", id: dep.id });
+    else if (dep.kind === "activity") {
+      const a = activityById(dep.id);
+      if (a) navigate({ name: "project", id: a.projectId });
+    }
+  }
+  function buildDepsDisplay(deps) {
+    if (!deps || deps.length === 0) return null;
+    const wrap = document.createElement("div");
+    wrap.className = "deps-display";
+    const lbl = document.createElement("span");
+    lbl.className = "deps-label";
+    lbl.textContent = "Depends on";
+    wrap.appendChild(lbl);
+    for (const dep of deps) {
+      const resolved = resolveDep(dep);
+      const chip = document.createElement("div");
+      chip.className = "dep-chip";
+      if (!resolved) chip.classList.add("dep-missing");
+      else chip.classList.add("clickable");
+      const kindBadge = document.createElement("span");
+      kindBadge.className = "dep-kind";
+      kindBadge.textContent = dep.kind;
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "dep-name";
+      nameSpan.textContent = depDisplayName(dep);
+      chip.append(kindBadge, nameSpan);
+      if (resolved) {
+        chip.title = `Go to ${dep.kind}`;
+        chip.addEventListener("click", (ev) => { ev.stopPropagation(); navigateToDep(dep); });
+      }
+      wrap.appendChild(chip);
+    }
+    return wrap;
+  }
+  // editor block — operates on a buffer; caller saves buffer on submit
+  function buildDependencyEditor(elementKind, elementId, initialDeps, onChange) {
+    const buffer = [...(initialDeps || [])];
+    const wrap = document.createElement("div");
+    wrap.className = "full";
+
+    const heading = document.createElement("div");
+    heading.style.fontSize = "0.78rem";
+    heading.style.color = "var(--muted)";
+    heading.style.marginBottom = "0.25rem";
+    heading.textContent = "Dependencies";
+    wrap.appendChild(heading);
+
+    const list = document.createElement("div");
+    list.className = "dep-list";
+    wrap.appendChild(list);
+
+    const adder = document.createElement("div");
+    adder.className = "dep-adder";
+    const sel = document.createElement("select");
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.textContent = "Add";
+    adder.append(sel, addBtn);
+    wrap.appendChild(adder);
+
+    function refresh() {
+      // list
+      list.innerHTML = "";
+      if (buffer.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "dep-empty";
+        empty.textContent = "No dependencies.";
+        list.appendChild(empty);
+      } else {
+        buffer.forEach((dep, i) => {
+          const chip = document.createElement("div");
+          chip.className = "dep-chip";
+          if (!resolveDep(dep)) chip.classList.add("dep-missing");
+          const kindBadge = document.createElement("span");
+          kindBadge.className = "dep-kind";
+          kindBadge.textContent = dep.kind;
+          const nameSpan = document.createElement("span");
+          nameSpan.className = "dep-name";
+          nameSpan.textContent = depDisplayName(dep);
+          const rm = document.createElement("button");
+          rm.type = "button";
+          rm.className = "dep-rm";
+          rm.innerHTML = "&times;";
+          rm.title = "Remove";
+          rm.addEventListener("click", () => {
+            buffer.splice(i, 1);
+            onChange(buffer);
+            refresh();
+          });
+          chip.append(kindBadge, nameSpan, rm);
+          list.appendChild(chip);
+        });
+      }
+      // adder select options (exclude already-added + self)
+      sel.innerHTML = "";
+      const ph = document.createElement("option");
+      ph.value = ""; ph.textContent = "Add a dependency…";
+      sel.appendChild(ph);
+      const opts = dependencyOptions(elementKind, elementId, buffer);
+      if (opts.length === 0) {
+        ph.textContent = "No more elements available";
+        sel.disabled = true;
+        addBtn.disabled = true;
+      } else {
+        sel.disabled = false;
+        addBtn.disabled = false;
+        for (const o of opts) {
+          const opt = document.createElement("option");
+          opt.value = `${o.kind}:${o.id}`;
+          opt.textContent = o.label;
+          sel.appendChild(opt);
+        }
+      }
+    }
+
+    addBtn.addEventListener("click", () => {
+      const v = sel.value;
+      if (!v) return;
+      const sep = v.indexOf(":");
+      const kind = v.slice(0, sep);
+      const id = v.slice(sep + 1);
+      buffer.push({ kind, id });
+      onChange(buffer);
+      refresh();
+    });
+
+    refresh();
+    return wrap;
+  }
+
+  // -------------------------------------------------------------------------
   // rendering
   // -------------------------------------------------------------------------
   function render() {
-    // header bits
-    $("todayDate").textContent = fmtDateLong(new Date());
     renderCrumbs();
     renderRunningBar();
 
@@ -1777,13 +2139,16 @@
     next.className = "view";
     if (view.name === "home") renderHome(next);
     else if (view.name === "reports") renderReportsView(next);
+    else if (view.name === "plan") renderPlanView(next);
     else if (view.name === "portfolio") renderPortfolioView(next, view.id);
     else if (view.name === "project") renderProjectView(next, view.id);
     swap(root, next);
 
-    // toggle Reports link state
+    // toggle header link states
     const rl = $("reportsLink");
     if (rl) rl.classList.toggle("active", view.name === "reports");
+    const pl = $("planLink");
+    if (pl) pl.classList.toggle("active", view.name === "plan");
 
     // clear highlight set after this paint; scroll to any new row first
     requestAnimationFrame(() => {
@@ -1816,6 +2181,9 @@
     } else if (view.name === "reports") {
       parts.push({ label: "All", href: "#/" });
       parts.push({ label: "Reports", current: true });
+    } else if (view.name === "plan") {
+      parts.push({ label: "All", href: "#/" });
+      parts.push({ label: "Plan", current: true });
     } else if (view.name === "portfolio") {
       parts.push({ label: "All", href: "#/" });
       const pf = portfolioById(view.id);
@@ -2000,6 +2368,9 @@
       d.addEventListener("click", () => openPortfolioMetaEditor(pf.id, hero));
       hero.appendChild(d);
     }
+
+    const depsView = buildDepsDisplay(pf.dependencies);
+    if (depsView) hero.appendChild(depsView);
 
     root.appendChild(hero);
 
@@ -2208,6 +2579,10 @@
       wrap.appendChild(bar);
       hero.appendChild(wrap);
     }
+
+    const projDeps = buildDepsDisplay(proj.dependencies);
+    if (projDeps) hero.appendChild(projDeps);
+
     root.appendChild(hero);
 
     // Activities
@@ -2317,6 +2692,9 @@
       center.appendChild(notes);
     }
 
+    const actDeps = buildDepsDisplay(a.dependencies);
+    if (actDeps) center.appendChild(actDeps);
+
     const today = document.createElement("div");
     today.className = "today";
     today.dataset.activityId = a.id;
@@ -2375,6 +2753,9 @@
     notesI.placeholder = "Context, links, what counts toward this activity…";
     notesL.appendChild(notesI);
 
+    let depsBuffer = [...(a.dependencies || [])];
+    const depsEditor = buildDependencyEditor("activity", a.id, depsBuffer, (next) => { depsBuffer = next; });
+
     const rowActs = document.createElement("div");
     rowActs.className = "row-actions";
     const saveBtn = document.createElement("button");
@@ -2383,6 +2764,7 @@
       updateActivity(a.id, {
         name: (nameI.value || "").trim() || a.name,
         notes: notesI.value,
+        dependencies: depsBuffer,
       });
       render();
     });
@@ -2391,7 +2773,7 @@
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, notesL, rowActs);
+    form.append(nameL, notesL, depsEditor, rowActs);
     rowEl.insertAdjacentElement("afterend", form);
     nameI.focus();
     nameI.select();
@@ -2570,6 +2952,9 @@
     notesI.placeholder = "Context, goals, links…";
     notesL.appendChild(notesI);
 
+    let depsBuffer = [...(p.dependencies || [])];
+    const depsEditor = buildDependencyEditor("portfolio", p.id, depsBuffer, (next) => { depsBuffer = next; });
+
     const rowActs = document.createElement("div");
     rowActs.className = "row-actions";
     const saveBtn = document.createElement("button");
@@ -2578,6 +2963,7 @@
       updatePortfolio(p.id, {
         name: (nameI.value || "").trim() || p.name,
         notes: notesI.value,
+        dependencies: depsBuffer,
       });
       render();
     });
@@ -2586,7 +2972,7 @@
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, notesL, rowActs);
+    form.append(nameL, notesL, depsEditor, rowActs);
 
     const existing = heroEl.querySelector(".meta-form");
     if (existing) existing.remove();
@@ -2661,6 +3047,9 @@
       }
     });
 
+    let depsBuffer = [...(p.dependencies || [])];
+    const depsEditor = buildDependencyEditor("project", p.id, depsBuffer, (next) => { depsBuffer = next; });
+
     saveBtn.addEventListener("click", () => {
       const est = estI.value.trim();
       updateProject(p.id, {
@@ -2669,13 +3058,14 @@
         deadline: dueI.value ? dateInputToIso(dueI.value) : null,
         estimatedHours: est === "" ? null : Number(est),
         description: descI.value,
+        dependencies: depsBuffer,
       });
       render();
     });
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn, moveBtn);
 
-    form.append(nameL, stL, dueL, estL, descL, rowActs);
+    form.append(nameL, stL, dueL, estL, descL, depsEditor, rowActs);
 
     // remove existing meta/desc/progress nodes and append form instead
     const existing = heroEl.querySelector(".meta-form");
@@ -3411,11 +3801,436 @@
       if (!confirm("Replace all current data with the imported file? This can't be undone.")) return;
       state = parsed;
       for (const e of state.entries) if (!Array.isArray(e.tags)) e.tags = [];
+      for (const p of state.portfolios) { if (typeof p.notes !== "string") p.notes = ""; if (!Array.isArray(p.dependencies)) p.dependencies = []; }
+      for (const p of state.projects)   { if (!Array.isArray(p.dependencies)) p.dependencies = []; }
+      for (const a of state.activities) { if (typeof a.notes !== "string") a.notes = ""; if (!Array.isArray(a.dependencies)) a.dependencies = []; }
       save();
       render();
       toast("Imported backup");
     };
     reader.readAsText(file);
+  }
+
+  // -------------------------------------------------------------------------
+  // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
+  // -------------------------------------------------------------------------
+  const planState = { scope: "all", scopeId: "" };
+
+  function planScopeItems() {
+    const out = { portfolios: [] };
+    const pack = (pf) => ({
+      pf,
+      projects: projectsOfPortfolio(pf.id).map(p => ({
+        p, activities: activitiesOfProject(p.id),
+      })),
+    });
+    if (planState.scope === "all") {
+      for (const pf of state.portfolios) out.portfolios.push(pack(pf));
+    } else if (planState.scope === "portfolio") {
+      const pf = portfolioById(planState.scopeId);
+      if (pf) out.portfolios.push(pack(pf));
+    } else if (planState.scope === "project") {
+      const p = projectById(planState.scopeId);
+      if (p) {
+        const pf = portfolioById(p.portfolioId);
+        if (pf) out.portfolios.push({ pf, projects: [{ p, activities: activitiesOfProject(p.id) }] });
+      }
+    }
+    return out;
+  }
+
+  function flatPlanRows() {
+    const data = planScopeItems();
+    const rows = [];
+    const depStr = (deps) => (deps || []).map(d => `${depDisplayName(d)} (${d.kind})`).join("; ");
+    for (const pfBlock of data.portfolios) {
+      const pf = pfBlock.pf;
+      const allActIdsInPf = new Set(state.activities.filter(a => pfBlock.projects.some(pb => pb.p.id === a.projectId)).map(a => a.id));
+      const pfMs = totalForFilterInRange(e => allActIdsInPf.has(e.activityId), 0, Date.now() + MS_DAY);
+      rows.push({
+        level: 0, kind: "portfolio", name: pf.name,
+        status: "", deadline: "",
+        estimatedHours: "", actualHours: (pfMs / MS_HOUR).toFixed(2),
+        notes: pf.notes || "", dependencies: depStr(pf.dependencies),
+      });
+      for (const pBlock of pfBlock.projects) {
+        const p = pBlock.p;
+        const actIds = new Set(activitiesOfProject(p.id).map(a => a.id));
+        const actualMs = totalForFilterInRange(e => actIds.has(e.activityId), 0, Date.now() + MS_DAY);
+        rows.push({
+          level: 1, kind: "project", name: p.name,
+          status: (STATUS_BY[p.status] || STATUS_BY.active).label,
+          deadline: p.deadline ? isoToDateInput(p.deadline) : "",
+          estimatedHours: p.estimatedHours == null ? "" : String(p.estimatedHours),
+          actualHours: (actualMs / MS_HOUR).toFixed(2),
+          notes: p.description || "", dependencies: depStr(p.dependencies),
+        });
+        for (const a of pBlock.activities) {
+          const actMs = totalForFilterInRange(e => e.activityId === a.id, 0, Date.now() + MS_DAY);
+          rows.push({
+            level: 2, kind: "activity", name: a.name,
+            status: "", deadline: "",
+            estimatedHours: "", actualHours: (actMs / MS_HOUR).toFixed(2),
+            notes: a.notes || "", dependencies: depStr(a.dependencies),
+          });
+        }
+      }
+    }
+    return rows;
+  }
+
+  function renderPlanView(root) {
+    // validate scope id
+    if (planState.scope === "portfolio" && !portfolioById(planState.scopeId)) { planState.scope = "all"; planState.scopeId = ""; }
+    if (planState.scope === "project"   && !projectById(planState.scopeId))   { planState.scope = "all"; planState.scopeId = ""; }
+
+    // hero
+    const hero = document.createElement("div");
+    hero.className = "hero";
+    const top = document.createElement("div");
+    top.className = "hero-top";
+    const title = document.createElement("h1");
+    title.textContent = "Plan";
+    title.style.flex = "1";
+    title.style.cursor = "default";
+    top.appendChild(title);
+    hero.appendChild(top);
+
+    const meta = document.createElement("div");
+    meta.className = "meta-row";
+    meta.innerHTML = `<span>A structured breakdown of your work — portfolios, projects, activities, with deadlines and dependencies.</span>`;
+    hero.appendChild(meta);
+
+    // scope selector
+    const scopeRow = document.createElement("div");
+    scopeRow.className = "plan-scope";
+    const lbl = document.createElement("span");
+    lbl.className = "lbl";
+    lbl.textContent = "Scope:";
+    const sel = document.createElement("select");
+    const optAll = document.createElement("option");
+    optAll.value = "all:"; optAll.textContent = "All portfolios";
+    sel.appendChild(optAll);
+    if (state.portfolios.length > 0) {
+      const og = document.createElement("optgroup"); og.label = "By portfolio";
+      for (const pf of state.portfolios) {
+        const o = document.createElement("option");
+        o.value = `portfolio:${pf.id}`; o.textContent = pf.name;
+        og.appendChild(o);
+      }
+      sel.appendChild(og);
+    }
+    if (state.projects.length > 0) {
+      const og = document.createElement("optgroup"); og.label = "By project";
+      for (const p of state.projects) {
+        const o = document.createElement("option");
+        o.value = `project:${p.id}`; o.textContent = p.name;
+        og.appendChild(o);
+      }
+      sel.appendChild(og);
+    }
+    sel.value = `${planState.scope}:${planState.scopeId || ""}`;
+    if (!sel.value || ![...sel.options].some(o => o.value === sel.value)) {
+      sel.value = "all:";
+      planState.scope = "all"; planState.scopeId = "";
+    }
+    sel.addEventListener("change", () => {
+      const v = sel.value, sep = v.indexOf(":");
+      planState.scope = v.slice(0, sep);
+      planState.scopeId = v.slice(sep + 1);
+      render();
+    });
+    scopeRow.append(lbl, sel);
+    hero.appendChild(scopeRow);
+    root.appendChild(hero);
+
+    // breakdown
+    const data = planScopeItems();
+    const totalCount = data.portfolios.reduce((s, b) => s + 1 + b.projects.length + b.projects.reduce((ss, pb) => ss + pb.activities.length, 0), 0);
+    if (totalCount === 0) {
+      const empty = document.createElement("section");
+      const e = document.createElement("div");
+      e.className = "plan-empty";
+      e.textContent = "Nothing to show — create a portfolio and a project to get started.";
+      empty.appendChild(e);
+      root.appendChild(empty);
+      return;
+    }
+
+    const breakdownSec = document.createElement("section");
+    const h = document.createElement("h2");
+    h.textContent = "Breakdown";
+    breakdownSec.appendChild(h);
+    for (const pfBlock of data.portfolios) {
+      breakdownSec.appendChild(buildPlanPortfolioRow(pfBlock.pf));
+      for (const pBlock of pfBlock.projects) {
+        breakdownSec.appendChild(buildPlanProjectRow(pBlock.p));
+        for (const a of pBlock.activities) {
+          breakdownSec.appendChild(buildPlanActivityRow(a));
+        }
+      }
+    }
+    root.appendChild(breakdownSec);
+
+    // timeline (projects with deadlines)
+    const dated = [];
+    for (const pfBlock of data.portfolios)
+      for (const pBlock of pfBlock.projects)
+        if (pBlock.p.deadline) dated.push(pBlock.p);
+    if (dated.length >= 1) {
+      const tlSec = document.createElement("section");
+      const th = document.createElement("h2");
+      th.textContent = "Timeline";
+      tlSec.appendChild(th);
+      renderPlanTimeline(tlSec, dated);
+      root.appendChild(tlSec);
+    }
+
+    // export
+    const exSec = document.createElement("section");
+    const eh = document.createElement("h2");
+    eh.textContent = "Export plan";
+    exSec.appendChild(eh);
+    const row = document.createElement("div");
+    row.className = "export-row";
+    const csvBtn = document.createElement("button");
+    csvBtn.className = "file-btn";
+    csvBtn.textContent = "Export CSV";
+    csvBtn.addEventListener("click", exportPlanCsv);
+    const xlsBtn = document.createElement("button");
+    xlsBtn.className = "file-btn";
+    xlsBtn.textContent = "Export XLS";
+    xlsBtn.addEventListener("click", exportPlanXls);
+    row.append(csvBtn, xlsBtn);
+    exSec.appendChild(row);
+    const note = document.createElement("div");
+    note.className = "empty";
+    note.textContent = "Exports follow the current scope. CSV is plain text; XLS opens natively in Excel and most office tools.";
+    exSec.appendChild(note);
+    root.appendChild(exSec);
+  }
+
+  function buildPlanPortfolioRow(pf) {
+    const row = document.createElement("div");
+    row.className = "plan-row level-0";
+    const dot = document.createElement("span");
+    dot.className = "dot"; dot.style.background = pf.color;
+    const center = document.createElement("div");
+    center.className = "plan-center";
+    const name = document.createElement("div");
+    name.className = "plan-name";
+    name.textContent = pf.name;
+    name.addEventListener("click", () => navigate({ name: "portfolio", id: pf.id }));
+    center.appendChild(name);
+
+    const projs = projectsOfPortfolio(pf.id);
+    const allActs = state.activities.filter(a => projs.some(p => p.id === a.projectId));
+    const actIds = new Set(allActs.map(a => a.id));
+    const totalMs = totalForFilterInRange(e => actIds.has(e.activityId), 0, Date.now() + MS_DAY);
+
+    const meta = document.createElement("div");
+    meta.className = "plan-meta";
+    const m1 = document.createElement("span");
+    m1.className = "meta-pill";
+    m1.textContent = `${projs.length} project${projs.length === 1 ? "" : "s"} · ${allActs.length} activit${allActs.length === 1 ? "y" : "ies"}`;
+    meta.appendChild(m1);
+    center.appendChild(meta);
+
+    if (pf.notes) {
+      const n = document.createElement("div");
+      n.className = "plan-notes";
+      n.textContent = pf.notes;
+      center.appendChild(n);
+    }
+    const deps = buildDepsDisplay(pf.dependencies);
+    if (deps) center.appendChild(deps);
+
+    const hours = document.createElement("div");
+    hours.className = "plan-hours";
+    hours.textContent = fmtHours(totalMs);
+    row.append(dot, center, hours);
+    return row;
+  }
+
+  function buildPlanProjectRow(p) {
+    const row = document.createElement("div");
+    row.className = "plan-row level-1";
+    const dot = document.createElement("span");
+    dot.className = "dot"; dot.style.background = p.color;
+    const center = document.createElement("div");
+    center.className = "plan-center";
+    const name = document.createElement("div");
+    name.className = "plan-name";
+    name.textContent = p.name;
+    name.addEventListener("click", () => navigate({ name: "project", id: p.id }));
+    center.appendChild(name);
+
+    const actIds = new Set(activitiesOfProject(p.id).map(a => a.id));
+    const totalMs = totalForFilterInRange(e => actIds.has(e.activityId), 0, Date.now() + MS_DAY);
+
+    const meta = document.createElement("div");
+    meta.className = "plan-meta";
+    const st = STATUS_BY[p.status] || STATUS_BY.active;
+    const badge = document.createElement("span");
+    badge.className = "badge " + st.cls;
+    badge.innerHTML = `<span class="badge-dot"></span>${st.label}`;
+    meta.appendChild(badge);
+    if (p.deadline) {
+      const d = daysUntil(p.deadline);
+      const dEl = document.createElement("span");
+      dEl.className = "meta-pill";
+      if (d < 0) dEl.classList.add("due-overdue");
+      else if (d <= 3) dEl.classList.add("due-soon");
+      dEl.textContent = `Due ${fmtDateShort(p.deadline)}` +
+        (d < 0 ? ` · ${Math.abs(d)}d overdue` : d === 0 ? " · today" : ` · in ${d}d`);
+      meta.appendChild(dEl);
+    }
+    const hrsPill = document.createElement("span");
+    hrsPill.className = "meta-pill";
+    hrsPill.textContent = p.estimatedHours != null
+      ? `${fmtHours(totalMs)} of ${p.estimatedHours}h`
+      : `${fmtHours(totalMs)} total`;
+    meta.appendChild(hrsPill);
+    center.appendChild(meta);
+
+    if (p.description) {
+      const n = document.createElement("div");
+      n.className = "plan-notes";
+      n.textContent = p.description;
+      center.appendChild(n);
+    }
+    const deps = buildDepsDisplay(p.dependencies);
+    if (deps) center.appendChild(deps);
+
+    const hours = document.createElement("div");
+    hours.className = "plan-hours";
+    hours.textContent = fmtHours(totalMs);
+    row.append(dot, center, hours);
+    return row;
+  }
+
+  function buildPlanActivityRow(a) {
+    const row = document.createElement("div");
+    row.className = "plan-row level-2";
+    const dot = document.createElement("span");
+    dot.className = "dot"; dot.style.background = a.color;
+    const center = document.createElement("div");
+    center.className = "plan-center";
+    const name = document.createElement("div");
+    name.className = "plan-name";
+    name.textContent = a.name;
+    name.addEventListener("click", () => navigate({ name: "project", id: a.projectId }));
+    center.appendChild(name);
+
+    const totalMs = totalForFilterInRange(e => e.activityId === a.id, 0, Date.now() + MS_DAY);
+
+    if (a.notes) {
+      const n = document.createElement("div");
+      n.className = "plan-notes";
+      n.textContent = a.notes;
+      center.appendChild(n);
+    }
+    const deps = buildDepsDisplay(a.dependencies);
+    if (deps) center.appendChild(deps);
+
+    const hours = document.createElement("div");
+    hours.className = "plan-hours";
+    hours.textContent = fmtHours(totalMs);
+    row.append(dot, center, hours);
+    return row;
+  }
+
+  function renderPlanTimeline(parent, projects) {
+    const now = Date.now();
+    const dates = projects.map(p => new Date(p.deadline).getTime());
+    let minT = Math.min(now, ...dates);
+    let maxT = Math.max(now, ...dates);
+    const span = Math.max(MS_DAY, maxT - minT);
+    const padding = span * 0.08;
+    minT -= padding; maxT += padding;
+    const range = maxT - minT;
+
+    const sortedProjects = [...projects].sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+
+    for (const p of sortedProjects) {
+      const tlRow = document.createElement("div");
+      tlRow.className = "timeline-row";
+
+      const label = document.createElement("div");
+      label.className = "timeline-label";
+      label.textContent = p.name;
+      label.title = p.name;
+      label.addEventListener("click", () => navigate({ name: "project", id: p.id }));
+
+      const barWrap = document.createElement("div");
+      barWrap.className = "timeline-bar-wrap";
+
+      const nowPct = ((now - minT) / range) * 100;
+      if (nowPct >= 0 && nowPct <= 100) {
+        const nowMark = document.createElement("div");
+        nowMark.className = "timeline-now";
+        nowMark.style.left = nowPct + "%";
+        nowMark.title = "Today";
+        barWrap.appendChild(nowMark);
+      }
+
+      const dlT = new Date(p.deadline).getTime();
+      const dlPct = ((dlT - minT) / range) * 100;
+      const d = daysUntil(p.deadline);
+      const mark = document.createElement("div");
+      mark.className = "timeline-marker " + (d < 0 ? "overdue" : d <= 3 ? "due-soon" : "normal");
+      mark.style.left = dlPct + "%";
+      mark.title = `${p.name} — ${fmtDateShort(p.deadline)}`;
+      barWrap.appendChild(mark);
+
+      tlRow.append(label, barWrap);
+      parent.appendChild(tlRow);
+    }
+
+    const axis = document.createElement("div");
+    axis.className = "timeline-axis";
+    const spacer = document.createElement("div");
+    const dates2 = document.createElement("div");
+    dates2.className = "axis-dates";
+    const left = document.createElement("span");
+    left.textContent = new Date(minT).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    const right = document.createElement("span");
+    right.textContent = new Date(maxT).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    dates2.append(left, right);
+    axis.append(spacer, dates2);
+    parent.appendChild(axis);
+  }
+
+  function exportPlanCsv() {
+    const rows = flatPlanRows();
+    if (rows.length === 0) { toast("Nothing to export"); return; }
+    const headers = ["Level", "Kind", "Name", "Status", "Deadline", "Estimated Hours", "Actual Hours", "Notes", "Dependencies"];
+    const lines = [headers];
+    for (const r of rows) {
+      const indent = "  ".repeat(r.level);
+      lines.push([r.level, r.kind, indent + r.name, r.status, r.deadline, r.estimatedHours, r.actualHours, r.notes, r.dependencies]);
+    }
+    const text = lines.map(row => row.map(csvQuote).join(",")).join("\n");
+    download(new Blob(["﻿" + text], { type: "text/csv;charset=utf-8" }), `timeplanner-plan-${dateStampForFile()}.csv`);
+    toast(`Exported plan CSV (${rows.length} rows)`);
+  }
+
+  function exportPlanXls() {
+    const rows = flatPlanRows();
+    if (rows.length === 0) { toast("Nothing to export"); return; }
+    const headers = ["Level", "Kind", "Name", "Status", "Deadline", "Estimated Hours", "Actual Hours", "Notes", "Dependencies"];
+    const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+    const headRow = `<tr>${headers.map(h => `<th style="background:#f3f4f6;border:1px solid #ccc;padding:4px 8px;text-align:left">${esc(h)}</th>`).join("")}</tr>`;
+    const bodyRows = rows.map(r => {
+      const indent = "&nbsp;".repeat(r.level * 4);
+      const cells = [String(r.level), r.kind, indent + esc(r.name), esc(r.status), esc(r.deadline), esc(r.estimatedHours), esc(r.actualHours), esc(r.notes), esc(r.dependencies)];
+      return `<tr>${cells.map(c => `<td style="border:1px solid #ddd;padding:4px 8px;vertical-align:top">${c}</td>`).join("")}</tr>`;
+    }).join("");
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8"><title>TimePlanner Plan</title></head>
+<body><table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px">${headRow}${bodyRows}</table></body></html>`;
+    download(new Blob(["﻿" + html], { type: "application/vnd.ms-excel;charset=utf-8" }), `timeplanner-plan-${dateStampForFile()}.xls`);
+    toast(`Exported plan XLS (${rows.length} rows)`);
   }
 
   // -------------------------------------------------------------------------
@@ -4217,6 +5032,9 @@
         for (const e of state.entries) if (!Array.isArray(e.tags)) e.tags = [];
         for (const p of state.portfolios) if (typeof p.notes !== "string") p.notes = "";
         for (const a of state.activities) if (typeof a.notes !== "string") a.notes = "";
+        for (const p of state.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
+        for (const p of state.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
+        for (const a of state.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         render();
         setSyncStatus("synced", "Synced");
