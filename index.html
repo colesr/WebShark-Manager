@@ -159,7 +159,22 @@
   .view {
     animation: fadeUp var(--t-base) var(--ease);
   }
+  /* directional slide based on navigation depth */
+  .view.view-forward { animation: viewSlideR var(--t-base) var(--ease); }
+  .view.view-back    { animation: viewSlideL var(--t-base) var(--ease); }
   .view.leaving { animation: fadeDown var(--t-fast) var(--ease) forwards; }
+  /* staggered entrance for each top-level block within a view */
+  .view > * { animation: sectionRise 400ms var(--ease) both; }
+  .view > *:nth-child(1) { animation-delay: 30ms; }
+  .view > *:nth-child(2) { animation-delay: 80ms; }
+  .view > *:nth-child(3) { animation-delay: 130ms; }
+  .view > *:nth-child(4) { animation-delay: 180ms; }
+  .view > *:nth-child(5) { animation-delay: 230ms; }
+  .view > *:nth-child(6) { animation-delay: 280ms; }
+  .view > *:nth-child(n+7) { animation-delay: 320ms; }
+  /* in-place refresh (e.g. after adding a task) — no entrance replay */
+  .view.view-refresh { animation: none; }
+  .view.view-refresh > * { animation: none; }
 
   /* sections */
   section {
@@ -589,6 +604,8 @@
     font-size: 0.78rem; color: var(--muted);
   }
   .meta-form .full { grid-column: 1 / -1; }
+  .meta-form .meta-field { display: flex; flex-direction: column; gap: 0.2rem; }
+  .meta-form .meta-cap { font-size: 0.78rem; color: var(--muted); }
   .meta-form .row-actions {
     grid-column: 1 / -1;
     display: flex; gap: 0.4rem;
@@ -603,6 +620,18 @@
   @keyframes fadeDown {
     from { opacity: 1; transform: none; }
     to   { opacity: 0; transform: translateY(-4px); }
+  }
+  @keyframes sectionRise {
+    from { opacity: 0; transform: translateY(9px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes viewSlideR {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes viewSlideL {
+    from { opacity: 0; transform: translateX(-18px); }
+    to   { opacity: 1; transform: none; }
   }
   @keyframes pulseRing {
     0%   { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.45); }
@@ -1525,6 +1554,215 @@
   }
   .activity .element-handle { align-self: flex-start; margin-top: 0.2rem; }
   .card-top .element-handle { margin-right: 0.1rem; }
+
+  /* task completion */
+  .activity { position: relative; }
+  .complete-btn {
+    width: 30px; height: 30px;
+    padding: 0;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--border-strong);
+    background: var(--card);
+    color: var(--muted);
+    cursor: pointer;
+    transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  }
+  .complete-btn svg { width: 15px; height: 15px; opacity: 0.35; transition: opacity var(--t-fast) var(--ease); }
+  .complete-btn:hover { border-color: var(--ok); color: var(--ok); }
+  .complete-btn:hover svg { opacity: 0.95; }
+  .complete-btn:active { transform: scale(0.88); }
+  .complete-btn.is-done { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .complete-btn.is-done svg { opacity: 1; }
+  .activity.done .activity-center,
+  .activity.done .today { opacity: 0.5; }
+  .activity.done .name {
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    color: var(--muted);
+  }
+  .activity.done .dot { opacity: 0.4; }
+  .activity.just-done { animation: doneFlash 700ms var(--ease); }
+  @keyframes doneFlash {
+    0%   { background-color: rgba(22,163,74,0); }
+    30%  { background-color: rgba(22,163,74,0.14); }
+    100% { background-color: rgba(22,163,74,0); }
+  }
+  .complete-burst {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 46px; height: 46px;
+    margin: -23px 0 0 -23px;
+    color: var(--ok);
+    pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 5;
+  }
+  .complete-burst svg { width: 30px; height: 30px; animation: burstPop 700ms var(--ease) both; }
+  .complete-burst::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 2px solid var(--ok);
+    animation: burstRing 700ms var(--ease) both;
+  }
+  @keyframes burstPop {
+    0%   { transform: scale(0.2); opacity: 0; }
+    45%  { transform: scale(1.15); opacity: 1; }
+    70%  { transform: scale(0.95); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  @keyframes burstRing {
+    0%   { transform: scale(0.3); opacity: 0.8; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .celebrate-overlay {
+    position: fixed; inset: 0;
+    z-index: 1100;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .celebrate-check {
+    position: relative;
+    width: 104px; height: 104px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ok);
+  }
+  .celebrate-check svg { width: 66px; height: 66px; animation: burstPop 1000ms var(--ease) both; }
+  .celebrate-check::before {
+    content: ""; position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 3px solid var(--ok);
+    animation: burstRing 1000ms var(--ease) both;
+  }
+
+  /* summarize-with-guru button */
+  .ai-summarize {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+    color: var(--accent);
+  }
+  .ai-summarize svg { width: 14px; height: 14px; }
+  .ai-summarize:hover { color: var(--accent-hover); background: var(--accent-soft); }
+  .ai-summarize.compact { padding: 0.25rem 0.32rem; }
+  .ai-summarize.compact svg { width: 15px; height: 15px; }
+
+  /* image galleries */
+  .img-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.7rem;
+  }
+  .img-thumb {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--subtle);
+    animation: fadeUp var(--t-base) var(--ease) both;
+    transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  }
+  .img-thumb:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.14); }
+  .img-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    cursor: zoom-in;
+  }
+  .img-remove {
+    position: absolute;
+    top: 3px; right: 3px;
+    width: 20px; height: 20px;
+    line-height: 18px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  }
+  .img-thumb:hover .img-remove { opacity: 1; transform: scale(1); }
+  .img-remove:hover { background: var(--danger); }
+  .img-add {
+    width: 76px; height: 76px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    cursor: pointer;
+    color: var(--muted);
+    background: var(--card);
+    transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  }
+  .img-add:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .img-add:active { transform: scale(0.97); }
+  .img-add input { display: none; }
+  .img-add-plus { font-size: 1.4rem; line-height: 1; font-weight: 300; }
+  .img-add-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  /* compact strip inside a task row */
+  .img-gallery.gallery-compact { gap: 0.35rem; margin-top: 0.45rem; }
+  .gallery-compact .img-thumb { width: 46px; height: 46px; border-radius: 6px; }
+
+  /* lightbox */
+  .lightbox {
+    position: fixed; inset: 0;
+    z-index: 1000;
+    background: rgba(10, 12, 16, 0.86);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+    animation: lightboxIn var(--t-base) var(--ease);
+  }
+  .lightbox.closing { animation: lightboxOut var(--t-fast) var(--ease) forwards; }
+  .lightbox-img {
+    max-width: 92vw;
+    max-height: 88vh;
+    border-radius: var(--radius);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    animation: lightboxImgIn var(--t-base) var(--ease);
+  }
+  .lightbox-counter {
+    position: fixed;
+    top: 1.1rem; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+  }
+  .lightbox-nav {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px; height: 44px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .lightbox-nav:hover { background: rgba(255,255,255,0.24); }
+  .lightbox-nav.prev { left: 1.2rem; }
+  .lightbox-nav.next { right: 1.2rem; }
+  @keyframes lightboxIn  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lightboxOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes lightboxImgIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -1638,6 +1876,12 @@
       for (const p of s.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
       for (const p of s.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
       for (const a of s.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
+      // backfill image galleries
+      for (const p of s.portfolios) if (!Array.isArray(p.images)) p.images = [];
+      for (const p of s.projects)   if (!Array.isArray(p.images)) p.images = [];
+      for (const a of s.activities) if (!Array.isArray(a.images)) a.images = [];
+      // backfill task completion flag
+      for (const a of s.activities) if (typeof a.done !== "boolean") a.done = false;
       // panel layouts (per-view section order + minimized state)
       if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
       return s;
@@ -1656,6 +1900,9 @@
   // newly created ids get a brief flash on next render
   let highlightIds = new Set();
   function highlight(id) { highlightIds.add(id); }
+
+  // ids that were just marked complete — play a celebration on next render
+  let justCompletedIds = new Set();
 
   // -------------------------------------------------------------------------
   // time helpers
@@ -1798,7 +2045,7 @@
     if (!name) return null;
     const color = pickColor(PORTFOLIO_PALETTE, state.portfolios.map(p => p.color));
     const id = uid();
-    state.portfolios.push({ id, name, color, notes: "", dependencies: [] });
+    state.portfolios.push({ id, name, color, notes: "", dependencies: [], images: [] });
     highlight(id);
     save();
     return id;
@@ -1846,6 +2093,7 @@
       estimatedHours: fields.estimatedHours == null ? null : Number(fields.estimatedHours),
       color,
       dependencies: [],
+      images: [],
     });
     highlight(id);
     save();
@@ -1882,7 +2130,7 @@
     const used = activitiesOfProject(projectId).map(a => a.color);
     const color = pickColor(ACTIVITY_PALETTE, used);
     const id = uid();
-    state.activities.push({ id, projectId, name, color, notes: "", dependencies: [] });
+    state.activities.push({ id, projectId, name, color, notes: "", dependencies: [], images: [], done: false });
     highlight(id);
     save();
     return id;
@@ -1909,6 +2157,19 @@
     if (!confirm(msg)) return;
     state.entries = state.entries.filter(e => e.activityId !== id);
     state.activities = state.activities.filter(a => a.id !== id);
+    save();
+    render();
+  }
+  function toggleActivityDone(id) {
+    const a = activityById(id);
+    if (!a) return;
+    a.done = !a.done;
+    if (a.done) {
+      justCompletedIds.add(id);
+      // stop the timer if this task is currently running
+      const r = getRunning();
+      if (r && r.activityId === id) r.end = new Date().toISOString();
+    }
     save();
     render();
   }
@@ -1954,7 +2215,7 @@
     return { ok: true };
   }
   function addManualEntry({ activityId, dateStr, startTime, endTime, tags }) {
-    if (!activityById(activityId)) return { ok: false, err: "Pick an activity." };
+    if (!activityById(activityId)) return { ok: false, err: "Pick a task." };
     if (!dateStr || !startTime || !endTime) return { ok: false, err: "All fields required." };
     const start = combineDateTime(dateStr, startTime);
     const end = combineDateTime(dateStr, endTime);
@@ -2049,7 +2310,7 @@
       if (excludeKind === "activity" && a.id === excludeId) continue;
       if (have.has(`activity:${a.id}`)) continue;
       const proj = projectById(a.projectId);
-      opts.push({ kind: "activity", id: a.id, label: `Activity · ${a.name}${proj ? " (" + proj.name + ")" : ""}` });
+      opts.push({ kind: "activity", id: a.id, label: `Task · ${a.name}${proj ? " (" + proj.name + ")" : ""}` });
     }
     return opts;
   }
@@ -2354,6 +2615,14 @@
   // -------------------------------------------------------------------------
   // rendering
   // -------------------------------------------------------------------------
+  // navigation depth — drives the direction of the view-transition slide
+  function viewDepth(v) {
+    if (!v) return 0;
+    if (v.name === "home") return 0;
+    if (v.name === "project") return 2;
+    return 1; // portfolio, reports, plan
+  }
+
   function render() {
     renderCrumbs();
     renderRunningBar();
@@ -2369,13 +2638,26 @@
     const root = $("view");
     const next = document.createElement("div");
     next.className = "view";
+    // directional transition based on how deep we're navigating;
+    // only animate the entrance on a real view change, not on in-place refreshes
+    const viewKey = view.name + ":" + (view.id || "");
+    const sameView = render._lastKey === viewKey;
+    const depth = viewDepth(view);
+    if (sameView) {
+      next.classList.add("view-refresh");
+    } else if (render._lastDepth != null) {
+      if (depth > render._lastDepth) next.classList.add("view-forward");
+      else if (depth < render._lastDepth) next.classList.add("view-back");
+    }
+    render._lastDepth = depth;
+    render._lastKey = viewKey;
     if (view.name === "home") renderHome(next);
     else if (view.name === "reports") renderReportsView(next);
     else if (view.name === "plan") renderPlanView(next);
     else if (view.name === "portfolio") renderPortfolioView(next, view.id);
     else if (view.name === "project") renderProjectView(next, view.id);
     applyDragAndDrop(view.name, next);
-    swap(root, next, () => initSortablesAfterAttach(view.name, next));
+    swap(root, next, () => initSortablesAfterAttach(view.name, next), !sameView);
 
     // toggle header link states
     const rl = $("reportsLink");
@@ -2390,9 +2672,9 @@
     });
   }
 
-  function swap(root, next, onDone) {
+  function swap(root, next, onDone, animate) {
     const old = root.firstElementChild;
-    if (!old) { root.appendChild(next); if (onDone) onDone(); return; }
+    if (!old || animate === false) { root.replaceChildren(next); if (onDone) onDone(); return; }
     old.classList.add("leaving");
     let replaced = false;
     const finalize = () => {
@@ -2578,6 +2860,7 @@
     });
     const actions = document.createElement("div");
     actions.className = "hero-actions";
+    const sumBtn = makeSummarizeButton("portfolio", pf.id);
     const editBtn = document.createElement("button");
     editBtn.className = "icon-btn";
     editBtn.textContent = "Edit";
@@ -2588,7 +2871,7 @@
     del.innerHTML = "&times;";
     del.style.fontSize = "1.1rem";
     del.addEventListener("click", () => deletePortfolio(pf.id));
-    actions.append(editBtn, del);
+    actions.append(sumBtn, editBtn, del);
     top.append(dot, title, actions);
     hero.appendChild(top);
 
@@ -2612,6 +2895,9 @@
 
     const depsView = buildDepsDisplay(pf.dependencies);
     if (depsView) hero.appendChild(depsView);
+
+    const pfGallery = buildImageGallery("portfolio", pf.id, pf.images, { editable: true });
+    if (pfGallery) hero.appendChild(pfGallery);
 
     root.appendChild(hero);
 
@@ -2755,6 +3041,7 @@
     const actions = document.createElement("div");
     actions.className = "hero-actions";
 
+    const sumBtn = makeSummarizeButton("project", proj.id);
     const editBtn = document.createElement("button");
     editBtn.className = "icon-btn";
     editBtn.textContent = "Edit";
@@ -2767,7 +3054,7 @@
     del.style.fontSize = "1.1rem";
     del.addEventListener("click", () => deleteProject(proj.id));
 
-    actions.append(editBtn, del);
+    actions.append(sumBtn, editBtn, del);
     top.append(dot, title, actions);
     hero.appendChild(top);
 
@@ -2829,14 +3116,17 @@
     const projDeps = buildDepsDisplay(proj.dependencies);
     if (projDeps) hero.appendChild(projDeps);
 
+    const projGallery = buildImageGallery("project", proj.id, proj.images, { editable: true });
+    if (projGallery) hero.appendChild(projGallery);
+
     root.appendChild(hero);
 
-    // Activities
+    // Tasks
     const actSec = document.createElement("section");
     actSec.dataset.panelId = "project-activities";
     const actHead = document.createElement("div");
     actHead.className = "section-head";
-    actHead.innerHTML = `<h2>Activities</h2>`;
+    actHead.innerHTML = `<h2>Tasks</h2>`;
     actSec.appendChild(actHead);
 
     const actList = document.createElement("div");
@@ -2844,14 +3134,14 @@
     if (acts.length === 0) {
       const empty = document.createElement("div");
       empty.className = "empty";
-      empty.textContent = "No activities yet — add one to start tracking time on this project.";
+      empty.textContent = "No tasks yet — add one to start tracking time on this project.";
       actSec.appendChild(empty);
     } else {
       const running = getRunning();
       acts.forEach((a, i) => actList.appendChild(buildActivityRow(a, running, i)));
       actSec.appendChild(actList);
     }
-    const actAdder = inlineNameAdder("New activity name…", "Add", (name) => {
+    const actAdder = inlineNameAdder("New task name…", "Add", (name) => {
       const id = addActivity(proj.id, name);
       if (id) render();
     });
@@ -2881,7 +3171,7 @@
     addBtn.className = "subtle";
     addBtn.textContent = "+ Add manual entry";
     addBtn.addEventListener("click", () => {
-      if (acts.length === 0) { alert("Add an activity first."); return; }
+      if (acts.length === 0) { alert("Add a task first."); return; }
       const editor = buildEntryEditor({
         activities: acts,
         activityId: acts[0].id,
@@ -2897,12 +3187,12 @@
     entSec.appendChild(addBtn);
     root.appendChild(entSec);
 
-    // Weekly chart by activity (within project)
+    // Weekly chart by task (within project)
     if (acts.length > 0) {
       const chartSec = document.createElement("section");
       chartSec.dataset.panelId = "project-week-chart";
       const h = document.createElement("h2");
-      h.textContent = "This week, by activity";
+      h.textContent = "This week, by task";
       chartSec.appendChild(h);
       renderWeekChartByActivity(chartSec, acts);
       root.appendChild(chartSec);
@@ -2914,6 +3204,7 @@
     row.className = "activity";
     row.dataset.activityId = a.id;
     if (highlightIds.has(a.id)) row.classList.add("new-row");
+    if (a.done) row.classList.add("done");
     row.style.animationDelay = (idx * 30) + "ms";
 
     const isRunning = running && running.activityId === a.id;
@@ -2932,7 +3223,7 @@
     name.textContent = a.name;
     name.title = "Click to rename";
     name.addEventListener("click", () => {
-      const next = prompt("Rename activity:", a.name);
+      const next = prompt("Rename task:", a.name);
       if (next !== null) { renameActivity(a.id, next); render(); }
     });
     center.appendChild(name);
@@ -2948,6 +3239,11 @@
     const actDeps = buildDepsDisplay(a.dependencies);
     if (actDeps) center.appendChild(actDeps);
 
+    if (a.images && a.images.length) {
+      const g = buildImageGallery("activity", a.id, a.images, { editable: false });
+      if (g) { g.classList.add("gallery-compact"); center.appendChild(g); }
+    }
+
     const today = document.createElement("div");
     today.className = "today";
     today.dataset.activityId = a.id;
@@ -2956,8 +3252,19 @@
     const actions = document.createElement("div");
     actions.className = "actions";
 
+    const completeBtn = document.createElement("button");
+    completeBtn.className = "icon-btn complete-btn" + (a.done ? " is-done" : "");
+    completeBtn.title = a.done ? "Mark as not complete" : "Mark complete";
+    completeBtn.setAttribute("aria-label", completeBtn.title);
+    completeBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+    completeBtn.addEventListener("click", () => toggleActivityDone(a.id));
+
     const toggle = document.createElement("button");
-    if (isRunning) {
+    if (a.done) {
+      toggle.className = "subtle";
+      toggle.textContent = "Done";
+      toggle.disabled = true;
+    } else if (isRunning) {
       toggle.className = "stop";
       toggle.textContent = "Stop";
       toggle.addEventListener("click", stopRunning);
@@ -2967,6 +3274,8 @@
       toggle.addEventListener("click", () => startActivity(a.id));
     }
 
+    const sumBtn = makeSummarizeButton("activity", a.id, { compact: true });
+
     const editBtn = document.createElement("button");
     editBtn.className = "icon-btn";
     editBtn.textContent = "Edit";
@@ -2975,14 +3284,65 @@
 
     const del = document.createElement("button");
     del.className = "icon-btn danger";
-    del.title = "Delete activity";
+    del.title = "Delete task";
     del.innerHTML = "&times;";
     del.style.fontSize = "1.1rem";
     del.addEventListener("click", () => deleteActivity(a.id));
 
-    actions.append(toggle, editBtn, del);
+    actions.append(completeBtn, toggle, sumBtn, editBtn, del);
     row.append(handle, dot, center, today, actions);
+
+    if (justCompletedIds.has(a.id)) {
+      justCompletedIds.delete(a.id);
+      requestAnimationFrame(() => playCompleteBurst(row));
+    }
     return row;
+  }
+
+  // a minimalist, satisfying completion flourish over a row/element
+  function playCompleteBurst(el) {
+    if (!el) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    void el.offsetWidth; // restart any prior animation
+    el.classList.add("just-done");
+    const burst = document.createElement("span");
+    burst.className = "complete-burst";
+    burst.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>`;
+    el.appendChild(burst);
+    setTimeout(() => burst.remove(), 900);
+    setTimeout(() => el.classList.remove("just-done"), 720);
+  }
+
+  function sparkleSvg() {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18.5 14.5l.7 1.9 1.9.7-1.9.7-.7 1.9-.7-1.9-1.9-.7 1.9-.7z"/></svg>`;
+  }
+
+  // a "Summarize with the guru" button for any entity hero/row
+  function makeSummarizeButton(kind, id, opts = {}) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "icon-btn ai-summarize" + (opts.compact ? " compact" : "");
+    btn.title = "Summarize with the Planning Guru";
+    btn.setAttribute("aria-label", btn.title);
+    btn.innerHTML = sparkleSvg() + (opts.compact ? "" : "<span>Summary</span>");
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      guruSummarizeEntity(kind, id);
+    });
+    return btn;
+  }
+
+  // centered celebration for completing a larger entity (e.g. a project)
+  function celebrateComplete(message) {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) {
+      const o = document.createElement("div");
+      o.className = "celebrate-overlay";
+      o.innerHTML = `<span class="celebrate-check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg></span>`;
+      document.body.appendChild(o);
+      setTimeout(() => o.remove(), 1000);
+    }
+    if (message) toast(message);
   }
 
   function openActivityEditor(activityId, rowEl) {
@@ -3003,11 +3363,19 @@
     notesL.textContent = "Notes";
     const notesI = document.createElement("textarea");
     notesI.value = a.notes || "";
-    notesI.placeholder = "Context, links, what counts toward this activity…";
+    notesI.placeholder = "Context, links, what counts toward this task…";
     notesL.appendChild(notesI);
 
     let depsBuffer = [...(a.dependencies || [])];
     const depsEditor = buildDependencyEditor("activity", a.id, depsBuffer, (next) => { depsBuffer = next; });
+
+    const imgL = document.createElement("div");
+    imgL.className = "full meta-field";
+    const imgCap = document.createElement("span");
+    imgCap.className = "meta-cap";
+    imgCap.textContent = "Photos";
+    imgL.appendChild(imgCap);
+    imgL.appendChild(buildImageGallery("activity", a.id, a.images, { editable: true }));
 
     const rowActs = document.createElement("div");
     rowActs.className = "row-actions";
@@ -3026,7 +3394,7 @@
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, notesL, depsEditor, rowActs);
+    form.append(nameL, notesL, depsEditor, imgL, rowActs);
     rowEl.insertAdjacentElement("afterend", form);
     nameI.focus();
     nameI.select();
@@ -3049,7 +3417,7 @@
     const center = document.createElement("div");
     const name = document.createElement("div");
     name.className = "name";
-    name.textContent = a ? a.name : "(deleted activity)";
+    name.textContent = a ? a.name : "(deleted task)";
     const meta = document.createElement("div");
     meta.className = "meta";
     const endLabel = e.end ? fmtClock(e.end) : "now";
@@ -3305,6 +3673,7 @@
 
     saveBtn.addEventListener("click", () => {
       const est = estI.value.trim();
+      const becameDone = stI.value === "done" && p.status !== "done";
       updateProject(p.id, {
         name: (nameI.value || "").trim() || p.name,
         status: stI.value,
@@ -3314,6 +3683,7 @@
         dependencies: depsBuffer,
       });
       render();
+      if (becameDone) celebrateComplete("Project complete — nice work!");
     });
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn, moveBtn);
@@ -3511,6 +3881,192 @@
   }
 
   // -------------------------------------------------------------------------
+  // image attachments — client-side compress to data URLs, stored inline
+  // -------------------------------------------------------------------------
+  const IMG_MAX_DIM = 1280;     // longest edge, px
+  const IMG_QUALITY = 0.82;     // JPEG quality
+  const IMG_MAX_PER_ENTITY = 12;
+
+  function entityByKind(kind, id) {
+    if (kind === "portfolio") return portfolioById(id);
+    if (kind === "project")   return projectById(id);
+    if (kind === "activity")  return activityById(id);
+    return null;
+  }
+
+  // resize + re-encode a single image File to a compressed data URL
+  function compressImageFile(file) {
+    return new Promise((resolve, reject) => {
+      if (!file || !/^image\//.test(file.type)) {
+        reject(new Error("Not an image file."));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Couldn't read the file."));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("Couldn't decode the image."));
+        img.onload = () => {
+          let { width, height } = img;
+          const scale = Math.min(1, IMG_MAX_DIM / Math.max(width, height));
+          width = Math.max(1, Math.round(width * scale));
+          height = Math.max(1, Math.round(height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          // PNGs with transparency would go black on JPEG — keep small PNGs as-is
+          const isPng = /png/i.test(file.type);
+          const out = isPng && file.size < 250000
+            ? canvas.toDataURL("image/png")
+            : canvas.toDataURL("image/jpeg", IMG_QUALITY);
+          resolve(out);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function addImagesToEntity(kind, id, fileList) {
+    const ent = entityByKind(kind, id);
+    if (!ent) return;
+    if (!Array.isArray(ent.images)) ent.images = [];
+    const files = Array.from(fileList || []).filter(f => /^image\//.test(f.type));
+    if (files.length === 0) return;
+    const room = IMG_MAX_PER_ENTITY - ent.images.length;
+    if (room <= 0) { toast(`Up to ${IMG_MAX_PER_ENTITY} photos here.`); return; }
+    const slice = files.slice(0, room);
+    let added = 0;
+    for (const f of slice) {
+      try {
+        const dataUrl = await compressImageFile(f);
+        ent.images.push(dataUrl);
+        added++;
+      } catch (err) {
+        console.error("Image add failed:", err);
+      }
+    }
+    if (added) {
+      save();
+      render();
+      toast(added === 1 ? "Photo added" : `${added} photos added`);
+    } else {
+      toast("Couldn't add those files");
+    }
+  }
+
+  function removeEntityImage(kind, id, index) {
+    const ent = entityByKind(kind, id);
+    if (!ent || !Array.isArray(ent.images)) return;
+    ent.images.splice(index, 1);
+    save();
+    render();
+  }
+
+  // a thumbnail gallery; editable adds an upload button + per-thumb remove
+  function buildImageGallery(kind, id, images, opts = {}) {
+    const editable = !!opts.editable;
+    images = Array.isArray(images) ? images : [];
+    if (images.length === 0 && !editable) return null;
+
+    const wrap = document.createElement("div");
+    wrap.className = "img-gallery";
+
+    images.forEach((src, i) => {
+      const thumb = document.createElement("div");
+      thumb.className = "img-thumb";
+      thumb.style.animationDelay = (i * 35) + "ms";
+      const im = document.createElement("img");
+      im.src = src;
+      im.loading = "lazy";
+      im.alt = "attachment";
+      im.addEventListener("click", () => openLightbox(images, i));
+      thumb.appendChild(im);
+      if (editable) {
+        const rm = document.createElement("button");
+        rm.type = "button";
+        rm.className = "img-remove";
+        rm.title = "Remove photo";
+        rm.innerHTML = "&times;";
+        rm.addEventListener("click", (e) => {
+          e.stopPropagation();
+          removeEntityImage(kind, id, i);
+        });
+        thumb.appendChild(rm);
+      }
+      wrap.appendChild(thumb);
+    });
+
+    if (editable && images.length < IMG_MAX_PER_ENTITY) {
+      const add = document.createElement("label");
+      add.className = "img-add";
+      add.title = "Add photos";
+      add.innerHTML = `<span class="img-add-plus">+</span><span class="img-add-label">Photo</span>`;
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/*";
+      input.multiple = true;
+      input.addEventListener("change", () => {
+        const files = input.files;
+        input.value = "";
+        addImagesToEntity(kind, id, files);
+      });
+      add.appendChild(input);
+      wrap.appendChild(add);
+    }
+    return wrap;
+  }
+
+  // fullscreen image viewer with prev/next
+  function openLightbox(images, startIndex) {
+    images = Array.isArray(images) ? images : [images];
+    let idx = startIndex || 0;
+    const overlay = document.createElement("div");
+    overlay.className = "lightbox";
+    const img = document.createElement("img");
+    img.className = "lightbox-img";
+    const show = () => { img.src = images[idx]; };
+    show();
+    overlay.appendChild(img);
+
+    if (images.length > 1) {
+      const counter = document.createElement("div");
+      counter.className = "lightbox-counter";
+      const upd = () => { counter.textContent = `${idx + 1} / ${images.length}`; };
+      upd();
+      overlay.appendChild(counter);
+      const mk = (cls, txt, delta) => {
+        const b = document.createElement("button");
+        b.className = "lightbox-nav " + cls;
+        b.innerHTML = txt;
+        b.addEventListener("click", (e) => {
+          e.stopPropagation();
+          idx = (idx + delta + images.length) % images.length;
+          show(); upd();
+        });
+        return b;
+      };
+      overlay.appendChild(mk("prev", "&#8249;", -1));
+      overlay.appendChild(mk("next", "&#8250;", 1));
+    }
+
+    const close = () => {
+      overlay.classList.add("closing");
+      document.removeEventListener("keydown", onKey);
+      setTimeout(() => overlay.remove(), 180);
+    };
+    const onKey = (e) => {
+      if (e.key === "Escape") close();
+      else if (e.key === "ArrowRight" && images.length > 1) { idx = (idx + 1) % images.length; show(); }
+      else if (e.key === "ArrowLeft" && images.length > 1) { idx = (idx - 1 + images.length) % images.length; show(); }
+    };
+    overlay.addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(overlay);
+  }
+
+  // -------------------------------------------------------------------------
   // reports view
   // -------------------------------------------------------------------------
   const reportsState = { range: "7d", portfolioId: "" };
@@ -3641,7 +4197,7 @@
     appendStatCard(kpiGrid, "Total time", fmtHours(totalMs), entries.length + " entr" + (entries.length === 1 ? "y" : "ies"));
     appendStatCard(kpiGrid, "Days active", String(dayKeys.size), bounds.days + " day" + (bounds.days === 1 ? "" : "s") + " in range");
     appendStatCard(kpiGrid, "Daily avg", dayKeys.size > 0 ? fmtHours(totalMs / dayKeys.size) : "0h", "on tracked days");
-    appendStatCard(kpiGrid, "Top activity", topActivity ? topActivity.name : "—", topActivity ? fmtHours(topActMs) : "no data");
+    appendStatCard(kpiGrid, "Top task", topActivity ? topActivity.name : "—", topActivity ? fmtHours(topActMs) : "no data");
     kpiSec.appendChild(kpiGrid);
     root.appendChild(kpiSec);
 
@@ -3661,7 +4217,7 @@
       const sec = document.createElement("section");
       sec.dataset.panelId = "reports-by-activity";
       const h = document.createElement("h2");
-      h.textContent = "By activity";
+      h.textContent = "By task";
       sec.appendChild(h);
       const items = [...allActsInRange.entries()]
         .map(([aid, ms]) => ({ a: activityById(aid), ms }))
@@ -3966,7 +4522,7 @@
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   }
   function exportCsv(bounds, filt) {
-    const rows = [["start","end","duration_hours","activity","project","portfolio","tags"]];
+    const rows = [["start","end","duration_hours","task","project","portfolio","tags"]];
     const inRange = state.entries.filter(e => {
       if (filt && !filt(e)) return false;
       const s = new Date(e.start).getTime();
@@ -4023,7 +4579,7 @@
       e => e.activityId,
       id => (activityById(id)?.name) || "(unknown)"
     );
-    if (byAct.length) { lines.push("", "## By Activity", ...byAct); }
+    if (byAct.length) { lines.push("", "## By Task", ...byAct); }
 
     const tagMs = new Map();
     for (const e of entries) {
@@ -4162,7 +4718,7 @@
 
     const meta = document.createElement("div");
     meta.className = "meta-row";
-    meta.innerHTML = `<span>A structured breakdown of your work — portfolios, projects, activities, with deadlines and dependencies.</span>`;
+    meta.innerHTML = `<span>A structured breakdown of your work — portfolios, projects, tasks, with deadlines and dependencies.</span>`;
     hero.appendChild(meta);
 
     // scope selector
@@ -4299,7 +4855,7 @@
     meta.className = "plan-meta";
     const m1 = document.createElement("span");
     m1.className = "meta-pill";
-    m1.textContent = `${projs.length} project${projs.length === 1 ? "" : "s"} · ${allActs.length} activit${allActs.length === 1 ? "y" : "ies"}`;
+    m1.textContent = `${projs.length} project${projs.length === 1 ? "" : "s"} · ${allActs.length} task${allActs.length === 1 ? "" : "s"}`;
     meta.appendChild(m1);
     center.appendChild(meta);
 
@@ -4811,6 +5367,12 @@
       return greetingMessage();
     }
 
+    // entity summary — "summarize X" / "overview of X" / "tell me about X"
+    if (/\b(summ?ar(y|ise|ize)|overview|recap|tell me about|break ?down|what's in)\b/.test(t)) {
+      const match = findEntityByText(t);
+      if (match) return summarizeEntity(match.kind, match.id);
+    }
+
     // intent routing — order matters: more specific keywords first
     if (/\b(at risk|risk|risks|behind|overcommit|overload|trouble|stuck|red flag|concern)\b/.test(t)) return findRisks();
     if (/\b(plan|allocate|schedule|distribute|week|weekly|days? a week|hours? a day)\b/.test(t)) {
@@ -4837,7 +5399,7 @@
     if (/\b(deadline|due date)\b/.test(t)) {
       return deadlineWisdom();
     }
-    if (/\b(activit(y|ies)|track what)\b/.test(t)) {
+    if (/\b(activit(y|ies)|tasks?|track what)\b/.test(t)) {
       return activitiesWisdom();
     }
     if (/\b(portfolio|portfolios|group)\b/.test(t)) {
@@ -4999,7 +5561,7 @@
     if (state.entries.length === 0) {
       return state.projects.length === 0
         ? "No projects yet. Once you've created a portfolio + project and tracked a session, I can give you a real progress report."
-        : "Projects exist but no time has been tracked yet. Start a timer on any activity and come back — I'll have something to say.";
+        : "Projects exist but no time has been tracked yet. Start a timer on any task and come back — I'll have something to say.";
     }
     const now = Date.now();
     const last7Ms = totalForFilterInRange(() => true, now - 7 * MS_DAY, now);
@@ -5049,6 +5611,264 @@
     return lines.join("\n");
   }
 
+  // ----- guru entity summaries (scan everything inside, surface highlights) -----
+
+  function guruSummarizeEntity(kind, id) {
+    const ent = entityByKind(kind, id);
+    if (!ent) return;
+    const kindLabel = kind === "activity" ? "task" : kind;
+    openChat();
+    const ask = `Summarize the ${kindLabel} "${ent.name}"`;
+    appendChatMessage("user", ask, true);
+    chatHistory.push({ role: "user", text: ask, ts: Date.now() });
+    saveChatHistory();
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      const reply = summarizeEntity(kind, id);
+      appendChatMessage("guru", reply, true);
+      chatHistory.push({ role: "guru", text: reply, ts: Date.now() });
+      saveChatHistory();
+    }, 460 + Math.random() * 320);
+  }
+
+  function summarizeEntity(kind, id) {
+    if (kind === "portfolio") return summarizePortfolio(id);
+    if (kind === "project")   return summarizeProject(id);
+    if (kind === "activity")  return summarizeTask(id);
+    return "I couldn't find that to summarize.";
+  }
+
+  // find the entity whose name appears in the user's text; prefer the longest match
+  function findEntityByText(t) {
+    const candidates = [];
+    for (const p of state.portfolios) candidates.push({ kind: "portfolio", id: p.id, name: (p.name || "").toLowerCase() });
+    for (const p of state.projects)   candidates.push({ kind: "project", id: p.id, name: (p.name || "").toLowerCase() });
+    for (const a of state.activities) candidates.push({ kind: "activity", id: a.id, name: (a.name || "").toLowerCase() });
+    let best = null;
+    for (const c of candidates) {
+      if (c.name.length >= 2 && t.includes(c.name)) {
+        if (!best || c.name.length > best.name.length) best = c;
+      }
+    }
+    return best;
+  }
+
+  function lastLoggedLabel(entries) {
+    if (!entries.length) return null;
+    let latest = 0;
+    for (const e of entries) {
+      const t = new Date(e.end || e.start).getTime();
+      if (t > latest) latest = t;
+    }
+    const days = Math.floor((startOfDay(new Date()).getTime() - startOfDay(new Date(latest)).getTime()) / MS_DAY);
+    if (days <= 0) return "today";
+    if (days === 1) return "yesterday";
+    if (days < 7) return `${days} days ago`;
+    return fmtDateShort(new Date(latest).toISOString());
+  }
+
+  function deadlineLabel(deadline) {
+    if (!deadline) return null;
+    const d = daysUntil(deadline);
+    if (d < 0)  return `overdue by ${Math.abs(d)} day${Math.abs(d) === 1 ? "" : "s"} (was ${fmtDateShort(deadline)})`;
+    if (d === 0) return "due today";
+    if (d === 1) return "due tomorrow";
+    return `due in ${d} days (${fmtDateShort(deadline)})`;
+  }
+
+  function summarizePortfolio(id) {
+    const pf = portfolioById(id);
+    if (!pf) return "That portfolio no longer exists.";
+    const projs = projectsOfPortfolio(id);
+    const now = Date.now();
+    const weekStart = startOfWeek(new Date()).getTime();
+    const projIds = new Set(projs.map(p => p.id));
+    const acts = state.activities.filter(a => projIds.has(a.projectId));
+    const actIds = new Set(acts.map(a => a.id));
+    const entries = state.entries.filter(e => actIds.has(e.activityId));
+    const totalMs = totalForFilterInRange(e => actIds.has(e.activityId), 0, now + MS_DAY);
+    const weekMs = totalForFilterInRange(e => actIds.has(e.activityId), weekStart, weekStart + 7 * MS_DAY);
+    const doneTasks = acts.filter(a => a.done).length;
+    const imgCount = (pf.images || []).length
+      + projs.reduce((s, p) => s + (p.images || []).length, 0)
+      + acts.reduce((s, a) => s + (a.images || []).length, 0);
+
+    if (projs.length === 0) {
+      return `**${pf.name}** is empty — no projects yet.\n\nAdd a project inside it with a clear name, a deadline, and an estimated hours value, and I'll be able to track and summarize progress here.`;
+    }
+
+    const statusCounts = { planning: 0, active: 0, "on-hold": 0, done: 0 };
+    for (const p of projs) statusCounts[p.status || "active"]++;
+
+    // top project by total time
+    let topProj = null, topMs = 0;
+    for (const p of projs) {
+      const ids = new Set(activitiesOfProject(p.id).map(a => a.id));
+      const ms = totalForFilterInRange(e => ids.has(e.activityId), 0, now + MS_DAY);
+      if (ms > topMs) { topMs = ms; topProj = p; }
+    }
+
+    const lines = [];
+    lines.push(`Here's the rundown on **${pf.name}**.`);
+    lines.push("");
+    lines.push("**The shape of it**");
+    const statusParts = STATUSES.map(s => `${statusCounts[s.value]} ${s.label.toLowerCase()}`).filter(x => !x.startsWith("0 ")).join(", ");
+    lines.push(`- ${projs.length} project${projs.length === 1 ? "" : "s"} (${statusParts || "no status set"}) · ${acts.length} task${acts.length === 1 ? "" : "s"}${doneTasks ? `, ${doneTasks} complete` : ""}`);
+    lines.push(`- **${fmtHours(totalMs)}** logged all-time · **${fmtHours(weekMs)}** this week`);
+    if (topProj && topMs > 0) {
+      const pct = totalMs > 0 ? Math.round((topMs / totalMs) * 100) : 0;
+      lines.push(`- Most of your time here went to **${topProj.name}** (${fmtHours(topMs)}, ${pct}%)`);
+    }
+    const last = lastLoggedLabel(entries);
+    if (last) lines.push(`- Last tracked ${last}`);
+    if (imgCount) lines.push(`- ${imgCount} photo${imgCount === 1 ? "" : "s"} attached across this portfolio`);
+    if (pf.notes) lines.push(`- Notes on file: "${pf.notes.length > 80 ? pf.notes.slice(0, 78) + "…" : pf.notes}"`);
+
+    // highlights — deadlines + risks
+    const watch = [];
+    for (const p of projs) {
+      if ((p.status || "active") === "done") continue;
+      const ids = new Set(activitiesOfProject(p.id).map(a => a.id));
+      const tMs = totalForFilterInRange(e => ids.has(e.activityId), 0, now + MS_DAY);
+      const tH = tMs / MS_HOUR;
+      if (p.deadline) {
+        const d = daysUntil(p.deadline);
+        if (d < 0) watch.push(`**${p.name}** is ${deadlineLabel(p.deadline)}`);
+        else if (d <= 3) watch.push(`**${p.name}** is ${deadlineLabel(p.deadline)}`);
+      }
+      if (p.estimatedHours != null && p.estimatedHours > 0 && tH > p.estimatedHours * 1.1) {
+        watch.push(`**${p.name}** is over its estimate (${tH.toFixed(1)}h vs ${p.estimatedHours}h)`);
+      }
+    }
+    if (watch.length) {
+      lines.push("");
+      lines.push("**Worth your attention**");
+      const seen = new Set();
+      for (const w of watch.filter(w => seen.has(w) ? false : (seen.add(w), true)).slice(0, 5)) lines.push(`- ${w}`);
+    } else {
+      lines.push("");
+      lines.push("**Nothing's on fire** — no overdue deadlines or blown estimates in here right now.");
+    }
+    lines.push("");
+    lines.push("Want me to **plan your week** around these or tell you **what to focus on**?");
+    return lines.join("\n");
+  }
+
+  function summarizeProject(id) {
+    const p = projectById(id);
+    if (!p) return "That project no longer exists.";
+    const pf = portfolioById(p.portfolioId);
+    const acts = activitiesOfProject(p.id);
+    const actIds = new Set(acts.map(a => a.id));
+    const now = Date.now();
+    const weekStart = startOfWeek(new Date()).getTime();
+    const entries = state.entries.filter(e => actIds.has(e.activityId));
+    const totalMs = totalForFilterInRange(e => actIds.has(e.activityId), 0, now + MS_DAY);
+    const weekMs = totalForFilterInRange(e => actIds.has(e.activityId), weekStart, weekStart + 7 * MS_DAY);
+    const totalH = totalMs / MS_HOUR;
+    const doneTasks = acts.filter(a => a.done).length;
+    const st = STATUS_BY[p.status] || STATUS_BY.active;
+    const imgCount = (p.images || []).length + acts.reduce((s, a) => s + (a.images || []).length, 0);
+
+    const lines = [];
+    lines.push(`Here's where **${p.name}** stands${pf ? ` (in ${pf.name})` : ""}.`);
+    lines.push("");
+    lines.push("**Status**");
+    lines.push(`- ${st.label}${p.deadline ? ` · ${deadlineLabel(p.deadline)}` : " · no deadline set"}`);
+    if (p.estimatedHours != null && p.estimatedHours > 0) {
+      const pct = Math.round((totalH / p.estimatedHours) * 100);
+      const over = totalH > p.estimatedHours;
+      lines.push(`- **${fmtHours(totalMs)} of ${p.estimatedHours}h** (${pct}%)${over ? ` — over by ${(totalH - p.estimatedHours).toFixed(1)}h` : ` — ${(p.estimatedHours - totalH).toFixed(1)}h left`}`);
+    } else {
+      lines.push(`- **${fmtHours(totalMs)}** logged all-time (no estimate set)`);
+    }
+    lines.push(`- **${fmtHours(weekMs)}** this week · ${entries.length} entr${entries.length === 1 ? "y" : "ies"} total`);
+
+    lines.push("");
+    if (acts.length === 0) {
+      lines.push("**Tasks** — none yet. Break this project into 2–5 tasks so I can see where the time goes.");
+    } else {
+      lines.push(`**Tasks (${acts.length}${doneTasks ? `, ${doneTasks} complete` : ""})**`);
+      const ranked = acts.map(a => ({
+        a,
+        ms: totalForFilterInRange(e => e.activityId === a.id, 0, now + MS_DAY),
+      })).sort((x, y) => y.ms - x.ms).slice(0, 5);
+      for (const r of ranked) {
+        const mark = r.a.done ? "✓ " : "";
+        lines.push(`- ${mark}**${r.a.name}** — ${fmtHours(r.ms)}`);
+      }
+    }
+
+    const last = lastLoggedLabel(entries);
+    const extra = [];
+    if (last) extra.push(`last tracked ${last}`);
+    if (imgCount) extra.push(`${imgCount} photo${imgCount === 1 ? "" : "s"} attached`);
+    if (p.description) extra.push(`described as "${p.description.length > 70 ? p.description.slice(0, 68) + "…" : p.description}"`);
+    if (extra.length) {
+      lines.push("");
+      lines.push("**Highlights:** " + extra.join(" · ") + ".");
+    }
+
+    // risk read
+    const risks = [];
+    if (p.status !== "done") {
+      if (p.deadline && daysUntil(p.deadline) < 0) risks.push("the deadline has already passed");
+      if (p.estimatedHours != null && p.estimatedHours > 0 && totalH > p.estimatedHours * 1.1) risks.push("you're over the hours estimate");
+      if (p.deadline && p.estimatedHours != null && p.estimatedHours > 0) {
+        const remaining = p.estimatedHours - totalH;
+        const d = Math.max(1, daysUntil(p.deadline) + 1);
+        if (remaining > 0 && remaining / d > 5) risks.push(`it needs ~${(remaining / d).toFixed(1)}h/day to land on time`);
+      }
+      if (entries.length === 0) risks.push("no time has been tracked yet");
+    }
+    lines.push("");
+    if (risks.length) lines.push("**Watch out:** " + risks.join("; ") + ".");
+    else lines.push(p.status === "done" ? "Marked **done** — nicely closed out." : "**Looking healthy** — on pace, within estimate, getting attention.");
+    return lines.join("\n");
+  }
+
+  function summarizeTask(id) {
+    const a = activityById(id);
+    if (!a) return "That task no longer exists.";
+    const proj = projectById(a.projectId);
+    const pf = proj ? portfolioById(proj.portfolioId) : null;
+    const now = Date.now();
+    const weekStart = startOfWeek(new Date()).getTime();
+    const entries = state.entries.filter(e => e.activityId === id);
+    const totalMs = totalForFilterInRange(e => e.activityId === id, 0, now + MS_DAY);
+    const weekMs = totalForFilterInRange(e => e.activityId === id, weekStart, weekStart + 7 * MS_DAY);
+    const todayMs = totalForFilterOnDay(e => e.activityId === id, new Date());
+    const imgCount = (a.images || []).length;
+
+    const where = [proj && proj.name, pf && pf.name].filter(Boolean).join(" · ");
+    const lines = [];
+    lines.push(`Quick read on the task **${a.name}**${where ? ` (${where})` : ""}.`);
+    lines.push("");
+    lines.push(`- Status: ${a.done ? "**complete** ✓" : "in progress"}`);
+    lines.push(`- **${fmtHours(totalMs)}** logged across **${entries.length} entr${entries.length === 1 ? "y" : "ies"}**`);
+    if (weekMs > 0 || todayMs > 0) lines.push(`- ${fmtHours(weekMs)} this week${todayMs > 0 ? ` · ${fmtHours(todayMs)} today` : ""}`);
+    const last = lastLoggedLabel(entries);
+    if (last) lines.push(`- Last worked ${last}`);
+    if (entries.length > 1) {
+      const avg = totalMs / entries.length;
+      lines.push(`- Sessions average ${fmtHours(avg)} each`);
+    }
+    if (imgCount) lines.push(`- ${imgCount} photo${imgCount === 1 ? "" : "s"} attached`);
+    if (a.notes) lines.push(`- Notes: "${a.notes.length > 90 ? a.notes.slice(0, 88) + "…" : a.notes}"`);
+    if (a.dependencies && a.dependencies.length) lines.push(`- Has ${a.dependencies.length} dependenc${a.dependencies.length === 1 ? "y" : "ies"}`);
+
+    lines.push("");
+    if (entries.length === 0 && !a.done) {
+      lines.push("No time tracked yet — start the timer when you begin, and this fills out fast.");
+    } else if (a.done) {
+      lines.push("This one's wrapped up. Nice.");
+    } else {
+      lines.push("Steady progress. Keep the sessions going.");
+    }
+    return lines.join("\n");
+  }
+
   // ----- guru wisdom (general advice for non-specific questions) -----
 
   function planningWisdom() {
@@ -5060,7 +5880,7 @@
       "- **Honest estimate.** Your gut + 30%. Set it *before* you start, then track against it.",
       "- **First concrete step.** The smallest action you can take today. Inertia kills more projects than complexity.",
       "",
-      "Want me to suggest activities and an estimate for a specific project? Tell me its name.",
+      "Want me to suggest tasks and an estimate for a specific project? Tell me its name.",
     ].join("\n");
   }
   function overwhelmedAdvice() {
@@ -5098,13 +5918,13 @@
   }
   function activitiesWisdom() {
     return [
-      "Activities are how you slice a project into trackable buckets. Good ones are:",
+      "Tasks are how you slice a project into trackable buckets. Good ones are:",
       "",
       "- **2–5 per project.** Fewer and you can't see where time goes; more and you'll forget which is which.",
       "- **Verb-shaped.** \"Design\", \"Write\", \"Review\", \"Meetings\" beat \"Stuff\" or \"Misc\".",
       "- **Reusable concepts, project-specific names.** Same \"Meetings\" pattern across projects is fine — tag entries with **#Meetings** to roll up across.",
       "",
-      "If you can't name 2 activities for a project, the project scope is probably too vague.",
+      "If you can't name 2 tasks for a project, the project scope is probably too vague.",
     ].join("\n");
   }
   function portfolioWisdom() {
@@ -5302,6 +6122,10 @@
         for (const p of state.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
         for (const p of state.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
         for (const a of state.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
+        for (const p of state.portfolios) if (!Array.isArray(p.images)) p.images = [];
+        for (const p of state.projects)   if (!Array.isArray(p.images)) p.images = [];
+        for (const a of state.activities) if (!Array.isArray(a.images)) a.images = [];
+        for (const a of state.activities) if (typeof a.done !== "boolean") a.done = false;
         if (!state.panelLayouts || typeof state.panelLayouts !== "object") state.panelLayouts = {};
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         render();
