@@ -416,9 +416,18 @@
     transition: color var(--t-fast) var(--ease);
   }
   .activity.running .today { color: var(--accent); font-weight: 500; }
-  .activity.running .dot {
+  .activity.running .dot,
+  .card.running .dot,
+  .dot-lg.running {
     box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.5);
     animation: pulseRing 1.6s ease-out infinite;
+  }
+  /* the active-work pulse can be turned off in settings */
+  :root[data-pulse="off"] .activity.running .dot,
+  :root[data-pulse="off"] .card.running .dot,
+  :root[data-pulse="off"] .dot-lg.running {
+    animation: none;
+    box-shadow: none;
   }
   .activity .actions { display: flex; gap: 0.35rem; align-items: center; }
   .icon-btn {
@@ -1307,6 +1316,168 @@
   }
   [data-theme="dark"] .toast { background: #2a2a31; }
 
+  /* -------- user preference overrides (set via Settings → applySettings) -- */
+  /* density */
+  :root[data-density="compact"] { --radius: 6px; --radius-lg: 9px; }
+  :root[data-density="compact"] .wrap { padding-top: 1.5rem; padding-bottom: 2.5rem; }
+  :root[data-density="compact"] .card { padding: 0.6rem 0.75rem; }
+  :root[data-density="compact"] .hero { margin-bottom: 1rem; }
+  :root[data-density="compact"] .section { margin-bottom: 1.1rem; }
+  /* font family */
+  :root[data-font="serif"] body { font-family: Georgia, Cambria, "Times New Roman", serif; }
+  :root[data-font="mono"] body  { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  /* ui scale — rem-based sizes scale with the root font-size */
+  :root[data-scale="small"] { font-size: 15px; }
+  :root[data-scale="large"] { font-size: 18px; }
+  /* reduce motion — kill animations + transitions globally */
+  :root[data-motion="reduced"] *,
+  :root[data-motion="reduced"] *::before,
+  :root[data-motion="reduced"] *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* -------- user menu dropdown -------- */
+  .user-menu {
+    position: absolute;
+    z-index: 250;
+    min-width: 168px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 12px 34px rgba(0,0,0,0.16);
+    padding: 0.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    animation: menuIn 140ms var(--ease);
+    transform-origin: top right;
+  }
+  .user-menu.closing { animation: menuOut 120ms var(--ease) forwards; }
+  @keyframes menuIn  { from { opacity: 0; transform: translateY(-4px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes menuOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+  .user-menu .menu-item {
+    background: none;
+    border: none;
+    text-align: left;
+    font: inherit;
+    font-size: 0.9rem;
+    color: var(--text);
+    padding: 0.5rem 0.65rem;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .user-menu .menu-item:hover { background: var(--subtle); }
+  .user-menu .menu-item.danger:hover { color: var(--danger); background: var(--danger-soft); }
+  .user-menu .menu-email {
+    font-size: 0.74rem;
+    color: var(--muted);
+    padding: 0.3rem 0.65rem 0.4rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+
+  /* -------- settings modal -------- */
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    background: rgba(0,0,0,0.42);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 4vh 1rem;
+    overflow-y: auto;
+    animation: overlayIn 180ms var(--ease);
+  }
+  .settings-overlay.closing { animation: overlayOut 160ms var(--ease) forwards; }
+  @keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
+  .settings-modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+    width: 100%;
+    max-width: 520px;
+    padding: 1.3rem 1.4rem 1.5rem;
+    animation: modalIn 220ms var(--ease);
+  }
+  .settings-overlay.closing .settings-modal { animation: modalOut 160ms var(--ease) forwards; }
+  @keyframes modalIn  { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes modalOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(8px) scale(0.98); } }
+  .settings-modal .settings-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+  .settings-modal h2 { margin: 0; font-size: 1.15rem; }
+  .settings-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 1.3rem; line-height: 1;
+    padding: 0.2rem 0.4rem; border-radius: 6px;
+  }
+  .settings-close:hover { background: var(--subtle); color: var(--text); }
+  .settings-group { margin-top: 1.15rem; }
+  .settings-group > .group-title {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--muted); font-weight: 600; margin-bottom: 0.6rem;
+  }
+  .settings-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 1rem; padding: 0.4rem 0;
+  }
+  .settings-row .row-label { font-size: 0.92rem; }
+  .settings-row .row-label small { display: block; color: var(--muted); font-size: 0.76rem; }
+  /* segmented control */
+  .seg {
+    display: inline-flex; background: var(--subtle);
+    border: 1px solid var(--border); border-radius: 8px; padding: 2px; gap: 2px;
+    flex-wrap: wrap; justify-content: flex-end;
+  }
+  .seg button {
+    background: none; border: none; cursor: pointer; font: inherit;
+    font-size: 0.82rem; color: var(--muted);
+    padding: 0.3rem 0.6rem; border-radius: 6px;
+    transition: background var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  }
+  .seg button.active { background: var(--card); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+  /* accent swatches */
+  .accent-swatches { display: inline-flex; gap: 0.45rem; }
+  .accent-swatch {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid transparent; cursor: pointer; padding: 0;
+    outline: 1px solid var(--border); outline-offset: 1px;
+    transition: transform var(--t-fast) var(--ease);
+  }
+  .accent-swatch:hover { transform: scale(1.12); }
+  .accent-swatch.active { border-color: var(--text); outline-color: var(--text); }
+  /* toggle switch */
+  .switch { position: relative; width: 40px; height: 22px; flex: none; cursor: pointer; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .track {
+    position: absolute; inset: 0; background: var(--border-strong);
+    border-radius: 999px; transition: background var(--t-fast) var(--ease);
+  }
+  .switch .track::before {
+    content: ""; position: absolute; left: 3px; top: 3px;
+    width: 16px; height: 16px; background: #fff; border-radius: 50%;
+    transition: transform var(--t-fast) var(--ease);
+  }
+  .switch input:checked + .track { background: var(--accent); }
+  .switch input:checked + .track::before { transform: translateX(18px); }
+
   /* dependency UI — chips for display, picker for editing */
   .dep-list { display: flex; flex-direction: column; gap: 0.3rem; }
   .dep-chip {
@@ -1834,6 +2005,33 @@
       document.documentElement.setAttribute("data-theme", t);
     } catch (e) {}
   })();
+  // Apply the rest of the visual preferences synchronously, so the static
+  // header doesn't flash defaults before the main script runs applySettings().
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem("timeplanner.prefs") || "{}");
+      var root = document.documentElement;
+      // accent swatches (default blue is left to CSS so dark mode keeps its lighter accent)
+      var accents = {
+        "#7c3aed": ["#7c3aed", "#6d28d9", "#f5f3ff"],
+        "#0891b2": ["#0891b2", "#0e7490", "#ecfeff"],
+        "#16a34a": ["#16a34a", "#15803d", "#f0fdf4"],
+        "#ca8a04": ["#ca8a04", "#a16207", "#fefce8"],
+        "#dc2626": ["#dc2626", "#b91c1c", "#fef2f2"]
+      };
+      var a = accents[p.accent];
+      if (a) {
+        root.style.setProperty("--accent", a[0]);
+        root.style.setProperty("--accent-hover", a[1]);
+        root.style.setProperty("--accent-soft", a[2]);
+      }
+      if (p.density === "compact") root.setAttribute("data-density", "compact");
+      if (p.fontFamily && p.fontFamily !== "system") root.setAttribute("data-font", p.fontFamily);
+      if (p.uiScale && p.uiScale !== "medium") root.setAttribute("data-scale", p.uiScale);
+      if (p.reduceMotion) root.setAttribute("data-motion", "reduced");
+      if (p.activePulse === false) root.setAttribute("data-pulse", "off");
+    } catch (e) {}
+  })();
 </script>
 </head>
 <body>
@@ -1914,11 +2112,38 @@
   ];
   const PRIORITY_BY = Object.fromEntries(PRIORITIES.map(p => [p.value, p]));
 
+  // -------------------------------------------------------------------------
+  // user preferences (synced via state.settings; mirrored to localStorage for
+  // flash-free startup — see the early IIFE in <head> and applySettings())
+  // -------------------------------------------------------------------------
+  const PREFS_KEY = "timeplanner.prefs";
+  const DEFAULT_SETTINGS = {
+    theme: "system",        // light | dark | system
+    accent: "#2563eb",      // one of ACCENT_CHOICES
+    density: "comfortable", // comfortable | compact
+    fontFamily: "system",   // system | serif | mono
+    uiScale: "medium",      // small | medium | large
+    landingView: "home",    // home | plan | reports
+    weekStart: "monday",    // monday | sunday
+    timeFormat: "24h",      // 24h | 12h
+    reduceMotion: false,
+    activePulse: true,
+  };
+  // curated swatches so each accent ships with a matching hover/soft shade
+  const ACCENT_CHOICES = [
+    { name: "Blue",   accent: "#2563eb", hover: "#1d4ed8", soft: "#eff6ff" },
+    { name: "Violet", accent: "#7c3aed", hover: "#6d28d9", soft: "#f5f3ff" },
+    { name: "Cyan",   accent: "#0891b2", hover: "#0e7490", soft: "#ecfeff" },
+    { name: "Green",  accent: "#16a34a", hover: "#15803d", soft: "#f0fdf4" },
+    { name: "Amber",  accent: "#ca8a04", hover: "#a16207", soft: "#fefce8" },
+    { name: "Red",    accent: "#dc2626", hover: "#b91c1c", soft: "#fef2f2" },
+  ];
+
   const $ = (id) => document.getElementById(id);
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   function freshState() {
-    return { portfolios: [], projects: [], activities: [], entries: [], panelLayouts: {} };
+    return { portfolios: [], projects: [], activities: [], entries: [], panelLayouts: {}, settings: { ...DEFAULT_SETTINGS } };
   }
   function load() {
     try {
@@ -1951,6 +2176,8 @@
       for (const a of s.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
       // panel layouts (per-view section order + minimized state)
       if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
+      // user preferences (merge defaults so new keys appear on old data)
+      s.settings = { ...DEFAULT_SETTINGS, ...(s.settings && typeof s.settings === "object" ? s.settings : {}) };
       return s;
     } catch {
       return freshState();
@@ -1958,6 +2185,8 @@
   }
   function save() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    // mirror prefs separately so the <head> IIFE can apply them before render
+    try { localStorage.setItem(PREFS_KEY, JSON.stringify(state.settings)); } catch (e) {}
     cloudPush();
   }
 
@@ -1996,6 +2225,12 @@
   }
   function fmtClock(iso) {
     const d = new Date(iso);
+    if ((state.settings && state.settings.timeFormat) === "12h") {
+      let h = d.getHours();
+      const ampm = h < 12 ? "AM" : "PM";
+      h = h % 12; if (h === 0) h = 12;
+      return `${h}:${pad(d.getMinutes())} ${ampm}`;
+    }
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
   function startOfDay(d) {
@@ -2003,7 +2238,9 @@
   }
   function startOfWeek(d) {
     const x = startOfDay(d);
-    const day = (x.getDay() + 6) % 7; // Mon = 0
+    // Mon = 0 by default; with weekStart "sunday", Sun = 0
+    const sundayStart = (state.settings && state.settings.weekStart) === "sunday";
+    const day = sundayStart ? x.getDay() : (x.getDay() + 6) % 7;
     x.setDate(x.getDate() - day);
     return x;
   }
@@ -2044,6 +2281,18 @@
   function activitiesOfProject(pid) { return state.activities.filter(a => a.projectId === pid); }
   function projectOfActivity(aid) {
     const a = activityById(aid); return a ? projectById(a.projectId) : null;
+  }
+  // is this project/portfolio the one whose task is currently being timed?
+  function isProjectRunning(pid) {
+    const r = getRunning(); if (!r) return false;
+    const a = activityById(r.activityId);
+    return !!a && a.projectId === pid;
+  }
+  function isPortfolioRunning(pfid) {
+    const r = getRunning(); if (!r) return false;
+    const a = activityById(r.activityId); if (!a) return false;
+    const p = projectById(a.projectId);
+    return !!p && p.portfolioId === pfid;
   }
 
   function entriesInRange(filterFn, fromMs, toMs) {
@@ -2877,6 +3126,7 @@
           subText: `${projs.length} project${projs.length === 1 ? "" : "s"}`,
           highlightId: p.id,
           delay: i,
+          running: isPortfolioRunning(p.id),
           onClick: () => navigate({ name: "portfolio", id: p.id }),
         });
         card.dataset.portfolioId = p.id;
@@ -2924,6 +3174,7 @@
     top.className = "hero-top";
     const dot = document.createElement("span");
     dot.className = "dot-lg";
+    if (isPortfolioRunning(pf.id)) dot.classList.add("running");
     dot.style.background = pf.color;
     const title = document.createElement("h1");
     title.textContent = pf.name;
@@ -3025,6 +3276,7 @@
     card.type = "button";
     card.className = "card";
     card.dataset.projectId = proj.id;
+    if (isProjectRunning(proj.id)) card.classList.add("running");
     if (highlightIds.has(proj.id)) card.classList.add("new-row");
     card.style.animationDelay = (idx * 30) + "ms";
     card.addEventListener("click", () => navigate({ name: "project", id: proj.id }));
@@ -3105,6 +3357,7 @@
     top.className = "hero-top";
     const dot = document.createElement("span");
     dot.className = "dot-lg"; dot.style.background = proj.color;
+    if (isProjectRunning(proj.id)) dot.classList.add("running");
     const title = document.createElement("h1");
     title.textContent = proj.name;
     title.title = "Click to rename";
@@ -3986,12 +4239,12 @@
     const sp1 = document.createElement("div");
     const axis = document.createElement("div");
     axis.className = "axis";
-    const dayNames = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const todayMs = startOfDay(new Date()).getTime();
     const ds = weekDays();
     ds.forEach((d, i) => {
       const cell = document.createElement("div");
-      cell.textContent = dayNames[i];
+      cell.textContent = dayNames[d.getDay()];
       if (d.getTime() === todayMs) cell.classList.add("today-cell");
       axis.appendChild(cell);
     });
@@ -4048,10 +4301,11 @@
   // -------------------------------------------------------------------------
   // makeCard helper (generic — currently used for portfolios on home)
   // -------------------------------------------------------------------------
-  function makeCard({ color, title, right, subText, highlightId, delay, onClick }) {
+  function makeCard({ color, title, right, subText, highlightId, delay, onClick, running }) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "card";
+    if (running) btn.classList.add("running");
     if (highlightId && highlightIds.has(highlightId)) btn.classList.add("new-row");
     btn.style.animationDelay = ((delay || 0) * 30) + "ms";
     btn.addEventListener("click", onClick);
@@ -6211,33 +6465,326 @@
   function moonIconSvg() {
     return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
   }
+  function resolveTheme(theme) {
+    if (theme === "system") {
+      return (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+    }
+    return theme === "dark" ? "dark" : "light";
+  }
   function applyTheme(theme) {
-    document.documentElement.setAttribute("data-theme", theme);
+    const resolved = resolveTheme(theme);
+    document.documentElement.setAttribute("data-theme", resolved);
     const btn = document.getElementById("themeToggle");
     if (btn) {
-      btn.innerHTML = theme === "dark" ? sunIconSvg() : moonIconSvg();
-      btn.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+      btn.innerHTML = resolved === "dark" ? sunIconSvg() : moonIconSvg();
+      btn.title = resolved === "dark" ? "Switch to light mode" : "Switch to dark mode";
     }
+    // mirror a concrete value for the flash-free <head> IIFE; clear it for
+    // "system" so the page keeps following the OS preference on reload
+    try {
+      if (theme === "system") localStorage.removeItem(THEME_KEY);
+      else localStorage.setItem(THEME_KEY, resolved);
+    } catch (e) {}
   }
+  // header toggle flips light <-> dark and records the explicit choice
   function toggleTheme() {
-    const current = document.documentElement.getAttribute("data-theme") || "light";
-    const next = current === "dark" ? "light" : "dark";
-    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+    const resolved = document.documentElement.getAttribute("data-theme") || "light";
+    const next = resolved === "dark" ? "light" : "dark";
+    state.settings.theme = next;
     applyTheme(next);
+    save();
   }
-  applyTheme(document.documentElement.getAttribute("data-theme") || "light");
   const themeToggleBtn = document.getElementById("themeToggle");
   if (themeToggleBtn) themeToggleBtn.addEventListener("click", toggleTheme);
 
-  // follow system changes only if user hasn't picked a theme themselves
+  // follow system changes only while the user's preference is "system"
   if (window.matchMedia) {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = (e) => {
-      try { if (localStorage.getItem(THEME_KEY)) return; } catch (err) {}
-      applyTheme(e.matches ? "dark" : "light");
+    const onChange = () => {
+      if (!state.settings || state.settings.theme !== "system") return;
+      applyTheme("system");
     };
     if (mq.addEventListener) mq.addEventListener("change", onChange);
     else if (mq.addListener) mq.addListener(onChange);
+  }
+
+  // -------------------------------------------------------------------------
+  // settings — apply preferences to the document, and mutate + persist them
+  // -------------------------------------------------------------------------
+  function applySettings(s) {
+    s = s || (state && state.settings) || DEFAULT_SETTINGS;
+    const root = document.documentElement;
+    // accent — leave the default blue to CSS so dark mode keeps its lighter shade
+    const choice = ACCENT_CHOICES.find(c => c.accent === s.accent);
+    if (!choice || choice.accent === DEFAULT_SETTINGS.accent) {
+      root.style.removeProperty("--accent");
+      root.style.removeProperty("--accent-hover");
+      root.style.removeProperty("--accent-soft");
+    } else {
+      root.style.setProperty("--accent", choice.accent);
+      root.style.setProperty("--accent-hover", choice.hover);
+      root.style.setProperty("--accent-soft", choice.soft);
+    }
+    root.setAttribute("data-density", s.density === "compact" ? "compact" : "comfortable");
+    root.setAttribute("data-font", s.fontFamily || "system");
+    root.setAttribute("data-scale", s.uiScale || "medium");
+    root.setAttribute("data-motion", s.reduceMotion ? "reduced" : "full");
+    root.setAttribute("data-pulse", s.activePulse === false ? "off" : "on");
+    applyTheme(s.theme || "system");
+  }
+  function updateSetting(key, value) {
+    state.settings[key] = value;
+    applySettings(state.settings);   // visual prefs apply immediately via CSS
+    save();
+    // only these change rendered content (week boundaries / clock labels)
+    if (key === "weekStart" || key === "timeFormat") render();
+    renderSettingsBody();            // reflect the new value in the open modal
+  }
+
+  // -------------------------------------------------------------------------
+  // user menu (dropdown under the username) + settings modal
+  // -------------------------------------------------------------------------
+  function gearIconSvg() {
+    return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+  }
+
+  let userMenuEl = null;
+  function onDocClickUserMenu(e) {
+    if (userMenuEl && !userMenuEl.contains(e.target) && e.target.id !== "authLink") closeUserMenu();
+  }
+  function onKeyUserMenu(e) { if (e.key === "Escape") closeUserMenu(); }
+  function closeUserMenu() {
+    if (!userMenuEl) return;
+    const el = userMenuEl; userMenuEl = null;
+    el.classList.add("closing");
+    document.removeEventListener("click", onDocClickUserMenu, true);
+    document.removeEventListener("keydown", onKeyUserMenu, true);
+    setTimeout(() => el.remove(), 120);
+    const btn = document.getElementById("authLink");
+    if (btn) btn.classList.remove("menu-open");
+  }
+  function openUserMenu() {
+    const btn = document.getElementById("authLink");
+    if (!btn) return;
+    const menu = document.createElement("div");
+    menu.className = "user-menu";
+
+    if (currentUser && currentUser.email) {
+      const em = document.createElement("div");
+      em.className = "menu-email";
+      em.textContent = currentUser.email;
+      menu.appendChild(em);
+    }
+
+    const settingsItem = document.createElement("button");
+    settingsItem.type = "button";
+    settingsItem.className = "menu-item";
+    settingsItem.innerHTML = gearIconSvg() + "<span>Settings</span>";
+    settingsItem.addEventListener("click", () => { closeUserMenu(); openSettings(); });
+    menu.appendChild(settingsItem);
+
+    const authItem = document.createElement("button");
+    authItem.type = "button";
+    authItem.className = "menu-item" + (currentUser ? " danger" : "");
+    authItem.innerHTML = `<span>${currentUser ? "Logout" : "Sign in"}</span>`;
+    authItem.addEventListener("click", () => {
+      closeUserMenu();
+      if (currentUser) signOut(); else signIn();
+    });
+    menu.appendChild(authItem);
+
+    document.body.appendChild(menu);
+    // anchor under the button, right edges aligned
+    const r = btn.getBoundingClientRect();
+    menu.style.top = (r.bottom + 6 + window.scrollY) + "px";
+    let left = r.right - menu.offsetWidth + window.scrollX;
+    if (left < 8) left = 8;
+    menu.style.left = left + "px";
+
+    userMenuEl = menu;
+    btn.classList.add("menu-open");
+    // defer so this same click doesn't immediately close the menu
+    setTimeout(() => {
+      document.addEventListener("click", onDocClickUserMenu, true);
+      document.addEventListener("keydown", onKeyUserMenu, true);
+    }, 0);
+  }
+  function toggleUserMenu() { userMenuEl ? closeUserMenu() : openUserMenu(); }
+
+  // ----- settings modal -----
+  let settingsOverlayEl = null;
+  function onKeySettings(e) { if (e.key === "Escape") closeSettings(); }
+  function closeSettings() {
+    if (!settingsOverlayEl) return;
+    const el = settingsOverlayEl; settingsOverlayEl = null;
+    el.classList.add("closing");
+    document.removeEventListener("keydown", onKeySettings, true);
+    setTimeout(() => el.remove(), 170);
+  }
+  function openSettings() {
+    if (settingsOverlayEl) return;
+    const overlay = document.createElement("div");
+    overlay.className = "settings-overlay";
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSettings(); });
+
+    const modal = document.createElement("div");
+    modal.className = "settings-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Settings");
+
+    const top = document.createElement("div");
+    top.className = "settings-top";
+    const h = document.createElement("h2"); h.textContent = "Settings";
+    const close = document.createElement("button");
+    close.type = "button"; close.className = "settings-close";
+    close.setAttribute("aria-label", "Close settings");
+    close.innerHTML = "&times;";
+    close.addEventListener("click", closeSettings);
+    top.append(h, close);
+    modal.appendChild(top);
+
+    const body = document.createElement("div");
+    body.id = "settingsBody";
+    modal.appendChild(body);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    settingsOverlayEl = overlay;
+    document.addEventListener("keydown", onKeySettings, true);
+    renderSettingsBody();
+  }
+
+  // small builders for the settings controls
+  function settingsGroup(title) {
+    const g = document.createElement("div");
+    g.className = "settings-group";
+    const t = document.createElement("div");
+    t.className = "group-title";
+    t.textContent = title;
+    g.appendChild(t);
+    return g;
+  }
+  function settingsRow(labelText, subText, control) {
+    const row = document.createElement("div");
+    row.className = "settings-row";
+    const lab = document.createElement("div");
+    lab.className = "row-label";
+    lab.textContent = labelText;
+    if (subText) {
+      const small = document.createElement("small");
+      small.textContent = subText;
+      lab.appendChild(small);
+    }
+    row.append(lab, control);
+    return row;
+  }
+  function segControl(current, options, onPick) {
+    const seg = document.createElement("div");
+    seg.className = "seg";
+    options.forEach(opt => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = opt.label;
+      if (opt.value === current) b.classList.add("active");
+      b.addEventListener("click", () => { if (opt.value !== current) onPick(opt.value); });
+      seg.appendChild(b);
+    });
+    return seg;
+  }
+  function accentControl(current, onPick) {
+    const wrap = document.createElement("div");
+    wrap.className = "accent-swatches";
+    ACCENT_CHOICES.forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "accent-swatch" + (c.accent === current ? " active" : "");
+      b.style.background = c.accent;
+      b.title = c.name;
+      b.setAttribute("aria-label", c.name);
+      b.addEventListener("click", () => { if (c.accent !== current) onPick(c.accent); });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+  function toggleControl(checked, onChange) {
+    const label = document.createElement("label");
+    label.className = "switch";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.checked = !!checked;
+    const track = document.createElement("span");
+    track.className = "track";
+    input.addEventListener("change", () => onChange(input.checked));
+    label.append(input, track);
+    return label;
+  }
+  function renderSettingsBody() {
+    const body = document.getElementById("settingsBody");
+    if (!body) return;
+    body.innerHTML = "";
+    const s = state.settings;
+
+    // Appearance
+    const appearance = settingsGroup("Appearance");
+    appearance.appendChild(settingsRow("Accent color", "Used for highlights and active states",
+      accentControl(s.accent, v => updateSetting("accent", v))));
+    appearance.appendChild(settingsRow("Theme", null,
+      segControl(s.theme, [
+        { value: "light", label: "Light" },
+        { value: "dark", label: "Dark" },
+        { value: "system", label: "System" },
+      ], v => updateSetting("theme", v))));
+    appearance.appendChild(settingsRow("Density", null,
+      segControl(s.density, [
+        { value: "comfortable", label: "Comfortable" },
+        { value: "compact", label: "Compact" },
+      ], v => updateSetting("density", v))));
+    body.appendChild(appearance);
+
+    // Typography & scale
+    const typo = settingsGroup("Typography & scale");
+    typo.appendChild(settingsRow("Font", null,
+      segControl(s.fontFamily, [
+        { value: "system", label: "System" },
+        { value: "serif", label: "Serif" },
+        { value: "mono", label: "Mono" },
+      ], v => updateSetting("fontFamily", v))));
+    typo.appendChild(settingsRow("UI size", null,
+      segControl(s.uiScale, [
+        { value: "small", label: "Small" },
+        { value: "medium", label: "Medium" },
+        { value: "large", label: "Large" },
+      ], v => updateSetting("uiScale", v))));
+    body.appendChild(typo);
+
+    // Behavior
+    const behavior = settingsGroup("Behavior");
+    behavior.appendChild(settingsRow("Default view", "Where the app opens",
+      segControl(s.landingView, [
+        { value: "home", label: "Home" },
+        { value: "plan", label: "Plan" },
+        { value: "reports", label: "Reports" },
+      ], v => updateSetting("landingView", v))));
+    behavior.appendChild(settingsRow("Week starts on", null,
+      segControl(s.weekStart, [
+        { value: "monday", label: "Monday" },
+        { value: "sunday", label: "Sunday" },
+      ], v => updateSetting("weekStart", v))));
+    behavior.appendChild(settingsRow("Time format", null,
+      segControl(s.timeFormat, [
+        { value: "24h", label: "24-hour" },
+        { value: "12h", label: "12-hour" },
+      ], v => updateSetting("timeFormat", v))));
+    body.appendChild(behavior);
+
+    // Motion & indicators
+    const motion = settingsGroup("Motion & indicators");
+    motion.appendChild(settingsRow("Reduce motion", "Turn off animations and transitions",
+      toggleControl(s.reduceMotion, v => updateSetting("reduceMotion", v))));
+    motion.appendChild(settingsRow("Active-work pulse", "Pulse the dot of whatever is being timed",
+      toggleControl(s.activePulse, v => updateSetting("activePulse", v))));
+    body.appendChild(motion);
   }
 
   // -------------------------------------------------------------------------
@@ -6333,7 +6880,10 @@
         for (const a of state.activities) if (typeof a.done !== "boolean") a.done = false;
         for (const a of state.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
         if (!state.panelLayouts || typeof state.panelLayouts !== "object") state.panelLayouts = {};
+        state.settings = { ...DEFAULT_SETTINGS, ...(state.settings && typeof state.settings === "object" ? state.settings : {}) };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        try { localStorage.setItem(PREFS_KEY, JSON.stringify(state.settings)); } catch (e) {}
+        applySettings(state.settings);
         render();
         setSyncStatus("synced", "Synced");
         toast("Loaded your saved data");
@@ -6380,15 +6930,15 @@
     if (currentUser) {
       const email = currentUser.email || "Signed in";
       btn.textContent = email.length > 20 ? email.slice(0, 18) + "…" : email;
-      btn.title = "Signed in — click to sign out";
-      btn.onclick = signOut;
+      btn.title = "Account & settings";
       btn.classList.add("active");
     } else {
       btn.textContent = cloudEnabled ? "Sign in" : "Sign in (setup needed)";
-      btn.title = cloudEnabled ? "Sign in to sync your data across devices" : "Cloud sync not configured — see SUPABASE_URL in the source";
-      btn.onclick = signIn;
+      btn.title = "Account & settings";
       btn.classList.remove("active");
     }
+    // clicking the name opens a small dropdown (Settings + sign in/out)
+    btn.onclick = (e) => { e.stopPropagation(); toggleUserMenu(); };
   }
 
   if (sb) {
@@ -6408,6 +6958,15 @@
   // -------------------------------------------------------------------------
   // initial paint
   // -------------------------------------------------------------------------
+  applySettings(state.settings);
+  // honor the user's default landing view on a cold open (no deep link)
+  if (!location.hash || location.hash === "#" || location.hash === "#/") {
+    const lv = state.settings.landingView;
+    if (lv === "plan" || lv === "reports") {
+      location.hash = "#/" + lv;
+      view = parseHash();
+    }
+  }
   render();
   renderAuthUI();
 })();
