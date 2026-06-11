@@ -2213,6 +2213,57 @@
   function freshState() {
     return { portfolios: [], projects: [], activities: [], entries: [], panelLayouts: {}, settings: { ...DEFAULT_SETTINGS } };
   }
+  // Normalize a (possibly older) state blob so every entity has the fields the
+  // current code expects. Mutates and returns `s`. Used by load() AND cloudPull()
+  // so the two stay in lockstep — see CLAUDE.md "Persistence & migrations".
+  function backfillState(s) {
+    if (!s || typeof s !== "object") return freshState();
+    for (const k of ["portfolios", "projects", "activities", "entries"]) {
+      if (!Array.isArray(s[k])) s[k] = [];
+    }
+    // backfill missing tags
+    for (const e of s.entries) if (!Array.isArray(e.tags)) e.tags = [];
+    // backfill missing notes on portfolios + activities
+    for (const p of s.portfolios) if (typeof p.notes !== "string") p.notes = "";
+    for (const a of s.activities) if (typeof a.notes !== "string") a.notes = "";
+    // backfill dependencies arrays
+    for (const p of s.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
+    for (const p of s.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
+    for (const a of s.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
+    // backfill image galleries
+    for (const p of s.portfolios) if (!Array.isArray(p.images)) p.images = [];
+    for (const p of s.projects)   if (!Array.isArray(p.images)) p.images = [];
+    for (const a of s.activities) if (!Array.isArray(a.images)) a.images = [];
+    // backfill task completion flag
+    for (const a of s.activities) if (typeof a.done !== "boolean") a.done = false;
+    // backfill task priority
+    for (const a of s.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
+    // panel layouts (per-view section order + minimized state)
+    if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
+    // user preferences (merge defaults so new keys appear on old data)
+    s.settings = { ...DEFAULT_SETTINGS, ...(s.settings && typeof s.settings === "object" ? s.settings : {}) };
+    return s;
+  }
+  // Order-independent serialization (keys sorted recursively). Supabase stores
+  // `state` as jsonb, which does NOT preserve object key order, so a raw
+  // JSON.stringify compare of local vs cloud is meaningless — it differs even
+  // when the data is identical. Use this for any local-vs-cloud equality check.
+  function canonicalJson(v) {
+    if (Array.isArray(v)) return "[" + v.map(canonicalJson).join(",") + "]";
+    if (v && typeof v === "object") {
+      return "{" + Object.keys(v).sort().map(k => JSON.stringify(k) + ":" + canonicalJson(v[k])).join(",") + "}";
+    }
+    return JSON.stringify(v === undefined ? null : v);
+  }
+  // True only if two states differ in meaningful content (ignores key order and
+  // backfill defaults, so jsonb round-trips and version skew don't false-trigger).
+  function statesEquivalent(a, b) {
+    try {
+      const ca = canonicalJson(backfillState(JSON.parse(JSON.stringify(a))));
+      const cb = canonicalJson(backfillState(JSON.parse(JSON.stringify(b))));
+      return ca === cb;
+    } catch { return false; }
+  }
   function load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -2221,32 +2272,7 @@
         for (const k of LEGACY_KEYS) localStorage.removeItem(k);
         return freshState();
       }
-      const s = JSON.parse(raw);
-      for (const k of ["portfolios", "projects", "activities", "entries"]) {
-        if (!Array.isArray(s[k])) s[k] = [];
-      }
-      // backfill missing tags
-      for (const e of s.entries) if (!Array.isArray(e.tags)) e.tags = [];
-      // backfill missing notes on portfolios + activities
-      for (const p of s.portfolios) if (typeof p.notes !== "string") p.notes = "";
-      for (const a of s.activities) if (typeof a.notes !== "string") a.notes = "";
-      // backfill dependencies arrays
-      for (const p of s.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
-      for (const p of s.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
-      for (const a of s.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
-      // backfill image galleries
-      for (const p of s.portfolios) if (!Array.isArray(p.images)) p.images = [];
-      for (const p of s.projects)   if (!Array.isArray(p.images)) p.images = [];
-      for (const a of s.activities) if (!Array.isArray(a.images)) a.images = [];
-      // backfill task completion flag
-      for (const a of s.activities) if (typeof a.done !== "boolean") a.done = false;
-      // backfill task priority
-      for (const a of s.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
-      // panel layouts (per-view section order + minimized state)
-      if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
-      // user preferences (merge defaults so new keys appear on old data)
-      s.settings = { ...DEFAULT_SETTINGS, ...(s.settings && typeof s.settings === "object" ? s.settings : {}) };
-      return s;
+      return backfillState(JSON.parse(raw));
     } catch {
       return freshState();
     }
@@ -7159,7 +7185,7 @@
       if (error) throw error;
       if (data && data.state) {
         const localHasData = state.portfolios.length || state.projects.length || state.entries.length;
-        const differs = JSON.stringify(state) !== JSON.stringify(data.state);
+        const differs = !statesEquivalent(state, data.state);
         if (localHasData && differs) {
           const choice = await showSyncConflict(state, data.state, data.updated_at);
           if (choice === "dismiss") {
@@ -7178,23 +7204,7 @@
           }
           // choice === "cloud" falls through to replace local with cloud
         }
-        state = data.state;
-        for (const k of ["portfolios", "projects", "activities", "entries"]) {
-          if (!Array.isArray(state[k])) state[k] = [];
-        }
-        for (const e of state.entries) if (!Array.isArray(e.tags)) e.tags = [];
-        for (const p of state.portfolios) if (typeof p.notes !== "string") p.notes = "";
-        for (const a of state.activities) if (typeof a.notes !== "string") a.notes = "";
-        for (const p of state.portfolios) if (!Array.isArray(p.dependencies)) p.dependencies = [];
-        for (const p of state.projects)   if (!Array.isArray(p.dependencies)) p.dependencies = [];
-        for (const a of state.activities) if (!Array.isArray(a.dependencies)) a.dependencies = [];
-        for (const p of state.portfolios) if (!Array.isArray(p.images)) p.images = [];
-        for (const p of state.projects)   if (!Array.isArray(p.images)) p.images = [];
-        for (const a of state.activities) if (!Array.isArray(a.images)) a.images = [];
-        for (const a of state.activities) if (typeof a.done !== "boolean") a.done = false;
-        for (const a of state.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
-        if (!state.panelLayouts || typeof state.panelLayouts !== "object") state.panelLayouts = {};
-        state.settings = { ...DEFAULT_SETTINGS, ...(state.settings && typeof state.settings === "object" ? state.settings : {}) };
+        state = backfillState(data.state);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         try { localStorage.setItem(PREFS_KEY, JSON.stringify(state.settings)); } catch (e) {}
         applySettings(state.settings);
