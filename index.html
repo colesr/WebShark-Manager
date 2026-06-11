@@ -7237,15 +7237,33 @@
     }
     const { error } = await sb.auth.signInWithOAuth({
       provider: "github",
-      options: { redirectTo: window.location.href },
+      // strip any hash (#/plan, #/p/<id>, …) — OAuth appends #access_token=… and a
+      // pre-existing hash mangles the fragment so the session can't be parsed back.
+      options: { redirectTo: window.location.origin + window.location.pathname },
     });
     if (error) alert("Sign-in failed: " + error.message);
   }
 
   async function signOut() {
     if (!sb) return;
-    if (!confirm("Sign out? Your data stays on this device.")) return;
+    if (!confirm("Sign out? Your data is saved in the cloud and will be restored when you sign back in.")) return;
     await sb.auth.signOut();
+  }
+
+  // Clear the app back to empty when the session ends (explicit logout OR token
+  // expiry). Data lives in the cloud, so this only wipes the local copy + view.
+  function resetToSignedOut() {
+    clearTimeout(cloudPushTimer);          // cancel any pending debounced push
+    cloudPulling = false;
+    // wipe data but keep current device appearance prefs so the UI doesn't flip
+    state = { portfolios: [], projects: [], activities: [], entries: [],
+              panelLayouts: {}, settings: state.settings };
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+    view = { name: "home" };
+    location.hash = "";                    // back to the empty/home route
+    setSyncStatus("", "");
+    render();
+    renderAuthUI();
   }
 
   function renderAuthUI() {
@@ -7276,6 +7294,7 @@
       currentUser = session ? session.user : null;
       renderAuthUI();
       if (currentUser && !wasUser) cloudPull();
+      else if (!currentUser && wasUser) resetToSignedOut();
     });
   }
 
