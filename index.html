@@ -1161,6 +1161,12 @@
     flex-shrink: 0;
   }
   .brand-logo svg { width: 100%; height: 100%; display: block; }
+  .brand-logo .hand { stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; transform-origin: 12px 12px; transition: transform 300ms linear; }
+  .loading .brand-logo .hand.minute { transform: rotate(35deg); animation: rotateMinute 1.6s linear infinite; }
+  .loading .brand-logo .hand.hour { transform: rotate(10deg); animation: rotateHour 3.2s linear infinite; }
+  @keyframes rotateMinute { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @keyframes rotateHour { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .brand-logo svg { width: 100%; height: 100%; display: block; }
   .brand-text { display: inline-flex; align-items: baseline; }
   .brand-dot {
     color: var(--accent);
@@ -1169,18 +1175,16 @@
     animation: brandDotPulse 3.2s ease-in-out infinite;
     padding: 0 0.04em;
   }
-  .brand-ai {
-    background: linear-gradient(120deg, var(--accent), #7c3aed);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: 700;
-    letter-spacing: -0.005em;
-  }
+  /* apply the .AI styling to the main wordmark */
+  .brand-wordmark { background: linear-gradient(120deg, var(--accent), #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; letter-spacing: -0.005em; cursor: pointer; display: inline-flex; align-items: baseline; }
+  .brand-wordmark:hover { transform: translateY(-1px); transition: transform 160ms ease; }
   @keyframes brandDotPulse {
     0%, 100% { opacity: 0.45; }
     50%      { opacity: 1; }
   }
+
+  /* subtle scale on click for the wordmark */
+  .brand-wordmark:active { transform: scale(0.98); }
 
   /* sync indicator — tiny status dot near the auth button */
   .sync-indicator {
@@ -2343,16 +2347,16 @@
 <div class="wrap">
   <header class="app">
     <div class="brand-row">
-      <a class="brand" href="#/" id="brandLink" aria-label="WebShark Manager.ai — home">
+      <a class="brand" href="#/" id="brandLink" aria-label="WebShark Manager — home">
         <span class="brand-logo" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
             <circle cx="12" cy="12" r="9.25" stroke-width="1.5"/>
-            <line x1="12" y1="4.5" x2="12" y2="8.5" stroke-width="2.2"/>
-            <circle cx="12" cy="10.4" r="1.05" fill="currentColor" stroke="none"/>
-            <circle cx="12" cy="12" r="0.7" fill="currentColor" stroke="none"/>
+              <line class="hand hour" x1="12" y1="12" x2="12" y2="8"/>
+              <line class="hand minute" x1="12" y1="12" x2="16" y2="12"/>
+              <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>
           </svg>
         </span>
-        <span class="brand-text">WebShark Manager<span class="brand-dot">.</span><span class="brand-ai">AI</span></span>
+        <span class="brand-text brand-wordmark">WebShark Manager<span class="brand-dot">.</span></span>
       </a>
       <div class="header-right">
         <button class="header-link theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme"></button>
@@ -2449,7 +2453,7 @@
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   function freshState() {
-    return { portfolios: [], projects: [], activities: [], entries: [], events: [], panelLayouts: {}, settings: { ...DEFAULT_SETTINGS } };
+    return { portfolios: [], projects: [], activities: [], entries: [], events: [], panelLayouts: {}, settings: { ...DEFAULT_SETTINGS }, appLogs: [] };
   }
   // Normalize a (possibly older) state blob so every entity has the fields the
   // current code expects. Mutates and returns `s`. Used by load() AND cloudPull()
@@ -2492,6 +2496,8 @@
     for (const a of s.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
     // panel layouts (per-view section order + minimized state)
     if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
+    // application logs (detailed user activity trace)
+    if (!Array.isArray(s.appLogs)) s.appLogs = [];
     // user preferences (merge defaults so new keys appear on old data)
     s.settings = { ...DEFAULT_SETTINGS, ...(s.settings && typeof s.settings === "object" ? s.settings : {}) };
     return s;
@@ -2713,6 +2719,7 @@
     const id = uid();
     state.portfolios.push({ id, name, color, notes: "", dependencies: [], images: [] });
     highlight(id);
+    logEvent('addPortfolio', { id, name, color });
     save();
     return id;
   }
@@ -2726,6 +2733,7 @@
     const p = portfolioById(id);
     if (!p) return;
     Object.assign(p, patch);
+    logEvent('updatePortfolio', { id, patch });
     save();
   }
   function deletePortfolio(id) {
@@ -2742,6 +2750,7 @@
     state.activities = state.activities.filter(a => !projIds.has(a.projectId));
     state.projects = state.projects.filter(p => p.portfolioId !== id);
     state.portfolios = state.portfolios.filter(p => p.id !== id);
+    logEvent('deletePortfolio', { id, name: p.name });
     save();
     if (view.name !== "home") navigate({ name: "home" });
     else render();
@@ -2762,6 +2771,7 @@
       images: [],
     });
     highlight(id);
+    logEvent('addProject', { id, portfolioId, name: (fields.name || "Untitled project").trim(), color });
     save();
     return id;
   }
@@ -2770,6 +2780,7 @@
     if (!p) return;
     Object.assign(p, patch);
     if (patch.estimatedHours === "" || patch.estimatedHours == null) p.estimatedHours = null;
+    logEvent('updateProject', { id, patch });
     save();
   }
   function deleteProject(id) {
@@ -2785,6 +2796,7 @@
     state.entries = state.entries.filter(e => !actIds.has(e.activityId));
     state.activities = state.activities.filter(a => a.projectId !== id);
     state.projects = state.projects.filter(p => p.id !== id);
+    logEvent('deleteProject', { id, name: p.name });
     save();
     if (view.name === "project" && view.id === id) navigate({ name: "portfolio", id: p.portfolioId });
     else render();
@@ -2798,6 +2810,7 @@
     const id = uid();
     state.activities.push({ id, projectId, name, color, notes: "", dependencies: [], images: [], done: false, priority: "none" });
     highlight(id);
+    logEvent('addActivity', { id, projectId, name, color });
     save();
     return id;
   }
@@ -2811,6 +2824,7 @@
     const a = activityById(id);
     if (!a) return;
     Object.assign(a, patch);
+    logEvent('updateActivity', { id, patch });
     save();
   }
   function deleteActivity(id) {
@@ -2823,6 +2837,7 @@
     if (!confirm(msg)) return;
     state.entries = state.entries.filter(e => e.activityId !== id);
     state.activities = state.activities.filter(a => a.id !== id);
+    logEvent('deleteActivity', { id, name: a.name });
     save();
     render();
   }
@@ -2850,6 +2865,7 @@
     const eid = uid();
     state.entries.push({ id: eid, activityId: id, start: now, end: null, tags: [] });
     highlight(eid);
+    logEvent('startActivity', { activityId: id, entryId: eid, start: now });
     save();
     render();
   }
@@ -2857,11 +2873,14 @@
     const r = getRunning();
     if (!r) return;
     r.end = new Date().toISOString();
+    logEvent('stopActivity', { activityId: r.activityId, entryId: r.id, end: r.end });
     save();
     render();
   }
   function deleteEntry(id) {
+    const e = state.entries.find(x=>x.id===id);
     state.entries = state.entries.filter(e => e.id !== id);
+    logEvent('deleteEntry', { id, activityId: e ? e.activityId : null });
     save();
     render();
   }
@@ -2876,6 +2895,7 @@
       if (overlapsWithRunning(next, id)) return { ok: false, err: "Conflicts with the running timer." };
     }
     Object.assign(e, patch);
+    logEvent('updateEntry', { id, patch });
     save();
     render();
     return { ok: true };
@@ -2896,6 +2916,7 @@
     if (overlapsWithRunning(entry)) return { ok: false, err: "Conflicts with the running timer." };
     state.entries.push(entry);
     highlight(entry.id);
+    logEvent('addEntry', { id: entry.id, activityId: entry.activityId, start: entry.start, end: entry.end, tags: entry.tags });
     save();
     render();
     return { ok: true };
@@ -3597,6 +3618,7 @@
           notes: notesInput.value.trim(),
           ref,
         });
+        logEvent('updateEvent', { id: ev.id, title, start: startIso, end: endIso, allDay });
       } else {
         state.events.push({
           id: uid(),
@@ -3608,6 +3630,7 @@
           color: null,
           ref,
         });
+        logEvent('addEvent', { title, start: startIso, end: endIso, allDay });
       }
       save();
       closeScheduleEditor();
@@ -3618,6 +3641,7 @@
       if (!ev) return;
       if (!confirm("Delete this event?")) return;
       state.events = state.events.filter(item => item.id !== ev.id);
+      logEvent('deleteEvent', { id: ev.id, title: ev.title });
       save();
       closeScheduleEditor();
       render();
@@ -3634,6 +3658,7 @@
       gBtn.addEventListener("click", () => {
         const url = googleEventEditUrl(ev);
         window.open(url, "_blank");
+        logEvent('openGoogleEvent', { id: ev.id, title: ev.title });
       });
       const icsBtn = document.createElement("button");
       icsBtn.type = "button";
@@ -3643,6 +3668,7 @@
       icsBtn.addEventListener("click", () => {
         const ics = generateIcsForEvents([ev]);
         download(new Blob([ics], { type: "text/calendar" }), `event-${ev.id}.ics`);
+        logEvent('downloadEventIcs', { id: ev.id, title: ev.title });
       });
       actions.append(gBtn, icsBtn);
     }
@@ -3745,10 +3771,31 @@
     exportAllBtn.textContent = "Export .ics";
     exportAllBtn.title = "Download visible events as an .ics file (Apple/Google import)";
     exportAllBtn.addEventListener("click", () => scheduleExportIcsForView(cursor, scheduleState.view));
+    const importBtn = document.createElement("button");
+    importBtn.type = "button";
+    importBtn.className = "sched-icon-btn";
+    importBtn.textContent = "Import .ics";
+    importBtn.title = "Import events from an .ics file";
+    const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = '.ics'; fileInput.style.display = 'none';
+    importBtn.addEventListener('click', () => { fileInput.click(); });
+    fileInput.addEventListener('change', async (ev) => {
+      const f = fileInput.files && fileInput.files[0]; if (!f) return;
+      const text = await f.text();
+      const parsed = parseIcs(text);
+      if (!parsed || parsed.length === 0) { toast('No events found in .ics'); return; }
+      for (const e of parsed) {
+        const evId = uid();
+        state.events.push({ id: evId, title: e.summary || 'Event', start: e.start, end: e.end, allDay: e.allDay, notes: e.description || '', color: null, ref: null });
+        logEvent('importEvent', { id: evId, title: e.summary || 'Event', start: e.start, end: e.end, allDay: e.allDay });
+      }
+      save(); render(); toast(`Imported ${parsed.length} event(s)`);
+    });
 
     const spacer = document.createElement("div");
     spacer.className = "spacer";
     toolbar.append(nav, spacer, viewSwitcher, exportAllBtn, addBtn);
+    // append hidden file input for import
+    toolbar.appendChild(fileInput);
     root.appendChild(toolbar);
 
     const legend = document.createElement("div");
@@ -4495,6 +4542,18 @@
     el.appendChild(burst);
     setTimeout(() => burst.remove(), 900);
     setTimeout(() => el.classList.remove("just-done"), 720);
+  }
+
+  // application logging
+  function logEvent(action, details) {
+    try {
+      const entry = { ts: new Date().toISOString(), action: action, details: details || {} };
+      if (!Array.isArray(state.appLogs)) state.appLogs = [];
+      state.appLogs.push(entry);
+      // keep logs reasonably bounded (e.g., 5k entries)
+      if (state.appLogs.length > 5000) state.appLogs.shift();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    } catch (e) { console.error('logEvent failed', e); }
   }
 
   function sparkleSvg() {
@@ -5671,6 +5730,9 @@
     exSec.appendChild(note);
     root.appendChild(exSec);
 
+    // application logs viewer
+    renderLogsViewer(root);
+
     // empty-state hint when nothing recorded
     if (entries.length === 0) {
       const hint = document.createElement("section");
@@ -5898,7 +5960,62 @@
     const ics = generateIcsForEvents(evs);
     const stamp = dateStampForFile();
     download(new Blob([ics], { type: 'text/calendar' }), `webshark-schedule-${stamp}.ics`);
+    logEvent('exportIcs', { view, from: new Date(from).toISOString(), to: new Date(to).toISOString(), count: evs.length });
     toast(`Exported ${evs.length} event(s) to .ics`);
+  }
+
+  // minimal ICS parser — extracts VEVENT blocks (DTSTART, DTEND, SUMMARY, DESCRIPTION)
+  function parseIcs(text) {
+    if (!text) return [];
+    const lines = text.split(/\r?\n/).map(l => l.trim());
+    const events = [];
+    let inEvent = false; let buf = [];
+    for (const l of lines) {
+      if (l === 'BEGIN:VEVENT') { inEvent = true; buf = []; continue; }
+      if (l === 'END:VEVENT') { inEvent = false; events.push(buf.slice()); buf = []; continue; }
+      if (inEvent) buf.push(l);
+    }
+    return events.map(lines => {
+      const obj = { raw: lines };
+      for (const ln of lines) {
+        const [k, ...rest] = ln.split(':');
+        const val = rest.join(':');
+        const key = k.split(';')[0];
+        if (key === 'DTSTART') obj.start = parseIcsDate(val);
+        if (key === 'DTEND') obj.end = parseIcsDate(val);
+        if (key === 'SUMMARY') obj.summary = val;
+        if (key === 'DESCRIPTION') obj.description = val;
+      }
+      if (!obj.end && obj.start && obj.start.length === 10) {
+        // all-day single-day event: make end same day
+        obj.end = obj.start;
+      }
+      obj.allDay = obj.start && obj.start.length === 10; // YYYYMMDD
+      return obj;
+    }).map(o => ({ summary: o.summary, description: o.description, allDay: o.allDay, start: convertIcsToIso(o.start, o.allDay), end: convertIcsToIso(o.end, o.allDay) }));
+  }
+  function parseIcsDate(val) {
+    return val && val.split(/[;:]/).pop() || null;
+  }
+  function convertIcsToIso(val, allDay) {
+    if (!val) return null;
+    if (allDay && /^\d{8}$/.test(val)) {
+      // YYYYMMDD -> ISO date start
+      const y = val.slice(0,4), m = val.slice(4,6), d = val.slice(6,8);
+      return new Date(`${y}-${m}-${d}T00:00:00`).toISOString();
+    }
+    // handle YYYYMMDDTHHMMSSZ or without Z
+    const iso = val.replace(/^(\d{8}T\d{6}Z)$/, (m)=> {
+      // convert to ISO format
+      const y = m.slice(0,4), mo = m.slice(4,6), da = m.slice(6,8), hh = m.slice(9,11), mi = m.slice(11,13), ss = m.slice(13,15);
+      return `${y}-${mo}-${da}T${hh}:${mi}:${ss}Z`;
+    });
+    if (/^\d{8}T\d{6}Z$/.test(val)) {
+      const y = val.slice(0,4), mo = val.slice(4,6), da = val.slice(6,8), hh = val.slice(9,11), mi = val.slice(11,13), ss = val.slice(13,15);
+      return new Date(Date.UTC(Number(y), Number(mo)-1, Number(da), Number(hh), Number(mi), Number(ss))).toISOString();
+    }
+    // fallback attempt
+    try { return new Date(val).toISOString(); } catch (e) { return null; }
   }
   function dateStampForFile() {
     const d = new Date();
@@ -5994,6 +6111,124 @@
     lines.push("", `_Generated ${new Date().toLocaleString()}_`);
     download(new Blob([lines.join("\n")], { type: "text/markdown" }), `timeplanner-report-${dateStampForFile()}.md`);
     toast("Exported Markdown report");
+  }
+
+  // -------------------------------------------------------------------------
+  // Logs viewer for Reports
+  // -------------------------------------------------------------------------
+  function renderLogsViewer(root) {
+    if (!Array.isArray(state.appLogs)) state.appLogs = [];
+    const sec = document.createElement('section');
+    sec.dataset.panelId = 'reports-logs';
+    const h = document.createElement('h2');
+    h.textContent = 'Application logs';
+    sec.appendChild(h);
+
+    const controls = document.createElement('div');
+    controls.className = 'logs-controls';
+
+    const q = document.createElement('input'); q.type = 'search'; q.placeholder = 'Search logs (action or details)'; q.className = 'logs-search';
+    const actSel = document.createElement('select'); actSel.className = 'logs-action-filter';
+    const actOpt = document.createElement('option'); actOpt.value = ''; actOpt.textContent = 'All actions'; actSel.appendChild(actOpt);
+    const actions = getLogActions();
+    actions.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; actSel.appendChild(o); });
+
+    const fromInput = document.createElement('input'); fromInput.type = 'date'; fromInput.className = 'logs-date';
+    const toInput = document.createElement('input'); toInput.type = 'date'; toInput.className = 'logs-date';
+    const filterBtn = document.createElement('button'); filterBtn.type = 'button'; filterBtn.textContent = 'Filter'; filterBtn.className = 'file-btn';
+    const clearFilterBtn = document.createElement('button'); clearFilterBtn.type = 'button'; clearFilterBtn.textContent = 'Clear'; clearFilterBtn.className = 'file-btn';
+
+    const exportJsonBtn = document.createElement('button'); exportJsonBtn.type = 'button'; exportJsonBtn.className = 'file-btn'; exportJsonBtn.textContent = 'Download JSON';
+    const exportCsvBtn = document.createElement('button'); exportCsvBtn.type = 'button'; exportCsvBtn.className = 'file-btn'; exportCsvBtn.textContent = 'Download CSV';
+    const clearBtn = document.createElement('button'); clearBtn.type = 'button'; clearBtn.className = 'danger'; clearBtn.textContent = 'Clear logs';
+
+    controls.append(q, actSel, fromInput, toInput, filterBtn, clearFilterBtn, exportJsonBtn, exportCsvBtn, clearBtn);
+    sec.appendChild(controls);
+
+    const listWrap = document.createElement('div'); listWrap.className = 'logs-list';
+    sec.appendChild(listWrap);
+    root.appendChild(sec);
+
+    let page = 0; const PAGE_SIZE = 100;
+    function renderPage() {
+      const filters = {
+        q: q.value.trim(),
+        action: actSel.value || null,
+        from: fromInput.value || null,
+        to: toInput.value || null,
+      };
+      const filtered = filterLogs(filters);
+      listWrap.innerHTML = '';
+      const start = page * PAGE_SIZE; const end = Math.min(filtered.length, start + PAGE_SIZE);
+      const pageItems = filtered.slice(start, end);
+      const meta = document.createElement('div'); meta.className = 'logs-meta'; meta.textContent = `Showing ${start+1}-${end} of ${filtered.length} log entries`;
+      listWrap.appendChild(meta);
+      const ul = document.createElement('div'); ul.className = 'logs-rows';
+      pageItems.forEach(it => {
+        const row = document.createElement('div'); row.className = 'log-row';
+        const ts = document.createElement('div'); ts.className = 'log-ts'; ts.textContent = new Date(it.ts).toLocaleString();
+        const act = document.createElement('div'); act.className = 'log-act'; act.textContent = it.action;
+        const det = document.createElement('div'); det.className = 'log-details'; det.textContent = (typeof it.details === 'object') ? JSON.stringify(it.details) : String(it.details);
+        row.append(ts, act, det);
+        ul.appendChild(row);
+      });
+      listWrap.appendChild(ul);
+      // pager
+      const pager = document.createElement('div'); pager.className = 'logs-pager';
+      if (start > 0) {
+        const prev = document.createElement('button'); prev.type='button'; prev.textContent='Prev'; prev.className='file-btn'; prev.addEventListener('click', ()=>{ page--; renderPage(); }); pager.appendChild(prev);
+      }
+      if (end < filtered.length) {
+        const next = document.createElement('button'); next.type='button'; next.textContent='Next'; next.className='file-btn'; next.addEventListener('click', ()=>{ page++; renderPage(); }); pager.appendChild(next);
+      }
+      listWrap.appendChild(pager);
+    }
+
+    filterBtn.addEventListener('click', () => { page = 0; renderPage(); });
+    clearFilterBtn.addEventListener('click', () => { q.value=''; actSel.value=''; fromInput.value=''; toInput.value=''; page=0; renderPage(); });
+    exportJsonBtn.addEventListener('click', () => { const filters = { q: q.value.trim(), action: actSel.value || null, from: fromInput.value || null, to: toInput.value || null }; const data = filterLogs(filters); download(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `app-logs-${dateStampForFile()}.json`); });
+    exportCsvBtn.addEventListener('click', () => { const filters = { q: q.value.trim(), action: actSel.value || null, from: fromInput.value || null, to: toInput.value || null }; const data = filterLogs(filters); exportLogsCsv(data); });
+    clearBtn.addEventListener('click', () => { if (!confirm('Clear all application logs?')) return; state.appLogs = []; save(); render(); toast('Cleared logs'); logEvent('clearLogs', {}); });
+
+    // initial render
+    renderPage();
+  }
+
+  function getLogActions() {
+    if (!Array.isArray(state.appLogs)) return [];
+    const s = new Set();
+    for (const l of state.appLogs) if (l && l.action) s.add(l.action);
+    return [...s].sort();
+  }
+
+  function filterLogs(filters) {
+    if (!Array.isArray(state.appLogs)) state.appLogs = [];
+    const out = state.appLogs.filter(l => {
+      if (!l) return false;
+      if (filters.action && l.action !== filters.action) return false;
+      if (filters.q) {
+        const q = filters.q.toLowerCase();
+        if (!(String(l.action).toLowerCase().includes(q) || JSON.stringify(l.details || {}).toLowerCase().includes(q))) return false;
+      }
+      if (filters.from) {
+        const fromMs = new Date(filters.from + 'T00:00:00').getTime();
+        if (new Date(l.ts).getTime() < fromMs) return false;
+      }
+      if (filters.to) {
+        const toMs = new Date(filters.to + 'T23:59:59').getTime();
+        if (new Date(l.ts).getTime() > toMs) return false;
+      }
+      return true;
+    });
+    // newest first
+    return out.slice().reverse();
+  }
+
+  function exportLogsCsv(logs) {
+    const rows = [['ts','action','details']];
+    for (const l of logs) rows.push([l.ts, l.action, JSON.stringify(l.details || {})]);
+    const text = rows.map(r => r.map(csvQuote).join(',')).join('\n');
+    download(new Blob([text], { type: 'text/csv' }), `app-logs-${dateStampForFile()}.csv`);
   }
   function importJsonFile(file) {
     const reader = new FileReader();
@@ -7865,11 +8100,23 @@
     }
   }
 
+  // loading indicator helpers — toggles `.loading` on the documentElement
+  let __loadingCount = 0;
+  function startLoading() {
+    __loadingCount = Math.max(0, __loadingCount) + 1;
+    document.documentElement.classList.add('loading');
+  }
+  function stopLoading() {
+    __loadingCount = Math.max(0, __loadingCount - 1);
+    if (__loadingCount <= 0) { document.documentElement.classList.remove('loading'); __loadingCount = 0; }
+  }
+
   function cloudPush() {
     if (!sb || !currentUser || cloudPulling) return;
     clearTimeout(cloudPushTimer);
     setSyncStatus("syncing", "Syncing…");
     cloudPushTimer = setTimeout(async () => {
+      startLoading();
       try {
         const { error } = await sb.from("user_state").upsert({
           user_id: currentUser.id,
@@ -7885,6 +8132,8 @@
       } catch (err) {
         console.error("Cloud push failed:", err);
         setSyncStatus("error", "Sync failed");
+      } finally {
+        stopLoading();
       }
     }, 800);
   }
@@ -8137,6 +8386,7 @@
   async function cloudPull() {
     if (!sb || !currentUser) return;
     cloudPulling = true;
+    startLoading();
     try {
       const { data, error } = await sb.from("user_state")
         .select("state, updated_at").eq("user_id", currentUser.id).maybeSingle();
@@ -8186,6 +8436,7 @@
       toast("Couldn't load saved data");
     } finally {
       cloudPulling = false;
+      stopLoading();
     }
   }
 
@@ -8194,19 +8445,24 @@
       alert("Cloud sync isn't configured.\n\nEdit index.html and set SUPABASE_URL and SUPABASE_ANON_KEY near the top of the script.");
       return;
     }
-    const { error } = await sb.auth.signInWithOAuth({
+    startLoading();
+    logEvent('signInAttempt', {});
+    try {
+      const { error } = await sb.auth.signInWithOAuth({
       provider: "github",
       // strip any hash (#/plan, #/p/<id>, …) — OAuth appends #access_token=… and a
       // pre-existing hash mangles the fragment so the session can't be parsed back.
       options: { redirectTo: window.location.origin + window.location.pathname },
-    });
-    if (error) alert("Sign-in failed: " + error.message);
+      });
+      if (error) { logEvent('signInError', { err: error.message }); alert("Sign-in failed: " + error.message); }
+    } finally { stopLoading(); }
   }
 
   async function signOut() {
     if (!sb) return;
     if (!confirm("Sign out? Your data is saved in the cloud and will be restored when you sign back in.")) return;
     await sb.auth.signOut();
+    logEvent('signOut', {});
   }
 
   // Clear the app back to empty when the session ends (explicit logout OR token
