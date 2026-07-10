@@ -2130,6 +2130,15 @@
     text-align: right; padding: 0 0.4rem 0 0;
     transform: translateY(-0.45em);
   }
+  .sched-half-label {
+    position: sticky; left: 0; z-index: 1;
+    height: calc(var(--sched-hour-h) / 2);
+    border-top: 1px solid rgba(0,0,0,0.02);
+    background: transparent;
+    font-size: 0.64rem; color: var(--muted);
+    text-align: right; padding: 0 0.4rem 0 0;
+    transform: translateY(-0.25em);
+  }
   .sched-day-col {
     position: relative;
     border-left: 1px solid var(--border);
@@ -2343,7 +2352,7 @@
             <circle cx="12" cy="12" r="0.7" fill="currentColor" stroke="none"/>
           </svg>
         </span>
-        <span class="brand-text">WebShark Manager<span class="brand-dot">.</span><span class="brand-ai">ai</span></span>
+        <span class="brand-text">WebShark Manager<span class="brand-dot">.</span><span class="brand-ai">AI</span></span>
       </a>
       <div class="header-right">
         <button class="header-link theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme"></button>
@@ -3615,6 +3624,29 @@
     });
     actions.append(saveBtn, cancelBtn, deleteBtn);
 
+    // export buttons for single event
+    if (ev) {
+      const gBtn = document.createElement("button");
+      gBtn.type = "button";
+      gBtn.className = "sched-icon-btn";
+      gBtn.textContent = "Open in Google";
+      gBtn.title = "Open this event in Google Calendar (create)";
+      gBtn.addEventListener("click", () => {
+        const url = googleEventEditUrl(ev);
+        window.open(url, "_blank");
+      });
+      const icsBtn = document.createElement("button");
+      icsBtn.type = "button";
+      icsBtn.className = "sched-icon-btn";
+      icsBtn.textContent = "Download .ics";
+      icsBtn.title = "Download this event as an .ics file";
+      icsBtn.addEventListener("click", () => {
+        const ics = generateIcsForEvents([ev]);
+        download(new Blob([ics], { type: "text/calendar" }), `event-${ev.id}.ics`);
+      });
+      actions.append(gBtn, icsBtn);
+    }
+
     body.append(titleLabel, dateLabel, allDayLabel, timesWrap, notesLabel, refLabel, error, actions);
     modal.appendChild(body);
     overlay.appendChild(modal);
@@ -3707,14 +3739,21 @@
     addBtn.textContent = "+ New event";
     addBtn.addEventListener("click", () => openScheduleEditor(null, cursor));
 
+    const exportAllBtn = document.createElement("button");
+    exportAllBtn.type = "button";
+    exportAllBtn.className = "sched-icon-btn";
+    exportAllBtn.textContent = "Export .ics";
+    exportAllBtn.title = "Download visible events as an .ics file (Apple/Google import)";
+    exportAllBtn.addEventListener("click", () => scheduleExportIcsForView(cursor, scheduleState.view));
+
     const spacer = document.createElement("div");
     spacer.className = "spacer";
-    toolbar.append(nav, spacer, viewSwitcher, addBtn);
+    toolbar.append(nav, spacer, viewSwitcher, exportAllBtn, addBtn);
     root.appendChild(toolbar);
 
     const legend = document.createElement("div");
     legend.className = "sched-legend";
-    legend.textContent = "Click an event to edit it.";
+    legend.innerHTML = `Click an event to edit it. Use <strong>Export .ics</strong> to download visible events, or open an event in Google via the editor.`;
     root.appendChild(legend);
 
     const body = document.createElement("div");
@@ -3768,10 +3807,19 @@
       grid.appendChild(head);
     });
 
-    for (let hour = 0; hour < 24; hour += 1) {
+    // when in day view, render half-hour rows for finer labels
+    const slots = scheduleState.view === "day" ? 24 * 2 : 24;
+    for (let s = 0; s < slots; s += 1) {
+      const isHalf = scheduleState.view === "day" && (s % 2 === 1);
       const label = document.createElement("div");
-      label.className = "sched-hour-label";
-      label.textContent = scheduleState.view === "day" ? `${hour}:00` : `${hour}:00`;
+      label.className = isHalf ? "sched-half-label" : "sched-hour-label";
+      if (isHalf) {
+        const hr = Math.floor(s / 2);
+        label.textContent = `${hr}:30`;
+      } else {
+        const hr = Math.floor(s / (scheduleState.view === "day" ? 2 : 1));
+        label.textContent = `${hr}:00`;
+      }
       grid.appendChild(label);
       days.forEach(() => {
         const col = document.createElement("div");
@@ -4344,6 +4392,13 @@
 
     const dot = document.createElement("span");
     dot.className = "dot"; dot.style.background = a.color;
+    dot.style.cursor = "pointer";
+    dot.title = "Change color";
+    dot.addEventListener("click", (e) => { e.stopPropagation();
+      showColorPopover(dot, ACTIVITY_PALETTE, a.color, (c) => {
+        dot.style.background = c; updateActivity(a.id, { color: c });
+      });
+    });
 
     const isExpanded = expandedTaskId === a.id || editingTaskId === a.id;
     if (isExpanded) row.classList.add("expanded");
@@ -4578,6 +4633,13 @@
     nameI.type = "text"; nameI.value = a.name;
     nameL.appendChild(nameI);
 
+    // color picker for activity
+    let actColor = a.color || ACTIVITY_PALETTE[0];
+    const colorAL = document.createElement("label");
+    colorAL.textContent = "Color";
+    const colorPickerA = colorSwatches(ACTIVITY_PALETTE, actColor, (c) => { actColor = c; });
+    colorAL.appendChild(colorPickerA);
+
     const priL = document.createElement("label");
     priL.textContent = "Priority";
     const priI = document.createElement("select");
@@ -4615,6 +4677,7 @@
     saveBtn.addEventListener("click", () => {
       updateActivity(a.id, {
         name: (nameI.value || "").trim() || a.name,
+        color: actColor,
         priority: priI.value,
         notes: notesI.value,
         dependencies: depsBuffer,
@@ -4628,7 +4691,7 @@
     cancelBtn.addEventListener("click", () => { editingTaskId = null; render(); });
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, priL, notesL, depsEditor, imgL, rowActs);
+    form.append(nameL, colorAL, priL, notesL, depsEditor, imgL, rowActs);
     return form;
   }
 
@@ -4797,6 +4860,13 @@
     nameI.type = "text"; nameI.value = p.name;
     nameL.appendChild(nameI);
 
+    // color picker for project
+    let projColor = p.color || PROJECT_PALETTE[0];
+    const colorPL = document.createElement("label");
+    colorPL.textContent = "Color";
+    const colorPickerP = colorSwatches(PROJECT_PALETTE, projColor, (c) => { projColor = c; });
+    colorPL.appendChild(colorPickerP);
+
     const notesL = document.createElement("label");
     notesL.className = "full";
     notesL.textContent = "Notes";
@@ -4807,6 +4877,13 @@
 
     let depsBuffer = [...(p.dependencies || [])];
     const depsEditor = buildDependencyEditor("portfolio", p.id, depsBuffer, (next) => { depsBuffer = next; });
+
+    // color picker
+    let colorValue = p.color || PORTFOLIO_PALETTE[0];
+    const colorL = document.createElement("label");
+    colorL.textContent = "Color";
+    const colorPicker = colorSwatches(PORTFOLIO_PALETTE, colorValue, (c) => { colorValue = c; });
+    colorL.appendChild(colorPicker);
 
     const rowActs = document.createElement("div");
     rowActs.className = "row-actions";
@@ -4825,7 +4902,7 @@
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, notesL, depsEditor, rowActs);
+    form.append(nameL, colorL, notesL, depsEditor, rowActs);
 
     const existing = heroEl.querySelector(".meta-form");
     if (existing) existing.remove();
@@ -4888,12 +4965,13 @@
     cancelBtn.textContent = "Cancel";
     const moveBtn = document.createElement("button");
     moveBtn.textContent = "Move portfolio…";
-    moveBtn.addEventListener("click", () => {
-      const others = state.portfolios.filter(x => x.id !== p.portfolioId);
-      if (others.length === 0) { alert("No other portfolio to move to."); return; }
-      const labels = others.map((x, i) => `${i + 1}. ${x.name}`).join("\n");
-      const pick = prompt(`Move to which portfolio?\n${labels}\n\nEnter the number:`);
-      const idx = parseInt(pick, 10);
+    saveBtn.addEventListener("click", () => {
+      updatePortfolio(p.id, {
+        name: (nameI.value || "").trim() || p.name,
+        color: colorValue,
+        notes: notesI.value,
+        dependencies: depsBuffer,
+      });
       if (!isNaN(idx) && idx >= 1 && idx <= others.length) {
         updateProject(p.id, { portfolioId: others[idx - 1].id });
         navigate({ name: "project", id: p.id });
@@ -4908,6 +4986,7 @@
       const becameDone = stI.value === "done" && p.status !== "done";
       updateProject(p.id, {
         name: (nameI.value || "").trim() || p.name,
+        color: projColor,
         status: stI.value,
         deadline: dueI.value ? dateInputToIso(dueI.value) : null,
         estimatedHours: est === "" ? null : Number(est),
@@ -4920,7 +4999,7 @@
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn, moveBtn);
 
-    form.append(nameL, stL, dueL, estL, descL, depsEditor, rowActs);
+    form.append(nameL, colorPL, stL, dueL, estL, descL, depsEditor, rowActs);
 
     // remove existing meta/desc/progress nodes and append form instead
     const existing = heroEl.querySelector(".meta-form");
@@ -5090,6 +5169,19 @@
     top.className = "card-top";
     const dot = document.createElement("span");
     dot.className = "dot"; dot.style.background = color;
+    dot.style.cursor = "pointer";
+    dot.title = "Change color";
+    dot.addEventListener("click", (e) => { e.stopPropagation();
+      showColorPopover(dot, PORTFOLIO_PALETTE, color, (c) => {
+        dot.style.background = c;
+        // find portfolio by title match (best-effort); safer APIs exist elsewhere
+        const pf = state.portfolios.find(p => p.name === title || p.id === highlightId);
+        if (pf) updatePortfolio(pf.id, { color: c });
+        else {
+          // fallback: apply visually
+        }
+      });
+    });
     const t = document.createElement("span");
     t.className = "title"; t.textContent = title;
     const r = document.createElement("span");
@@ -5742,6 +5834,71 @@
     document.body.appendChild(a);
     a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function toIcsDateTime(iso, allDay) {
+    const d = new Date(iso);
+    const pad2 = (n) => String(n).padStart(2, "0");
+    if (allDay) {
+      return `${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}`;
+    }
+    return `${d.getUTCFullYear()}${pad2(d.getUTCMonth()+1)}${pad2(d.getUTCDate())}T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}${pad2(d.getUTCSeconds())}Z`;
+  }
+  function generateIcsForEvents(events) {
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//WebShark Manager//EN",
+    ];
+    const now = new Date();
+    for (const ev of events) {
+      const uid = ev.id || (Math.random().toString(36).slice(2));
+      const dtstamp = toIcsDateTime(now.toISOString(), false);
+      const dtstart = toIcsDateTime(ev.start, !!ev.allDay);
+      const dtend = toIcsDateTime(ev.end, !!ev.allDay);
+      lines.push("BEGIN:VEVENT");
+      lines.push(`UID:${uid}`);
+      lines.push(`DTSTAMP:${dtstamp}`);
+      if (ev.allDay) {
+        lines.push(`DTSTART;VALUE=DATE:${dtstart}`);
+        lines.push(`DTEND;VALUE=DATE:${dtend}`);
+      } else {
+        lines.push(`DTSTART:${dtstart}`);
+        lines.push(`DTEND:${dtend}`);
+      }
+      lines.push(`SUMMARY:${(ev.title || '').replace(/\n/g, ' ' )}`);
+      if (ev.notes) lines.push(`DESCRIPTION:${(ev.notes || '').replace(/\n/g, ' ')}`);
+      lines.push("END:VEVENT");
+    }
+    lines.push("END:VCALENDAR");
+    return lines.join("\r\n");
+  }
+  function googleEventEditUrl(ev) {
+    const start = toIcsDateTime(ev.start, !!ev.allDay);
+    const end = toIcsDateTime(ev.end, !!ev.allDay);
+    const params = new URLSearchParams();
+    params.set('text', ev.title || 'Event');
+    params.set('dates', `${start}/${end}`);
+    if (ev.notes) params.set('details', ev.notes);
+    return `https://calendar.google.com/calendar/u/0/r/eventedit?${params.toString()}`;
+  }
+  function scheduleExportIcsForView(cursor, view) {
+    let from = startOfDay(cursor).getTime();
+    let to = from + MS_DAY;
+    if (view === 'week') {
+      const days = scheduleWeekDays(cursor);
+      from = startOfDay(days[0]).getTime();
+      to = startOfDay(days[days.length-1]).getTime() + MS_DAY;
+    } else if (view === 'month') {
+      const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+      const last = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 0);
+      from = startOfDay(first).getTime();
+      to = startOfDay(last).getTime() + MS_DAY;
+    }
+    const evs = scheduleEventsInRange(from, to);
+    const ics = generateIcsForEvents(evs);
+    const stamp = dateStampForFile();
+    download(new Blob([ics], { type: 'text/calendar' }), `webshark-schedule-${stamp}.ics`);
+    toast(`Exported ${evs.length} event(s) to .ics`);
   }
   function dateStampForFile() {
     const d = new Date();
@@ -7569,6 +7726,37 @@
       wrap.appendChild(b);
     });
     return wrap;
+  }
+  // simple color swatches picker for portfolio/project/activity color
+  function colorSwatches(palette, current, onPick) {
+    const wrap = document.createElement("div");
+    wrap.className = "accent-swatches";
+    palette.forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "accent-swatch" + (c === current ? " active" : "");
+      b.style.background = c;
+      b.title = c;
+      b.setAttribute("aria-label", c);
+      b.addEventListener("click", () => { if (c !== current) onPick(c); });
+      wrap.appendChild(b);
+    });
+    return wrap;
+  }
+
+  function showColorPopover(anchorEl, palette, current, onPick) {
+    // remove existing
+    const existing = document.querySelector('.color-popover'); if (existing) existing.remove();
+    const pop = document.createElement('div'); pop.className = 'color-popover';
+    pop.style.position = 'absolute'; pop.style.zIndex = 9999; pop.style.padding = '6px'; pop.style.borderRadius = '6px'; pop.style.background = 'var(--card)'; pop.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+    const sw = colorSwatches(palette, current, (c) => { onPick(c); pop.remove(); });
+    pop.appendChild(sw);
+    document.body.appendChild(pop);
+    const r = anchorEl.getBoundingClientRect();
+    pop.style.left = (window.scrollX + r.right + 8) + 'px';
+    pop.style.top = (window.scrollY + r.top) + 'px';
+    function onDocClick(e) { if (!pop.contains(e.target) && e.target !== anchorEl) { pop.remove(); document.removeEventListener('click', onDocClick); } }
+    setTimeout(() => document.addEventListener('click', onDocClick), 0);
   }
   function toggleControl(checked, onChange) {
     const label = document.createElement("label");
