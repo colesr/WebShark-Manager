@@ -3429,6 +3429,426 @@
   }
 
   // -------- Home view (portfolios)
+  function openScheduleEditor(eventId, initialDate) {
+    if (scheduleEditorEl) {
+      scheduleEditorEl.remove();
+      scheduleEditorEl = null;
+    }
+
+    const ev = eventId ? scheduleEventById(eventId) : null;
+    const overlay = document.createElement("div");
+    overlay.className = "settings-overlay";
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeScheduleEditor(); });
+
+    const modal = document.createElement("div");
+    modal.className = "settings-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", ev ? "Edit schedule event" : "New schedule event");
+
+    const top = document.createElement("div");
+    top.className = "settings-top";
+    const heading = document.createElement("h2");
+    heading.textContent = ev ? "Edit event" : "New event";
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "settings-close";
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.innerHTML = "&times;";
+    closeBtn.addEventListener("click", closeScheduleEditor);
+    top.append(heading, closeBtn);
+    modal.appendChild(top);
+
+    const body = document.createElement("div");
+    body.className = "settings-body";
+
+    const titleLabel = document.createElement("label");
+    titleLabel.textContent = "Title";
+    const titleInput = document.createElement("input");
+    titleInput.type = "text";
+    titleInput.value = ev ? ev.title : "";
+    titleLabel.appendChild(titleInput);
+
+    const dateLabel = document.createElement("label");
+    dateLabel.textContent = "Date";
+    const dateInput = document.createElement("input");
+    dateInput.type = "date";
+    dateInput.value = ev ? isoToDateInput(ev.start) : (initialDate ? isoToDateInput(initialDate.toISOString()) : isoToDateInput(new Date().toISOString()));
+    dateLabel.appendChild(dateInput);
+
+    const allDayLabel = document.createElement("label");
+    allDayLabel.className = "sched-check";
+    const allDayInput = document.createElement("input");
+    allDayInput.type = "checkbox";
+    allDayInput.checked = ev ? !!ev.allDay : false;
+    allDayLabel.appendChild(allDayInput);
+    allDayLabel.append("All-day event");
+
+    const timesWrap = document.createElement("div");
+    timesWrap.className = "sched-form-grid row2";
+    const startLabel = document.createElement("label");
+    startLabel.textContent = "Start";
+    const startInput = document.createElement("input");
+    startInput.type = "time";
+    startInput.value = ev ? fmtClock(ev.start) : "09:00";
+    startLabel.appendChild(startInput);
+    const endLabel = document.createElement("label");
+    endLabel.textContent = "End";
+    const endInput = document.createElement("input");
+    endInput.type = "time";
+    endInput.value = ev ? fmtClock(ev.end) : "10:00";
+    endLabel.appendChild(endInput);
+    timesWrap.append(startLabel, endLabel);
+
+    const notesLabel = document.createElement("label");
+    notesLabel.className = "full";
+    notesLabel.textContent = "Notes";
+    const notesInput = document.createElement("textarea");
+    notesInput.value = ev ? ev.notes || "" : "";
+    notesLabel.appendChild(notesInput);
+
+    const refLabel = document.createElement("label");
+    refLabel.textContent = "Link to task";
+    const refSelect = document.createElement("select");
+    const noneOpt = document.createElement("option");
+    noneOpt.value = "";
+    noneOpt.textContent = "None";
+    refSelect.appendChild(noneOpt);
+    for (const a of state.activities) {
+      const opt = document.createElement("option");
+      opt.value = a.id;
+      const project = projectById(a.projectId);
+      opt.textContent = `${a.name}${project ? " — " + project.name : ""}`;
+      if (ev && ev.ref && ev.ref.kind === "activity" && ev.ref.id === a.id) opt.selected = true;
+      refSelect.appendChild(opt);
+    }
+    refLabel.appendChild(refSelect);
+
+    const error = document.createElement("div");
+    error.className = "err";
+
+    function refreshTimeInputs() {
+      const disabled = allDayInput.checked;
+      startInput.disabled = disabled;
+      endInput.disabled = disabled;
+      startInput.style.opacity = disabled ? "0.6" : "1";
+      endInput.style.opacity = disabled ? "0.6" : "1";
+    }
+    allDayInput.addEventListener("change", refreshTimeInputs);
+    refreshTimeInputs();
+
+    const actions = document.createElement("div");
+    actions.className = "sched-form-actions";
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "primary";
+    saveBtn.textContent = "Save";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "danger";
+    deleteBtn.textContent = "Delete";
+    if (!ev) deleteBtn.style.display = "none";
+
+    saveBtn.addEventListener("click", () => {
+      const title = titleInput.value.trim() || "Event";
+      const dateStr = dateInput.value;
+      if (!dateStr) { error.textContent = "Pick a date."; return; }
+      const allDay = allDayInput.checked;
+      let start = allDay ? "00:00" : startInput.value;
+      let end = allDay ? "23:59" : endInput.value;
+      if (!allDay && (!start || !end)) { error.textContent = "Pick both start and end times."; return; }
+      const startIso = combineDateTime(dateStr, start);
+      const endIso = combineDateTime(dateStr, end);
+      if (!allDay && new Date(endIso).getTime() < new Date(startIso).getTime()) {
+        error.textContent = "End must be at or after start.";
+        return;
+      }
+      const ref = refSelect.value ? { kind: "activity", id: refSelect.value } : null;
+      if (ev) {
+        Object.assign(ev, {
+          title,
+          start: startIso,
+          end: endIso,
+          allDay,
+          notes: notesInput.value.trim(),
+          ref,
+        });
+      } else {
+        state.events.push({
+          id: uid(),
+          title,
+          start: startIso,
+          end: endIso,
+          allDay,
+          notes: notesInput.value.trim(),
+          color: null,
+          ref,
+        });
+      }
+      save();
+      closeScheduleEditor();
+      render();
+    });
+    cancelBtn.addEventListener("click", closeScheduleEditor);
+    deleteBtn.addEventListener("click", () => {
+      if (!ev) return;
+      if (!confirm("Delete this event?")) return;
+      state.events = state.events.filter(item => item.id !== ev.id);
+      save();
+      closeScheduleEditor();
+      render();
+    });
+    actions.append(saveBtn, cancelBtn, deleteBtn);
+
+    body.append(titleLabel, dateLabel, allDayLabel, timesWrap, notesLabel, refLabel, error, actions);
+    modal.appendChild(body);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    scheduleEditorEl = overlay;
+    document.addEventListener("keydown", onScheduleKeydown, true);
+    titleInput.focus();
+
+    function onScheduleKeydown(e) {
+      if (e.key === "Escape") closeScheduleEditor();
+    }
+
+    function closeScheduleEditor() {
+      if (!scheduleEditorEl) return;
+      document.removeEventListener("keydown", onScheduleKeydown, true);
+      scheduleEditorEl.classList.add("closing");
+      const el = scheduleEditorEl;
+      scheduleEditorEl = null;
+      setTimeout(() => el.remove(), 180);
+    }
+  }
+
+  function closeScheduleEditor() {
+    if (!scheduleEditorEl) return;
+    scheduleEditorEl.classList.add("closing");
+    const el = scheduleEditorEl;
+    scheduleEditorEl = null;
+    setTimeout(() => el.remove(), 180);
+  }
+
+  function renderScheduleView(root) {
+    const cursor = scheduleCursorDate();
+    const hero = document.createElement("div");
+    hero.className = "hero";
+    const top = document.createElement("div");
+    top.className = "hero-top";
+    const title = document.createElement("h1");
+    title.textContent = "Schedule";
+    title.style.flex = "1";
+    title.style.cursor = "default";
+    top.appendChild(title);
+    hero.appendChild(top);
+
+    const meta = document.createElement("div");
+    meta.className = "meta-row";
+    meta.innerHTML = `<span>View and manage your calendar events in daily, weekly, or monthly mode.</span>`;
+    hero.appendChild(meta);
+    root.appendChild(hero);
+
+    const toolbar = document.createElement("div");
+    toolbar.className = "sched-toolbar";
+    const nav = document.createElement("div");
+    nav.className = "nav-group";
+    const prevBtn = document.createElement("button");
+    prevBtn.type = "button";
+    prevBtn.className = "sched-icon-btn";
+    prevBtn.textContent = "←";
+    prevBtn.title = "Previous";
+    prevBtn.addEventListener("click", () => scheduleAdjustCursor(-1));
+    const nextBtn = document.createElement("button");
+    nextBtn.type = "button";
+    nextBtn.className = "sched-icon-btn";
+    nextBtn.textContent = "→";
+    nextBtn.title = "Next";
+    nextBtn.addEventListener("click", () => scheduleAdjustCursor(1));
+    const rangeLabel = document.createElement("div");
+    rangeLabel.className = "range-label";
+    rangeLabel.textContent = scheduleRangeLabel();
+    nav.append(prevBtn, rangeLabel, nextBtn);
+
+    const viewSwitcher = segControl(scheduleState.view, [
+      { value: "day", label: "Day" },
+      { value: "week", label: "Week" },
+      { value: "month", label: "Month" },
+    ], scheduleSetView);
+    viewSwitcher.classList.add("nav-group");
+
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "sched-icon-btn primary";
+    addBtn.textContent = "+ New event";
+    addBtn.addEventListener("click", () => openScheduleEditor(null, cursor));
+
+    const spacer = document.createElement("div");
+    spacer.className = "spacer";
+    toolbar.append(nav, spacer, viewSwitcher, addBtn);
+    root.appendChild(toolbar);
+
+    const legend = document.createElement("div");
+    legend.className = "sched-legend";
+    legend.textContent = "Click an event to edit it.";
+    root.appendChild(legend);
+
+    const body = document.createElement("div");
+    body.className = "sched-grid-wrap";
+    if (scheduleState.view === "month") {
+      renderScheduleMonth(body, cursor);
+    } else {
+      renderScheduleTimeGrid(body, cursor, scheduleState.view);
+    }
+    root.appendChild(body);
+  }
+
+  function renderScheduleTimeGrid(root, cursor, mode) {
+    const days = mode === "day" ? [cursor] : scheduleWeekDays(cursor);
+    const todayKey = startOfDay(new Date()).getTime();
+    const alldayRow = document.createElement("div");
+    alldayRow.className = "sched-allday-row " + mode;
+    const labelCell = document.createElement("div");
+    labelCell.className = "sched-allday-label";
+    labelCell.textContent = "All day";
+    alldayRow.appendChild(labelCell);
+    days.forEach((day) => {
+      const cell = document.createElement("div");
+      cell.className = "sched-allday-cell";
+      if (startOfDay(day).getTime() === todayKey) cell.classList.add("today");
+      const events = scheduleEventsForDay(day).filter(ev => ev.allDay);
+      events.forEach((ev) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "sched-event all-day-chip";
+        chip.style.background = scheduleEventColor(ev);
+        chip.textContent = ev.title;
+        chip.title = `${ev.title} — All day`;
+        chip.addEventListener("click", (e) => { e.stopPropagation(); openScheduleEditor(ev.id, day); });
+        cell.appendChild(chip);
+      });
+      alldayRow.appendChild(cell);
+    });
+    root.appendChild(alldayRow);
+
+    const grid = document.createElement("div");
+    grid.className = "sched-time-grid " + mode;
+    const corner = document.createElement("div");
+    corner.className = "sched-corner";
+    grid.appendChild(corner);
+    days.forEach((day) => {
+      const head = document.createElement("div");
+      head.className = "sched-day-head" + (startOfDay(day).getTime() === todayKey ? " today" : "");
+      const dow = day.toLocaleDateString(undefined, { weekday: "short" });
+      head.innerHTML = `<span>${escapeHtml(dow)}</span><span class="dnum">${day.getDate()}</span>`;
+      grid.appendChild(head);
+    });
+
+    for (let hour = 0; hour < 24; hour += 1) {
+      const label = document.createElement("div");
+      label.className = "sched-hour-label";
+      label.textContent = scheduleState.view === "day" ? `${hour}:00` : `${hour}:00`;
+      grid.appendChild(label);
+      days.forEach(() => {
+        const col = document.createElement("div");
+        col.className = "sched-day-col";
+        grid.appendChild(col);
+      });
+    }
+
+    const dayCols = Array.from(grid.querySelectorAll(".sched-day-col"));
+
+    // replace placeholder day columns with actual columns for event rendering
+    for (let i = 0; i < days.length; i += 1) {
+      const day = days[i];
+      const dayStart = startOfDay(day).getTime();
+      const dayEnd = dayStart + MS_DAY;
+      const dayCol = dayCols[i];
+      const events = scheduleEventsInRange(dayStart, dayEnd).filter(ev => !ev.allDay);
+      events.forEach((ev) => {
+        const evStart = Math.max(new Date(ev.start).getTime(), dayStart);
+        const evEnd = Math.min(new Date(ev.end).getTime(), dayEnd);
+        const top = ((evStart - dayStart) / MS_HOUR) * 48;
+        const height = Math.max(22, ((evEnd - evStart) / MS_HOUR) * 48);
+        const block = document.createElement("button");
+        block.type = "button";
+        block.className = "sched-event";
+        block.style.top = `${top}px`;
+        block.style.height = `${height}px`;
+        block.style.background = scheduleEventColor(ev);
+        block.innerHTML = `<span class="ev-title">${escapeHtml(ev.title)}</span><span class="ev-time">${ev.allDay ? "All day" : fmtClock(ev.start) + " – " + fmtClock(ev.end)}</span>`;
+        block.addEventListener("click", (e) => { e.stopPropagation(); openScheduleEditor(ev.id, day); });
+        dayCol.appendChild(block);
+      });
+      const now = Date.now();
+      if (now >= dayStart && now < dayEnd) {
+        const nowLine = document.createElement("div");
+        nowLine.className = "sched-now-line";
+        nowLine.style.top = `${((now - dayStart) / MS_HOUR) * 48}px`;
+        dayCol.appendChild(nowLine);
+      }
+    }
+
+    root.appendChild(grid);
+  }
+
+  function renderScheduleMonth(root, cursor) {
+    const firstOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+    const firstDay = startOfWeek(firstOfMonth);
+    const cells = Array.from({ length: 42 }, (_, index) => {
+      const d = new Date(firstDay);
+      d.setDate(firstDay.getDate() + index);
+      return d;
+    });
+
+    const monthGrid = document.createElement("div");
+    monthGrid.className = "sched-month";
+    const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const sundayStart = (state.settings && state.settings.weekStart) === "sunday";
+    const orderedDayNames = sundayStart ? dayNames : ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    orderedDayNames.forEach((name) => {
+      const head = document.createElement("div");
+      head.className = "mhead";
+      head.textContent = name;
+      monthGrid.appendChild(head);
+    });
+
+    const todayKey = startOfDay(new Date()).getTime();
+    cells.forEach((day) => {
+      const cell = document.createElement("div");
+      cell.className = "mcell";
+      if (day.getMonth() !== cursor.getMonth()) cell.classList.add("out");
+      if (startOfDay(day).getTime() === todayKey) cell.classList.add("today");
+      const label = document.createElement("div");
+      label.className = "mday";
+      label.textContent = String(day.getDate());
+      cell.appendChild(label);
+      const events = scheduleEventsForDay(day).slice(0, 3);
+      events.forEach((ev) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "mev";
+        btn.style.background = scheduleEventColor(ev);
+        btn.textContent = ev.title;
+        btn.title = `${ev.title} • ${fmtClock(ev.start)} – ${fmtClock(ev.end)}`;
+        btn.addEventListener("click", (e) => { e.stopPropagation(); openScheduleEditor(ev.id, day); });
+        cell.appendChild(btn);
+      });
+      const total = scheduleEventsForDay(day).length;
+      if (total > 3) {
+        const more = document.createElement("div");
+        more.className = "more";
+        more.textContent = `+${total - 3} more`;
+        cell.appendChild(more);
+      }
+      monthGrid.appendChild(cell);
+    });
+    root.appendChild(monthGrid);
+  }
+
   function renderHome(root) {
     const sec = document.createElement("section");
     sec.dataset.panelId = "portfolios";
@@ -5427,6 +5847,93 @@
   // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
   // -------------------------------------------------------------------------
   const planState = { scope: "all", scopeId: "" };
+
+  const scheduleState = {
+    view: "week",   // day | week | month
+    cursor: new Date().toISOString(),
+  };
+  let scheduleEditorEl = null;
+
+  function scheduleCursorDate() {
+    return new Date(scheduleState.cursor);
+  }
+  function scheduleSaveCursor(date) {
+    scheduleState.cursor = date.toISOString();
+  }
+  function scheduleAdjustCursor(direction) {
+    const cursor = scheduleCursorDate();
+    if (scheduleState.view === "month") {
+      cursor.setMonth(cursor.getMonth() + direction);
+    } else if (scheduleState.view === "week") {
+      cursor.setDate(cursor.getDate() + direction * 7);
+    } else {
+      cursor.setDate(cursor.getDate() + direction);
+    }
+    scheduleSaveCursor(cursor);
+    render();
+  }
+  function scheduleSetView(view) {
+    scheduleState.view = view;
+    render();
+  }
+  function scheduleEventById(id) {
+    return state.events.find(ev => ev.id === id) || null;
+  }
+  function scheduleEventsInRange(fromMs, toMs) {
+    return state.events
+      .filter(ev => {
+        const s = new Date(ev.start).getTime();
+        const e = new Date(ev.end).getTime();
+        return e > fromMs && s < toMs;
+      })
+      .sort((a, b) => new Date(a.start) - new Date(b.start));
+  }
+  function scheduleEventsForDay(date) {
+    const dayStart = startOfDay(date).getTime();
+    return scheduleEventsInRange(dayStart, dayStart + MS_DAY);
+  }
+  function scheduleEventColor(ev) {
+    if (ev.color) return ev.color;
+    if (ev.ref && ev.ref.kind === "activity") {
+      const a = activityById(ev.ref.id);
+      if (a && a.color) return a.color;
+      const p = a && projectById(a.projectId);
+      if (p && p.color) return p.color;
+    }
+    if (ev.ref && ev.ref.kind === "project") {
+      const p = projectById(ev.ref.id);
+      if (p && p.color) return p.color;
+    }
+    if (ev.ref && ev.ref.kind === "portfolio") {
+      const pf = portfolioById(ev.ref.id);
+      if (pf && pf.color) return pf.color;
+    }
+    return "var(--accent)";
+  }
+  function scheduleRangeLabel() {
+    const cursor = scheduleCursorDate();
+    if (scheduleState.view === "day") {
+      return fmtDateLong(cursor);
+    }
+    if (scheduleState.view === "week") {
+      const start = startOfWeek(cursor);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      if (start.getMonth() === end.getMonth()) {
+        return `${start.toLocaleDateString(undefined, { month: "short" })} ${start.getDate()}–${end.getDate()}, ${end.getFullYear()}`;
+      }
+      return `${fmtDateShort(start.toISOString())} – ${fmtDateShort(end.toISOString())}`;
+    }
+    return cursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  }
+  function scheduleWeekDays(cursor) {
+    const start = startOfWeek(cursor);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      return d;
+    });
+  }
 
   function planScopeItems() {
     const out = { portfolios: [] };
