@@ -41,9 +41,13 @@
     -webkit-font-smoothing: antialiased;
   }
   .wrap {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 2.25rem 1.25rem 4rem;
+    /* Expand the main container to fill the viewport width so windows
+       and panels span the entire page. Keep padding for comfortable gutters. */
+    max-width: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 1.25rem;
+    box-sizing: border-box;
   }
 
   /* header */
