@@ -1178,21 +1178,22 @@
   /* apply the .AI styling to the main wordmark */
   .brand-wordmark { background: linear-gradient(120deg, var(--accent), #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; letter-spacing: -0.005em; cursor: pointer; display: inline-flex; align-items: baseline; }
   .brand-wordmark:hover { transform: translateY(-1px); transition: transform 160ms ease; }
-  /* small shark-tooth accent next to the wordmark */
+  /* small shark-tooth accent next to the wordmark (refined) */
   .brand-tooth {
-    width: 10px;
-    height: 10px;
+    width: 14px;
+    height: 14px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-left: 0.45rem;
-    transform: translateY(-2px);
+    margin-left: 0.4rem;
+    transform: translateY(-1px);
     flex-shrink: 0;
     color: var(--accent);
-    transition: transform 180ms var(--ease), color 180ms var(--ease);
+    transition: transform 160ms var(--ease), color 160ms var(--ease);
   }
   .brand-tooth svg { width: 100%; height: 100%; display: block; fill: currentColor; }
-  .brand-wordmark:hover .brand-tooth { transform: translateY(-1px) rotate(-6deg); color: var(--accent-hover); }
+  .brand-tooth svg path { stroke: rgba(255,255,255,0.88); stroke-width: 0.8; stroke-linejoin: round; stroke-linecap: round; }
+  .brand-wordmark:hover .brand-tooth { transform: translateY(-0.5px) scale(1.12) rotate(-8deg); color: var(--accent-hover); }
   @keyframes brandDotPulse {
     0%, 100% { opacity: 0.45; }
     50%      { opacity: 1; }
