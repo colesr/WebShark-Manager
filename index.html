@@ -2198,6 +2198,18 @@
     border-left: 1px solid var(--border);
     padding: 0.15rem 0; min-height: 1.5rem;
   }
+  .sched-day-col:hover, .sched-month .mcell:hover {
+    background: color-mix(in srgb, var(--accent-soft) 30%, transparent);
+  }
+  .sched-month .mcell {
+    min-height: 92px; border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    padding: 0.25rem; vertical-align: top;
+    cursor: pointer;
+  }
+  .sched-month .mcell:hover {
+    outline: 1px solid var(--accent);
+  }
   .sched-month {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -3662,6 +3674,15 @@
     prevBtn.textContent = "←";
     prevBtn.title = "Previous";
     prevBtn.addEventListener("click", () => scheduleAdjustCursor(-1));
+    const todayBtn = document.createElement("button");
+    todayBtn.type = "button";
+    todayBtn.className = "sched-icon-btn today-btn";
+    todayBtn.textContent = "Today";
+    todayBtn.title = "Go to today";
+    todayBtn.addEventListener("click", () => {
+      scheduleSaveCursor(new Date());
+      render();
+    });
     const nextBtn = document.createElement("button");
     nextBtn.type = "button";
     nextBtn.className = "sched-icon-btn";
@@ -3671,7 +3692,7 @@
     const rangeLabel = document.createElement("div");
     rangeLabel.className = "range-label";
     rangeLabel.textContent = scheduleRangeLabel();
-    nav.append(prevBtn, rangeLabel, nextBtn);
+    nav.append(prevBtn, todayBtn, rangeLabel, nextBtn);
 
     const viewSwitcher = segControl(scheduleState.view, [
       { value: "day", label: "Day" },
@@ -3767,6 +3788,7 @@
       const dayStart = startOfDay(day).getTime();
       const dayEnd = dayStart + MS_DAY;
       const dayCol = dayCols[i];
+      dayCol.addEventListener("click", () => openScheduleEditor(null, day));
       const events = scheduleEventsInRange(dayStart, dayEnd).filter(ev => !ev.allDay);
       events.forEach((ev) => {
         const evStart = Math.max(new Date(ev.start).getTime(), dayStart);
@@ -3827,6 +3849,7 @@
       label.textContent = String(day.getDate());
       cell.appendChild(label);
       const events = scheduleEventsForDay(day).slice(0, 3);
+      cell.addEventListener("click", () => openScheduleEditor(null, day));
       events.forEach((ev) => {
         const btn = document.createElement("button");
         btn.type = "button";
