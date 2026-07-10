@@ -220,6 +220,10 @@
     margin-bottom: 1.1rem;
     animation: fadeUp var(--t-base) var(--ease);
   }
+  /* plan view modes */
+  .plan-view-compact .plan-notes, .plan-view-compact .plan-deps, .plan-view-compact .plan-meta { display: none; }
+  .plan-view-moderate .plan-notes { display: none; }
+  .plan-view-detail .plan-notes, .plan-view-detail .plan-deps, .plan-view-detail .plan-meta { display: block; }
   .hero-top {
     display: flex;
     align-items: flex-start;
@@ -1169,11 +1173,7 @@
   .brand-logo svg { width: 100%; height: 100%; display: block; }
   .brand-text { display: inline-flex; align-items: baseline; }
   .brand-dot {
-    color: var(--accent);
-    font-weight: 700;
-    display: inline-block;
-    animation: brandDotPulse 3.2s ease-in-out infinite;
-    padding: 0 0.04em;
+    display: none; /* removed tiny circular blinker per UX request */
   }
   /* apply the .AI styling to the main wordmark */
   .brand-wordmark { background: linear-gradient(120deg, var(--accent), #7c3aed); -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 700; letter-spacing: -0.005em; cursor: pointer; display: inline-flex; align-items: baseline; }
@@ -4975,97 +4975,60 @@
     const p = projectById(projectId);
     if (!p) return;
 
-    const form = document.createElement("div");
-    form.className = "meta-form";
+    const form = document.createElement('div'); form.className = 'meta-form';
 
-    const nameL = document.createElement("label");
-    nameL.textContent = "Name";
-    const nameI = document.createElement("input");
-    nameI.type = "text"; nameI.value = p.name;
-    nameL.appendChild(nameI);
+    const nameL = document.createElement('label'); nameL.textContent = 'Name';
+    const nameI = document.createElement('input'); nameI.type = 'text'; nameI.value = p.name; nameL.appendChild(nameI);
 
-    const stL = document.createElement("label");
-    stL.textContent = "Status";
-    const stI = document.createElement("select");
-    for (const s of STATUSES) {
-      const o = document.createElement("option");
-      o.value = s.value; o.textContent = s.label;
-      if (s.value === p.status) o.selected = true;
-      stI.appendChild(o);
-    }
+    // color picker
+    let projColor = p.color || PROJECT_PALETTE[0];
+    const colorPL = document.createElement('label'); colorPL.textContent = 'Color';
+    const colorPickerP = colorSwatches(PROJECT_PALETTE, projColor, (c) => { projColor = c; });
+    colorPL.appendChild(colorPickerP);
+
+    const stL = document.createElement('label'); stL.textContent = 'Status';
+    const stI = document.createElement('select');
+    for (const s of STATUSES) { const o = document.createElement('option'); o.value = s.value; o.textContent = s.label; if (s.value === p.status) o.selected = true; stI.appendChild(o); }
     stL.appendChild(stI);
 
-    const dueL = document.createElement("label");
-    dueL.textContent = "Deadline";
-    const dueI = document.createElement("input");
-    dueI.type = "date";
-    dueI.value = p.deadline ? isoToDateInput(p.deadline) : "";
-    dueL.appendChild(dueI);
+    const dueL = document.createElement('label'); dueL.textContent = 'Deadline';
+    const dueI = document.createElement('input'); dueI.type = 'date'; dueI.value = p.deadline ? isoToDateInput(p.deadline) : ''; dueL.appendChild(dueI);
 
-    const estL = document.createElement("label");
-    estL.textContent = "Estimated hours";
-    const estI = document.createElement("input");
-    estI.type = "number"; estI.min = "0"; estI.step = "0.5";
-    estI.value = p.estimatedHours == null ? "" : p.estimatedHours;
-    estL.appendChild(estI);
+    const estL = document.createElement('label'); estL.textContent = 'Estimated hours';
+    const estI = document.createElement('input'); estI.type = 'number'; estI.min='0'; estI.step='0.5'; estI.value = p.estimatedHours == null ? '' : p.estimatedHours; estL.appendChild(estI);
 
-    const descL = document.createElement("label");
-    descL.className = "full";
-    descL.textContent = "Description";
-    const descI = document.createElement("textarea");
-    descI.value = p.description || "";
-    descL.appendChild(descI);
-
-    const rowActs = document.createElement("div");
-    rowActs.className = "row-actions";
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "primary"; saveBtn.textContent = "Save";
-    const cancelBtn = document.createElement("button");
-    cancelBtn.textContent = "Cancel";
-    const moveBtn = document.createElement("button");
-    moveBtn.textContent = "Move portfolio…";
-    saveBtn.addEventListener("click", () => {
-      updatePortfolio(p.id, {
-        name: (nameI.value || "").trim() || p.name,
-        color: colorValue,
-        notes: notesI.value,
-        dependencies: depsBuffer,
-      });
-      if (!isNaN(idx) && idx >= 1 && idx <= others.length) {
-        updateProject(p.id, { portfolioId: others[idx - 1].id });
-        navigate({ name: "project", id: p.id });
-      }
-    });
+    const descL = document.createElement('label'); descL.className = 'full'; descL.textContent = 'Description';
+    const descI = document.createElement('textarea'); descI.value = p.description || ''; descL.appendChild(descI);
 
     let depsBuffer = [...(p.dependencies || [])];
-    const depsEditor = buildDependencyEditor("project", p.id, depsBuffer, (next) => { depsBuffer = next; });
+    const depsEditor = buildDependencyEditor('project', p.id, depsBuffer, (next) => { depsBuffer = next; });
 
-    saveBtn.addEventListener("click", () => {
+    const rowActs = document.createElement('div'); rowActs.className = 'row-actions';
+    const saveBtn = document.createElement('button'); saveBtn.className = 'primary'; saveBtn.textContent = 'Save';
+    const cancelBtn = document.createElement('button'); cancelBtn.textContent = 'Cancel';
+
+    saveBtn.addEventListener('click', () => {
       const est = estI.value.trim();
-      const becameDone = stI.value === "done" && p.status !== "done";
+      const becameDone = stI.value === 'done' && p.status !== 'done';
       updateProject(p.id, {
-        name: (nameI.value || "").trim() || p.name,
+        name: (nameI.value || '').trim() || p.name,
         color: projColor,
         status: stI.value,
         deadline: dueI.value ? dateInputToIso(dueI.value) : null,
-        estimatedHours: est === "" ? null : Number(est),
+        estimatedHours: est === '' ? null : Number(est),
         description: descI.value,
         dependencies: depsBuffer,
       });
       render();
-      if (becameDone) celebrateComplete("Project complete — nice work!");
+      if (becameDone) celebrateComplete('Project complete — nice work!');
     });
-    cancelBtn.addEventListener("click", () => render());
-    rowActs.append(saveBtn, cancelBtn, moveBtn);
+    cancelBtn.addEventListener('click', () => render());
+    rowActs.append(saveBtn, cancelBtn);
 
     form.append(nameL, colorPL, stL, dueL, estL, descL, depsEditor, rowActs);
-
-    // remove existing meta/desc/progress nodes and append form instead
-    const existing = heroEl.querySelector(".meta-form");
-    if (existing) existing.remove();
+    const existing = heroEl.querySelector('.meta-form'); if (existing) existing.remove();
     heroEl.appendChild(form);
-    nameI.focus();
-    nameI.select();
+    nameI.focus(); nameI.select();
   }
 
   // -------- inline name adder
@@ -5400,6 +5363,54 @@
       });
       add.appendChild(input);
       wrap.appendChild(add);
+    }
+    return wrap;
+  }
+
+  // generic file attachments (any MIME type) stored inline as data URLs
+  async function addFilesToEntity(kind, id, fileList) {
+    const ent = entityByKind(kind, id);
+    if (!ent) return;
+    if (!Array.isArray(ent.files)) ent.files = [];
+    const files = Array.from(fileList || []);
+    if (files.length === 0) return;
+    let added = 0;
+    for (const f of files) {
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error('read error'));
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(f);
+        });
+        ent.files.push({ id: uid(), name: f.name, type: f.type || 'application/octet-stream', size: f.size, data: dataUrl });
+        added++;
+      } catch (e) { console.error('file add error', e); }
+    }
+    if (added) { save(); render(); toast(added === 1 ? 'File added' : `${added} files added`); }
+  }
+
+  function removeEntityFile(kind, id, idx) {
+    const ent = entityByKind(kind, id); if (!ent || !Array.isArray(ent.files)) return; ent.files.splice(idx, 1); save(); render();
+  }
+
+  function buildFileList(kind, id, files, opts = {}) {
+    const wrap = document.createElement('div'); wrap.className = 'file-list';
+    files = Array.isArray(files) ? files : [];
+    files.forEach((f, i) => {
+      const row = document.createElement('div'); row.className = 'file-row';
+      const a = document.createElement('a'); a.href = f.data; a.download = f.name; a.textContent = f.name; a.title = `${f.name} · ${f.type}`; a.addEventListener('click', (e)=>{});
+      row.appendChild(a);
+      if (opts.editable) {
+        const rm = document.createElement('button'); rm.type='button'; rm.className='icon-btn'; rm.textContent='Remove'; rm.addEventListener('click', ()=> removeEntityFile(kind, id, i)); row.appendChild(rm);
+      }
+      wrap.appendChild(row);
+    });
+    if (opts.editable) {
+      const add = document.createElement('label'); add.className='file-add file-btn'; add.textContent='Add files…';
+      const input = document.createElement('input'); input.type='file'; input.multiple = true; input.style.display='none';
+      input.addEventListener('change', ()=> { const files = Array.from(input.files || []); input.value=''; if (files.length) addFilesToEntity(kind, id, files); });
+      add.appendChild(input); add.addEventListener('click', ()=> input.click()); wrap.appendChild(add);
     }
     return wrap;
   }
@@ -6235,63 +6246,45 @@
     h.textContent = 'Application logs';
     sec.appendChild(h);
 
-    const controls = document.createElement('div');
-    controls.className = 'logs-controls';
-
+    const controls = document.createElement('div'); controls.className = 'logs-controls';
     const q = document.createElement('input'); q.type = 'search'; q.placeholder = 'Search logs (action or details)'; q.className = 'logs-search';
-    const actSel = document.createElement('select'); actSel.className = 'logs-action-filter';
-    const actOpt = document.createElement('option'); actOpt.value = ''; actOpt.textContent = 'All actions'; actSel.appendChild(actOpt);
-    const actions = getLogActions();
-    actions.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; actSel.appendChild(o); });
-
-    const fromInput = document.createElement('input'); fromInput.type = 'date'; fromInput.className = 'logs-date';
-    const toInput = document.createElement('input'); toInput.type = 'date'; toInput.className = 'logs-date';
-    const filterBtn = document.createElement('button'); filterBtn.type = 'button'; filterBtn.textContent = 'Filter'; filterBtn.className = 'file-btn';
-    const clearFilterBtn = document.createElement('button'); clearFilterBtn.type = 'button'; clearFilterBtn.textContent = 'Clear'; clearFilterBtn.className = 'file-btn';
-
-    const exportJsonBtn = document.createElement('button'); exportJsonBtn.type = 'button'; exportJsonBtn.className = 'file-btn'; exportJsonBtn.textContent = 'Download JSON';
-    const exportCsvBtn = document.createElement('button'); exportCsvBtn.type = 'button'; exportCsvBtn.className = 'file-btn'; exportCsvBtn.textContent = 'Download CSV';
-    const clearBtn = document.createElement('button'); clearBtn.type = 'button'; clearBtn.className = 'danger'; clearBtn.textContent = 'Clear logs';
-
-    controls.append(q, actSel, fromInput, toInput, filterBtn, clearFilterBtn, exportJsonBtn, exportCsvBtn, clearBtn);
+    const actSel = document.createElement('select'); actSel.className = 'logs-action-filter'; const actOpt = document.createElement('option'); actOpt.value=''; actOpt.textContent='All actions'; actSel.appendChild(actOpt);
+    const actions = getLogActions(); actions.forEach(a => { const o = document.createElement('option'); o.value = a; o.textContent = a; actSel.appendChild(o); });
+    const fromInput = document.createElement('input'); fromInput.type='date'; fromInput.className='logs-date'; const toInput = document.createElement('input'); toInput.type='date'; toInput.className='logs-date';
+    const filterBtn = document.createElement('button'); filterBtn.type='button'; filterBtn.textContent='Filter'; filterBtn.className='file-btn';
+    const clearFilterBtn = document.createElement('button'); clearFilterBtn.type='button'; clearFilterBtn.textContent='Clear'; clearFilterBtn.className='file-btn';
+    const exportJsonBtn = document.createElement('button'); exportJsonBtn.type='button'; exportJsonBtn.className='file-btn'; exportJsonBtn.textContent='Download JSON';
+    const exportCsvBtn = document.createElement('button'); exportCsvBtn.type='button'; exportCsvBtn.className='file-btn'; exportCsvBtn.textContent='Download CSV';
+    const clearBtn = document.createElement('button'); clearBtn.type='button'; clearBtn.className='danger'; clearBtn.textContent='Clear logs';
+    // archival controls
+    const daysInp = document.createElement('input'); daysInp.type='number'; daysInp.min='1'; daysInp.value='30'; daysInp.style.width='80px'; const archiveBtn = document.createElement('button'); archiveBtn.type='button'; archiveBtn.className='file-btn'; archiveBtn.textContent='Archive older than days';
+    controls.append(q, actSel, fromInput, toInput, filterBtn, clearFilterBtn, exportJsonBtn, exportCsvBtn, daysInp, archiveBtn, clearBtn);
     sec.appendChild(controls);
-
-    const listWrap = document.createElement('div'); listWrap.className = 'logs-list';
-    sec.appendChild(listWrap);
-    root.appendChild(sec);
+    const listWrap = document.createElement('div'); listWrap.className = 'logs-list'; sec.appendChild(listWrap); root.appendChild(sec);
 
     let page = 0; const PAGE_SIZE = 100;
     function renderPage() {
-      const filters = {
-        q: q.value.trim(),
-        action: actSel.value || null,
-        from: fromInput.value || null,
-        to: toInput.value || null,
-      };
+      const filters = { q: q.value.trim(), action: actSel.value || null, from: fromInput.value || null, to: toInput.value || null };
       const filtered = filterLogs(filters);
       listWrap.innerHTML = '';
       const start = page * PAGE_SIZE; const end = Math.min(filtered.length, start + PAGE_SIZE);
       const pageItems = filtered.slice(start, end);
-      const meta = document.createElement('div'); meta.className = 'logs-meta'; meta.textContent = `Showing ${start+1}-${end} of ${filtered.length} log entries`;
+      const meta = document.createElement('div'); meta.className='logs-meta'; meta.textContent = `Showing ${filtered.length===0?0:start+1}-${end} of ${filtered.length} log entries`;
       listWrap.appendChild(meta);
-      const ul = document.createElement('div'); ul.className = 'logs-rows';
+      const ul = document.createElement('div'); ul.className='logs-rows';
       pageItems.forEach(it => {
-        const row = document.createElement('div'); row.className = 'log-row';
-        const ts = document.createElement('div'); ts.className = 'log-ts'; ts.textContent = new Date(it.ts).toLocaleString();
-        const act = document.createElement('div'); act.className = 'log-act'; act.textContent = it.action;
-        const det = document.createElement('div'); det.className = 'log-details'; det.textContent = (typeof it.details === 'object') ? JSON.stringify(it.details) : String(it.details);
+        const row = document.createElement('div'); row.className='log-row'; row.style.display='grid'; row.style.gridTemplateColumns='200px 1fr 120px'; row.style.gap='8px'; row.style.padding='6px 8px'; row.style.borderBottom='1px solid var(--border)'; row.style.alignItems='center';
+        const ts = document.createElement('div'); ts.className='log-ts'; ts.textContent = new Date(it.ts).toLocaleString(); ts.style.color='var(--muted)'; ts.style.fontSize='0.9rem';
+        const act = document.createElement('div'); act.className='log-act'; act.textContent = it.action; act.style.fontWeight='600';
+        const det = document.createElement('div'); det.className='log-details'; det.textContent = (typeof it.details === 'object') ? JSON.stringify(it.details) : String(it.details); det.style.fontSize='0.9rem'; det.style.color='var(--text)'; det.style.opacity='0.9'; det.style.overflow='hidden'; det.style.textOverflow='ellipsis'; det.style.whiteSpace='nowrap';
         row.append(ts, act, det);
+        row.addEventListener('click', () => openLogDetailModal(it));
         ul.appendChild(row);
       });
       listWrap.appendChild(ul);
-      // pager
-      const pager = document.createElement('div'); pager.className = 'logs-pager';
-      if (start > 0) {
-        const prev = document.createElement('button'); prev.type='button'; prev.textContent='Prev'; prev.className='file-btn'; prev.addEventListener('click', ()=>{ page--; renderPage(); }); pager.appendChild(prev);
-      }
-      if (end < filtered.length) {
-        const next = document.createElement('button'); next.type='button'; next.textContent='Next'; next.className='file-btn'; next.addEventListener('click', ()=>{ page++; renderPage(); }); pager.appendChild(next);
-      }
+      const pager = document.createElement('div'); pager.className='logs-pager'; pager.style.marginTop='8px';
+      if (start > 0) { const prev = document.createElement('button'); prev.type='button'; prev.textContent='Prev'; prev.className='file-btn'; prev.addEventListener('click', ()=>{ page--; renderPage(); }); pager.appendChild(prev); }
+      if (end < filtered.length) { const next = document.createElement('button'); next.type='button'; next.textContent='Next'; next.className='file-btn'; next.addEventListener('click', ()=>{ page++; renderPage(); }); pager.appendChild(next); }
       listWrap.appendChild(pager);
     }
 
@@ -6300,6 +6293,19 @@
     exportJsonBtn.addEventListener('click', () => { const filters = { q: q.value.trim(), action: actSel.value || null, from: fromInput.value || null, to: toInput.value || null }; const data = filterLogs(filters); download(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), `app-logs-${dateStampForFile()}.json`); });
     exportCsvBtn.addEventListener('click', () => { const filters = { q: q.value.trim(), action: actSel.value || null, from: fromInput.value || null, to: toInput.value || null }; const data = filterLogs(filters); exportLogsCsv(data); });
     clearBtn.addEventListener('click', () => { if (!confirm('Clear all application logs?')) return; state.appLogs = []; save(); render(); toast('Cleared logs'); logEvent('clearLogs', {}); });
+    archiveBtn.addEventListener('click', () => { const days = Number(daysInp.value) || 30; archiveLogsOlderThan(days); renderPage(); toast('Archived logs older than ' + days + ' days'); });
+
+    function openLogDetailModal(log) {
+      const overlay = document.createElement('div'); overlay.className='settings-overlay';
+      const modal = document.createElement('div'); modal.className='settings-modal'; modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true');
+      const top = document.createElement('div'); top.className='settings-top'; const h2 = document.createElement('h2'); h2.textContent = 'Log detail'; const close = document.createElement('button'); close.className='settings-close'; close.innerHTML='&times;'; close.addEventListener('click', ()=> overlay.remove()); top.append(h2, close);
+      const body = document.createElement('div'); body.className='settings-body';
+      const pre = document.createElement('pre'); pre.style.maxHeight='60vh'; pre.style.overflow='auto'; pre.textContent = JSON.stringify(log, null, 2);
+      const actions = document.createElement('div'); actions.className='sched-form-actions'; const dl = document.createElement('button'); dl.className='file-btn'; dl.textContent='Download JSON'; dl.addEventListener('click', ()=> { download(new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' }), `log-${log.ts}.json`); }); const copy = document.createElement('button'); copy.className='file-btn'; copy.textContent='Copy JSON'; copy.addEventListener('click', ()=> { navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(log, null, 2)); toast('Copied to clipboard'); });
+      actions.append(dl, copy);
+      body.append(pre, actions);
+      modal.append(top, body); overlay.appendChild(modal); document.body.appendChild(overlay);
+    }
 
     // initial render
     renderPage();
@@ -6341,6 +6347,22 @@
     const text = rows.map(r => r.map(csvQuote).join(',')).join('\n');
     download(new Blob([text], { type: 'text/csv' }), `app-logs-${dateStampForFile()}.csv`);
   }
+
+  // archive logs older than N days into state.archivedLogs
+  function archiveLogsOlderThan(days) {
+    if (!Array.isArray(state.appLogs)) state.appLogs = [];
+    if (!Array.isArray(state.archivedLogs)) state.archivedLogs = [];
+    const cutoff = Date.now() - (Number(days) || 30) * MS_DAY;
+    const keep = []; const moved = [];
+    for (const l of state.appLogs) {
+      if (!l || !l.ts) continue;
+      if (new Date(l.ts).getTime() < cutoff) moved.push(l); else keep.push(l);
+    }
+    state.appLogs = keep;
+    state.archivedLogs = state.archivedLogs.concat(moved);
+    logEvent('archiveLogs', { days: days, moved: moved.length });
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+  }
   function importJsonFile(file) {
     const reader = new FileReader();
     reader.onload = (ev) => {
@@ -6372,7 +6394,7 @@
   // -------------------------------------------------------------------------
   // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
   // -------------------------------------------------------------------------
-  const planState = { scope: "all", scopeId: "" };
+  const planState = { scope: "all", scopeId: "", searchQuery: "", viewMode: "moderate" };
 
   const scheduleState = {
     view: "week",   // day | week | month
@@ -6586,11 +6608,40 @@
       render();
     });
     scopeRow.append(lbl, sel);
+    // add plan search and view mode selector
+    const searchWrap = document.createElement('div'); searchWrap.className = 'plan-search';
+    const searchInp = document.createElement('input'); searchInp.type = 'search'; searchInp.placeholder = 'Search plans…'; searchInp.className = 'plan-keyword'; searchInp.value = planState.searchQuery || '';
+    const searchBtn = document.createElement('button'); searchBtn.type='button'; searchBtn.className='file-btn'; searchBtn.textContent='Search';
+    const viewSel = document.createElement('select'); viewSel.className='plan-viewsel'; ['compact','moderate','detail'].forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent = v[0].toUpperCase()+v.slice(1); viewSel.appendChild(o); }); viewSel.value = planState.viewMode || 'moderate';
+    searchWrap.append(searchInp, searchBtn, viewSel);
+    scopeRow.appendChild(searchWrap);
     hero.appendChild(scopeRow);
+
+    searchBtn.addEventListener('click', ()=>{ planState.searchQuery = searchInp.value.trim(); planState.viewMode = viewSel.value; render(); });
+    searchInp.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') searchBtn.click(); });
+    viewSel.addEventListener('change', ()=> { planState.viewMode = viewSel.value; render(); });
     root.appendChild(hero);
 
     // breakdown
     const data = planScopeItems();
+    // apply keyword filtering if present
+    const q = (planState.searchQuery || '').toLowerCase().trim();
+    let filteredData = data;
+    if (q) {
+      filteredData = { portfolios: [] };
+      for (const block of data.portfolios) {
+        const pf = block.pf;
+        const pMatches = pf.name.toLowerCase().includes(q) || (pf.notes || '').toLowerCase().includes(q);
+        const projBlocks = [];
+        for (const pb of block.projects) {
+          const p = pb.p;
+          const pMatch = p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q);
+          const acts = pb.activities.filter(a => a.name.toLowerCase().includes(q) || (a.notes || '').toLowerCase().includes(q));
+          if (pMatch || acts.length > 0) projBlocks.push({ p, activities: acts });
+        }
+        if (pMatches || projBlocks.length > 0) filteredData.portfolios.push({ pf, projects: projBlocks });
+      }
+    }
     const totalCount = data.portfolios.reduce((s, b) => s + 1 + b.projects.length + b.projects.reduce((ss, pb) => ss + pb.activities.length, 0), 0);
     if (totalCount === 0) {
       const empty = document.createElement("section");
@@ -6607,7 +6658,9 @@
     const h = document.createElement("h2");
     h.textContent = "Breakdown";
     breakdownSec.appendChild(h);
-    for (const pfBlock of data.portfolios) {
+    // apply viewMode classes for styling
+    breakdownSec.classList.add('plan-view-' + (planState.viewMode || 'moderate'));
+    for (const pfBlock of filteredData.portfolios) {
       breakdownSec.appendChild(buildPlanPortfolioRow(pfBlock.pf));
       for (const pBlock of pfBlock.projects) {
         breakdownSec.appendChild(buildPlanProjectRow(pBlock.p));
@@ -7198,6 +7251,16 @@
       if (match) return summarizeEntity(match.kind, match.id);
     }
 
+    // search requests: "search for X" / "find X" etc.
+    if (/\b(search for|search|find|lookup|show me)\b/.test(t)) {
+      const q = t.replace(/^(search for|search|find|lookup|show me)\s*/, '').trim();
+      if (!q) return "What would you like me to search for?";
+      const results = searchAllContent(q, 12);
+      if (!results || results.length === 0) return `No matches found for "${q}".`;
+      const lines = results.map(r => `- ${r.kind}: ${r.title}${r.snippet ? ' — ' + (r.snippet.slice(0,120)) : ''}`);
+      return `Search results for "${q}":\n\n` + lines.join('\n');
+    }
+
     // intent routing — order matters: more specific keywords first
     if (/\b(at risk|risk|risks|behind|overcommit|overload|trouble|stuck|red flag|concern)\b/.test(t)) return findRisks();
     if (/\b(plan|allocate|schedule|distribute|week|weekly|days? a week|hours? a day)\b/.test(t)) {
@@ -7477,6 +7540,34 @@
       }
     }
     return best;
+  }
+
+  // search across portfolios, projects, activities, events, entries, and logs
+  function searchAllContent(q, max = 12) {
+    q = (q || '').toLowerCase().trim();
+    if (!q) return [];
+    const out = [];
+    for (const p of state.portfolios) {
+      if (p.name.toLowerCase().includes(q) || (p.notes || '').toLowerCase().includes(q)) out.push({ kind: 'portfolio', id: p.id, title: p.name, snippet: p.notes || '' });
+    }
+    for (const p of state.projects) {
+      if (p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q)) out.push({ kind: 'project', id: p.id, title: p.name, snippet: p.description || '' });
+    }
+    for (const a of state.activities) {
+      if (a.name.toLowerCase().includes(q) || (a.notes || '').toLowerCase().includes(q)) out.push({ kind: 'activity', id: a.id, title: a.name, snippet: a.notes || '' });
+    }
+    for (const ev of state.events || []) {
+      if ((ev.title||'').toLowerCase().includes(q) || (ev.notes||'').toLowerCase().includes(q)) out.push({ kind: 'event', id: ev.id, title: ev.title, snippet: ev.notes || '' });
+    }
+    for (const e of state.entries || []) {
+      const tags = (e.tags || []).join(' ');
+      if ((e.notes||'').toLowerCase().includes(q) || tags.toLowerCase().includes(q)) out.push({ kind: 'entry', id: e.id, title: `Entry ${e.id}`, snippet: e.notes || '' });
+    }
+    // logs
+    for (const l of state.appLogs || []) {
+      if ((l.action||'').toLowerCase().includes(q) || JSON.stringify(l.details || {}).toLowerCase().includes(q)) out.push({ kind: 'log', id: l.ts, title: l.action, snippet: JSON.stringify(l.details || {}) });
+    }
+    return out.slice(0, max);
   }
 
   function lastLoggedLabel(entries) {
@@ -8075,20 +8166,67 @@
   }
   // simple color swatches picker for portfolio/project/activity color
   function colorSwatches(palette, current, onPick) {
-    const wrap = document.createElement("div");
-    wrap.className = "accent-swatches";
-    palette.forEach(c => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "accent-swatch" + (c === current ? " active" : "");
-      b.style.background = c;
-      b.title = c;
-      b.setAttribute("aria-label", c);
-      b.addEventListener("click", () => { if (c !== current) onPick(c); });
-      wrap.appendChild(b);
-    });
+    const wrap = document.createElement('div'); wrap.className = 'accent-swatches';
+    function renderSwatches(sel) {
+      wrap.innerHTML = '';
+      palette.forEach(c => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'accent-swatch' + (c === sel ? ' active' : ''); b.style.background = c; b.title = c; b.setAttribute('aria-label', c);
+        b.addEventListener('click', () => { sel = c; // update active state
+          Array.from(wrap.querySelectorAll('.accent-swatch')).forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+          onPick(c);
+        });
+        wrap.appendChild(b);
+      });
+      // advanced palette opener
+      const adv = document.createElement('button'); adv.type = 'button'; adv.className = 'icon-btn'; adv.textContent = 'Advanced';
+      adv.addEventListener('click', () => openAdvancedColorPicker(sel, (c) => { renderSwatches(c); onPick(c); }));
+      wrap.appendChild(adv);
+    }
+    renderSwatches(current);
     return wrap;
   }
+
+  function openAdvancedColorPicker(initial, onChoose) {
+    // modal with input[type=color], HSL sliders and hex
+    const existing = document.getElementById('advancedColorPicker'); if (existing) existing.remove();
+    const overlay = document.createElement('div'); overlay.className = 'settings-overlay'; overlay.id = 'advancedColorPicker';
+    const modal = document.createElement('div'); modal.className = 'settings-modal';
+    const top = document.createElement('div'); top.className = 'settings-top';
+    const h2 = document.createElement('h2'); h2.textContent = 'Color picker'; const close = document.createElement('button'); close.className='settings-close'; close.innerHTML='&times;'; close.addEventListener('click', ()=> overlay.remove()); top.append(h2, close);
+    const body = document.createElement('div'); body.className='settings-body';
+    const colorInp = document.createElement('input'); colorInp.type='color'; colorInp.value = initial || '#2563eb';
+    const hexRow = document.createElement('div'); const hexLabel = document.createElement('label'); hexLabel.textContent='Hex'; const hexInp = document.createElement('input'); hexInp.type='text'; hexInp.value = colorInp.value; hexLabel.appendChild(hexInp); hexRow.appendChild(hexLabel);
+    const hslWrap = document.createElement('div'); hslWrap.className='hsl-wrap';
+    const hSlider = makeRangeControl('H', 0, 360, 1, 200); const sSlider = makeRangeControl('S',0,100,1,100); const lSlider = makeRangeControl('L',0,100,1,50);
+    hslWrap.append(hSlider.wrap, sSlider.wrap, lSlider.wrap);
+    function syncFromHex(hex) { const rgb = hexToRgb(hex); if (!rgb) return; const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b); hSlider.input.value = Math.round(hsl.h); sSlider.input.value = Math.round(hsl.s); lSlider.input.value = Math.round(hsl.l); colorInp.value = rgbToHex(rgb.r, rgb.g, rgb.b); hexInp.value = colorInp.value; }
+    function syncFromHsl() { const h = Number(hSlider.input.value), s = Number(sSlider.input.value), l = Number(lSlider.input.value); const rgb = hslToRgb(h, s/100, l/100); const hex = rgbToHex(rgb.r, rgb.g, rgb.b); colorInp.value = hex; hexInp.value = hex; }
+    colorInp.addEventListener('input', ()=> syncFromHex(colorInp.value));
+    hexInp.addEventListener('change', ()=> syncFromHex(hexInp.value.trim()));
+    [hSlider.input, sSlider.input, lSlider.input].forEach(inp => inp.addEventListener('input', syncFromHsl));
+    syncFromHex(colorInp.value);
+    const actions = document.createElement('div'); actions.className='sched-form-actions';
+    const ok = document.createElement('button'); ok.className='primary'; ok.type='button'; ok.textContent='Choose'; ok.addEventListener('click', ()=> { onChoose(colorInp.value); overlay.remove(); });
+    const cancel = document.createElement('button'); cancel.type='button'; cancel.textContent='Cancel'; cancel.addEventListener('click', ()=> overlay.remove());
+    actions.append(ok, cancel);
+    body.append(colorInp, hexRow, hslWrap, actions);
+    modal.append(top, body); overlay.appendChild(modal); document.body.appendChild(overlay);
+  }
+
+  function makeRangeControl(label, min, max, step, initial) {
+    const wrap = document.createElement('label'); wrap.style.display='block'; wrap.textContent = label;
+    const input = document.createElement('input'); input.type='range'; input.min=min; input.max=max; input.step=step; input.value = initial; input.style.width='180px';
+    wrap.appendChild(input);
+    return { wrap, input };
+  }
+
+  function hexToRgb(hex) {
+    if (!hex) return null; hex = hex.replace('#',''); if (hex.length === 3) hex = hex.split('').map(c=>c+c).join(''); if (hex.length !== 6) return null; const r = parseInt(hex.slice(0,2),16); const g = parseInt(hex.slice(2,4),16); const b = parseInt(hex.slice(4,6),16); return { r, g, b };
+  }
+  function rgbToHex(r,g,b) { return '#'+[r,g,b].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+  function rgbToHsl(r,g,b) { r/=255; g/=255; b/=255; const max=Math.max(r,g,b), min=Math.min(r,g,b); let h=0,s=0,l=(max+min)/2; if(max!==min){ const d = max-min; s = l>0.5? d/(2-max-min) : d/(max+min); switch(max){case r: h=(g-b)/d + (g<b?6:0); break; case g: h=(b-r)/d + 2; break; case b: h=(r-g)/d + 4; break;} h = h*60;} return { h, s: s*100, l: l*100 }; }
+  function hslToRgb(h, s, l) { s=Math.min(1,Math.max(0,s)); l=Math.min(1,Math.max(0,l)); const c = (1 - Math.abs(2*l -1)) * s; const hh = h/60; const x = c * (1 - Math.abs(hh % 2 -1)); let r1=0,g1=0,b1=0; if (hh>=0 && hh<1){r1=c;g1=x;b1=0}else if(hh<2){r1=x;g1=c;b1=0}else if(hh<3){r1=0;g1=c;b1=x}else if(hh<4){r1=0;g1=x;b1=c}else if(hh<5){r1=x;g1=0;b1=c}else{r1=c;g1=0;b1=x} const m = l - c/2; const r = Math.round((r1 + m)*255), g = Math.round((g1 + m)*255), b = Math.round((b1 + m)*255); return { r, g, b }; }
 
   function showColorPopover(anchorEl, palette, current, onPick) {
     // remove existing
