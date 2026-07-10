@@ -5964,57 +5964,168 @@
     toast(`Exported ${evs.length} event(s) to .ics`);
   }
 
-  // minimal ICS parser — extracts VEVENT blocks (DTSTART, DTEND, SUMMARY, DESCRIPTION)
+  // Improved ICS parser — unfolds folded lines, parses params (TZID, VALUE), supports RRULE expansion
   function parseIcs(text) {
     if (!text) return [];
-    const lines = text.split(/\r?\n/).map(l => l.trim());
+    // unfold folded lines (lines that start with space or tab continue previous)
+    const unfolded = text.replace(/\r?\n[ \t]/g, '');
+    const rawLines = unfolded.split(/\r?\n/).map(l => l.trim());
     const events = [];
     let inEvent = false; let buf = [];
-    for (const l of lines) {
+    for (const l of rawLines) {
       if (l === 'BEGIN:VEVENT') { inEvent = true; buf = []; continue; }
       if (l === 'END:VEVENT') { inEvent = false; events.push(buf.slice()); buf = []; continue; }
       if (inEvent) buf.push(l);
     }
-    return events.map(lines => {
-      const obj = { raw: lines };
+
+    const vevents = events.map(lines => {
+      const obj = { raw: lines, props: {} };
       for (const ln of lines) {
-        const [k, ...rest] = ln.split(':');
-        const val = rest.join(':');
-        const key = k.split(';')[0];
-        if (key === 'DTSTART') obj.start = parseIcsDate(val);
-        if (key === 'DTEND') obj.end = parseIcsDate(val);
-        if (key === 'SUMMARY') obj.summary = val;
-        if (key === 'DESCRIPTION') obj.description = val;
+        const colonIdx = ln.indexOf(':');
+        if (colonIdx === -1) continue;
+        const left = ln.slice(0, colonIdx);
+        const val = ln.slice(colonIdx + 1);
+        const [keyPart, ...rest] = left.split(';');
+        const key = keyPart.toUpperCase();
+        const params = {};
+        if (rest.length) {
+          for (const p of rest) {
+            const [pn, pv] = p.split('='); if (!pn) continue; params[pn.toUpperCase()] = pv || true;
+          }
+        }
+        obj.props[key] = obj.props[key] || [];
+        obj.props[key].push({ value: val, params });
       }
-      if (!obj.end && obj.start && obj.start.length === 10) {
-        // all-day single-day event: make end same day
-        obj.end = obj.start;
-      }
-      obj.allDay = obj.start && obj.start.length === 10; // YYYYMMDD
       return obj;
-    }).map(o => ({ summary: o.summary, description: o.description, allDay: o.allDay, start: convertIcsToIso(o.start, o.allDay), end: convertIcsToIso(o.end, o.allDay) }));
+    });
+
+    // expand VEVENTs into flat event objects (handle RRULE basic expansion)
+    const out = [];
+    for (const v of vevents) {
+      const dtstarts = v.props['DTSTART'] || [];
+      const dtends = v.props['DTEND'] || [];
+      const summaries = v.props['SUMMARY'] || [];
+      const descs = v.props['DESCRIPTION'] || [];
+      const rrules = v.props['RRULE'] || [];
+
+      const title = summaries[0] ? summaries[0].value : (descs[0] ? descs[0].value.split('\n')[0] : 'Event');
+      const notes = descs[0] ? descs[0].value : '';
+
+      // for each DTSTART (usually one), create a base event
+      for (const dt of dtstarts) {
+        const startRaw = dt.value;
+        const startParams = dt.params || {};
+        const endRaw = (dtends[0] && dtends[0].value) || null;
+        const endParams = (dtends[0] && dtends[0].params) || {};
+        const allDay = !!(startParams.VALUE === 'DATE' || /^\d{8}$/.test(startRaw));
+        const base = {
+          summary: title,
+          description: notes,
+          allDay,
+          startRaw, startParams,
+          endRaw, endParams,
+        };
+
+        if (rrules.length > 0) {
+          // parse RRULE string (first one)
+          const r = parseRRule(rrules[0].value);
+          const instances = expandRecurrence(base, r, 365);
+          for (const inst of instances) out.push(inst);
+        } else {
+          out.push({ summary: title, description: notes, allDay, start: convertIcsToIso(startRaw, allDay, startParams), end: convertIcsToIso(endRaw, allDay, endParams) });
+        }
+      }
+    }
+    return out;
   }
-  function parseIcsDate(val) {
-    return val && val.split(/[;:]/).pop() || null;
+
+  function parseRRule(val) {
+    // returns simple object of key->value (handles multiple tokens)
+    const parts = (val || '').split(';'); const o = {};
+    for (const p of parts) { const [k, v] = p.split('='); if (!k) continue; o[k.toUpperCase()] = v || true; }
+    return o;
   }
-  function convertIcsToIso(val, allDay) {
+
+  function expandRecurrence(base, rule, maxDays=365) {
+    // base: { startRaw, startParams, endRaw, endParams, allDay, summary, description }
+    // rule: parsed RRULE object (FREQ, INTERVAL, UNTIL, COUNT, BYDAY)
+    const instances = [];
+    try {
+      const freq = (rule.FREQ || 'DAILY').toUpperCase();
+      const interval = Number(rule.INTERVAL || 1);
+      const count = rule.COUNT ? Number(rule.COUNT) : null;
+      const until = rule.UNTIL ? convertIcsToIso(rule.UNTIL, false, {}) : null;
+      const byday = rule.BYDAY ? rule.BYDAY.split(',') : null;
+
+      let cur = new Date(convertIcsToIso(base.startRaw, base.allDay, base.startParams));
+      const startMs = cur.getTime();
+      const limitMs = startMs + (maxDays * MS_DAY);
+      let produced = 0;
+
+      while (true) {
+        if (count && produced >= count) break;
+        if (until && new Date(cur) > new Date(until)) break;
+        if (cur.getTime() > limitMs) break;
+
+        // if BYDAY present for weekly, include only matching weekdays
+        if (byday && freq === 'WEEKLY') {
+          // BYDAY tokens like MO,TU,... map to 1-7 (Mon-Sun)
+          const dayNames = { MO:1, TU:2, WE:3, TH:4, FR:5, SA:6, SU:0 };
+          const curDay = cur.getDay();
+          if (byday.some(d => dayNames[d] === curDay)) {
+            const ev = { summary: base.summary, description: base.description, allDay: base.allDay, start: convertIcsToIso(formatIcsDtFromDate(cur, base.startRaw), base.allDay, base.startParams), end: base.endRaw ? convertIcsToIso(formatIcsDtFromDate(cur, base.endRaw), base.allDay, base.endParams) : null };
+            instances.push(ev); produced++;
+          }
+        } else {
+          const ev = { summary: base.summary, description: base.description, allDay: base.allDay, start: convertIcsToIso(formatIcsDtFromDate(cur, base.startRaw), base.allDay, base.startParams), end: base.endRaw ? convertIcsToIso(formatIcsDtFromDate(cur, base.endRaw), base.allDay, base.endParams) : null };
+          instances.push(ev); produced++;
+        }
+
+        // advance
+        if (freq === 'DAILY') cur.setDate(cur.getDate() + interval);
+        else if (freq === 'WEEKLY') cur.setDate(cur.getDate() + (7 * interval));
+        else if (freq === 'MONTHLY') cur.setMonth(cur.getMonth() + interval);
+        else cur.setDate(cur.getDate() + interval);
+      }
+    } catch (e) { console.error('expandRecurrence error', e); }
+    return instances;
+  }
+
+  function formatIcsDtFromDate(dt, rawTemplate) {
+    // rawTemplate like YYYYMMDD or YYYYMMDDTHHMMSSZ or YYYYMMDDTHHMMSS
+    // return a string formatted like the template but with dt's components
+    const y = dt.getFullYear(); const mo = pad(dt.getMonth()+1); const d = pad(dt.getDate());
+    const hh = pad(dt.getHours()); const mi = pad(dt.getMinutes()); const ss = pad(dt.getSeconds());
+    if (/^\d{8}$/.test(rawTemplate)) return `${y}${mo}${d}`;
+    // produce UTC style without trailing Z if template lacks Z
+    const hasZ = /Z$/.test(rawTemplate);
+    if (hasZ) return `${y}${mo}${d}T${hh}${mi}${ss}Z`;
+    return `${y}${mo}${d}T${hh}${mi}${ss}`;
+  }
+
+  function parseIcsDate(token) {
+    // token may be a raw property value or include params; our parseIcs returns value and params separately now
+    return token && token.split(/[;:]/).pop() || null;
+  }
+
+  function convertIcsToIso(val, allDay, params) {
+    // params can include TZID or VALUE
     if (!val) return null;
     if (allDay && /^\d{8}$/.test(val)) {
-      // YYYYMMDD -> ISO date start
       const y = val.slice(0,4), m = val.slice(4,6), d = val.slice(6,8);
       return new Date(`${y}-${m}-${d}T00:00:00`).toISOString();
     }
-    // handle YYYYMMDDTHHMMSSZ or without Z
-    const iso = val.replace(/^(\d{8}T\d{6}Z)$/, (m)=> {
-      // convert to ISO format
-      const y = m.slice(0,4), mo = m.slice(4,6), da = m.slice(6,8), hh = m.slice(9,11), mi = m.slice(11,13), ss = m.slice(13,15);
-      return `${y}-${mo}-${da}T${hh}:${mi}:${ss}Z`;
-    });
+    // handle UTC form YYYYMMDDTHHMMSSZ
     if (/^\d{8}T\d{6}Z$/.test(val)) {
       const y = val.slice(0,4), mo = val.slice(4,6), da = val.slice(6,8), hh = val.slice(9,11), mi = val.slice(11,13), ss = val.slice(13,15);
       return new Date(Date.UTC(Number(y), Number(mo)-1, Number(da), Number(hh), Number(mi), Number(ss))).toISOString();
     }
-    // fallback attempt
+    // local naive YYYYMMDDTHHMMSS (no Z) — interpret as local time then convert to ISO
+    if (/^\d{8}T\d{6}$/.test(val)) {
+      const y = val.slice(0,4), mo = val.slice(4,6), da = val.slice(6,8), hh = val.slice(9,11), mi = val.slice(11,13), ss = val.slice(13,15);
+      try { return new Date(`${y}-${mo}-${da}T${hh}:${mi}:${ss}`).toISOString(); } catch (e) { return null; }
+    }
+    // try Date parse fallback
     try { return new Date(val).toISOString(); } catch (e) { return null; }
   }
   function dateStampForFile() {
