@@ -2318,6 +2318,33 @@
     font-size: 0.8rem; color: var(--muted); margin: 0.35rem 0 0;
     line-height: 1.4;
   }
+  .sched-date-jump {
+    font: inherit; color: var(--text);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 0.35rem 0.45rem;
+  }
+  .schedule-layout {
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+    align-items: start;
+  }
+  .schedule-side {
+    max-height: min(72vh, 780px);
+    overflow: auto;
+  }
+  .sched-time-grid.compact { --sched-hour-h: 38px; }
+  .sched-day-head small {
+    display: block;
+    font-size: 0.64rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+  }
+  .dep-chip.active { outline: 2px solid var(--accent); }
+  @media (max-width: 980px) {
+    .schedule-layout { grid-template-columns: 1fr; }
+    .schedule-side { max-height: none; }
+  }
   [data-theme="dark"] .sched-icon-btn,
   [data-theme="dark"] .file-btn { background: var(--card); }
 </style>
@@ -2395,6 +2422,7 @@
         <a class="header-link" id="reportsLink" href="#/reports">Reports</a>
         <a class="header-link" id="planLink" href="#/plan">Plan</a>
         <a class="header-link" id="scheduleLink" href="#/schedule">Schedule</a>
+        <a class="header-link" id="documentsLink" href="#/documents">Documents</a>
       </div>
     </div>
     <nav class="crumbs" id="crumbs"></nav>
@@ -2480,14 +2508,24 @@
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
   function freshState() {
-    return { portfolios: [], projects: [], activities: [], entries: [], events: [], panelLayouts: {}, settings: { ...DEFAULT_SETTINGS }, appLogs: [] };
+    return {
+      portfolios: [],
+      projects: [],
+      activities: [],
+      entries: [],
+      events: [],
+      documents: [],
+      panelLayouts: {},
+      settings: { ...DEFAULT_SETTINGS },
+      appLogs: []
+    };
   }
   // Normalize a (possibly older) state blob so every entity has the fields the
   // current code expects. Mutates and returns `s`. Used by load() AND cloudPull()
   // so the two stay in lockstep — see CLAUDE.md "Persistence & migrations".
   function backfillState(s) {
     if (!s || typeof s !== "object") return freshState();
-    for (const k of ["portfolios", "projects", "activities", "entries", "events"]) {
+    for (const k of ["portfolios", "projects", "activities", "entries", "events", "documents"]) {
       if (!Array.isArray(s[k])) s[k] = [];
     }
     // schedule events (calendar module)
@@ -2503,6 +2541,7 @@
       } else {
         ev.ref = null;
       }
+      if (!Array.isArray(ev.docLinks)) ev.docLinks = [];
     }
     // backfill missing tags
     for (const e of s.entries) if (!Array.isArray(e.tags)) e.tags = [];
@@ -2517,6 +2556,33 @@
     for (const p of s.portfolios) if (!Array.isArray(p.images)) p.images = [];
     for (const p of s.projects)   if (!Array.isArray(p.images)) p.images = [];
     for (const a of s.activities) if (!Array.isArray(a.images)) a.images = [];
+    for (const p of s.portfolios) if (!Array.isArray(p.docLinks)) p.docLinks = [];
+    for (const p of s.projects)   if (!Array.isArray(p.docLinks)) p.docLinks = [];
+    for (const a of s.activities) if (!Array.isArray(a.docLinks)) a.docLinks = [];
+    for (const d of s.documents) {
+      if (!d.id) d.id = uid();
+      if (typeof d.type !== "string" || !["word", "excel", "powerpoint"].includes(d.type)) d.type = "word";
+      if (typeof d.name !== "string" || !d.name.trim()) d.name = `Untitled ${d.type}`;
+      if (typeof d.createdAt !== "string") d.createdAt = new Date().toISOString();
+      if (typeof d.updatedAt !== "string") d.updatedAt = d.createdAt;
+      if (!d.content || typeof d.content !== "object") d.content = {};
+      if (d.type === "word") {
+        if (typeof d.content.text !== "string") {
+          if (typeof d.content.html === "string") d.content.text = d.content.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          else d.content.text = "Untitled document\n";
+        }
+      } else if (d.type === "excel") {
+        if (!Array.isArray(d.content.sheets) || d.content.sheets.length === 0) {
+          d.content.sheets = [{ id: uid(), name: "Sheet1", rows: 18, cols: 8, cells: {} }];
+        }
+        if (typeof d.content.activeSheet !== "number") d.content.activeSheet = 0;
+      } else if (d.type === "powerpoint") {
+        if (!Array.isArray(d.content.slides) || d.content.slides.length === 0) {
+          d.content.slides = [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb" }];
+        }
+        if (typeof d.content.activeSlide !== "number") d.content.activeSlide = 0;
+      }
+    }
     // backfill task completion flag
     for (const a of s.activities) if (typeof a.done !== "boolean") a.done = false;
     // backfill task priority
@@ -2744,7 +2810,7 @@
     if (!name) return null;
     const color = pickColor(PORTFOLIO_PALETTE, state.portfolios.map(p => p.color));
     const id = uid();
-    state.portfolios.push({ id, name, color, notes: "", dependencies: [], images: [] });
+    state.portfolios.push({ id, name, color, notes: "", dependencies: [], images: [], docLinks: [] });
     highlight(id);
     logEvent('addPortfolio', { id, name, color });
     save();
@@ -2796,6 +2862,7 @@
       color,
       dependencies: [],
       images: [],
+      docLinks: [],
     });
     highlight(id);
     logEvent('addProject', { id, portfolioId, name: (fields.name || "Untitled project").trim(), color });
@@ -2835,7 +2902,7 @@
     const used = activitiesOfProject(projectId).map(a => a.color);
     const color = pickColor(ACTIVITY_PALETTE, used);
     const id = uid();
-    state.activities.push({ id, projectId, name, color, notes: "", dependencies: [], images: [], done: false, priority: "none" });
+    state.activities.push({ id, projectId, name, color, notes: "", dependencies: [], images: [], docLinks: [], done: false, priority: "none" });
     highlight(id);
     logEvent('addActivity', { id, projectId, name, color });
     save();
@@ -2962,6 +3029,7 @@
     if (h === "reports") return { name: "reports" };
     if (h === "plan") return { name: "plan" };
     if (h === "schedule") return { name: "schedule" };
+    if (h === "documents") return { name: "documents" };
     const parts = h.split("/");
     if (parts[0] === "p" && parts[1]) {
       if (parts[2] === "proj" && parts[3]) return { name: "project", id: parts[3], portfolioId: parts[1] };
@@ -2974,6 +3042,7 @@
     if (v.name === "reports") return "#/reports";
     if (v.name === "plan") return "#/plan";
     if (v.name === "schedule") return "#/schedule";
+    if (v.name === "documents") return "#/documents";
     if (v.name === "portfolio") return `#/p/${v.id}`;
     if (v.name === "project") {
       const p = projectById(v.id);
@@ -3374,6 +3443,7 @@
     else if (view.name === "reports") renderReportsView(next);
     else if (view.name === "plan") renderPlanView(next);
     else if (view.name === "schedule") renderScheduleView(next);
+    else if (view.name === "documents") renderDocumentsView(next);
     else if (view.name === "portfolio") renderPortfolioView(next, view.id);
     else if (view.name === "project") renderProjectView(next, view.id);
     applyDragAndDrop(view.name, next);
@@ -3386,6 +3456,8 @@
     if (pl) pl.classList.toggle("active", view.name === "plan");
     const sl = $("scheduleLink");
     if (sl) sl.classList.toggle("active", view.name === "schedule");
+    const dl = $("documentsLink");
+    if (dl) dl.classList.toggle("active", view.name === "documents");
 
     // clear highlight set after this paint; scroll to any new row first
     requestAnimationFrame(() => {
@@ -3425,6 +3497,9 @@
     } else if (view.name === "schedule") {
       parts.push({ label: "All", href: "#/" });
       parts.push({ label: "Schedule", current: true });
+    } else if (view.name === "documents") {
+      parts.push({ label: "All", href: "#/" });
+      parts.push({ label: "Documents", current: true });
     } else if (view.name === "portfolio") {
       parts.push({ label: "All", href: "#/" });
       const pf = portfolioById(view.id);
@@ -3577,21 +3652,36 @@
     notesLabel.appendChild(notesInput);
 
     const refLabel = document.createElement("label");
-    refLabel.textContent = "Link to task";
+    refLabel.textContent = "Link to item";
     const refSelect = document.createElement("select");
     const noneOpt = document.createElement("option");
     noneOpt.value = "";
     noneOpt.textContent = "None";
     refSelect.appendChild(noneOpt);
+    for (const pf of state.portfolios) {
+      const opt = document.createElement("option");
+      opt.value = `portfolio:${pf.id}`;
+      opt.textContent = `Portfolio · ${pf.name}`;
+      if (ev && ev.ref && ev.ref.kind === "portfolio" && ev.ref.id === pf.id) opt.selected = true;
+      refSelect.appendChild(opt);
+    }
+    for (const p of state.projects) {
+      const opt = document.createElement("option");
+      opt.value = `project:${p.id}`;
+      opt.textContent = `Project · ${p.name}`;
+      if (ev && ev.ref && ev.ref.kind === "project" && ev.ref.id === p.id) opt.selected = true;
+      refSelect.appendChild(opt);
+    }
     for (const a of state.activities) {
       const opt = document.createElement("option");
-      opt.value = a.id;
+      opt.value = `activity:${a.id}`;
       const project = projectById(a.projectId);
-      opt.textContent = `${a.name}${project ? " — " + project.name : ""}`;
+      opt.textContent = `Task · ${a.name}${project ? " — " + project.name : ""}`;
       if (ev && ev.ref && ev.ref.kind === "activity" && ev.ref.id === a.id) opt.selected = true;
       refSelect.appendChild(opt);
     }
     refLabel.appendChild(refSelect);
+    const docSel = buildDocumentSelector(ev && Array.isArray(ev.docLinks) ? ev.docLinks : []);
 
     const error = document.createElement("div");
     error.className = "err";
@@ -3635,7 +3725,12 @@
         error.textContent = "End must be at or after start.";
         return;
       }
-      const ref = refSelect.value ? { kind: "activity", id: refSelect.value } : null;
+      let ref = null;
+      if (refSelect.value) {
+        const [kind, id] = refSelect.value.split(":");
+        if (kind && id) ref = { kind, id };
+      }
+      const docLinks = docSel.getSelected();
       if (ev) {
         Object.assign(ev, {
           title,
@@ -3644,6 +3739,7 @@
           allDay,
           notes: notesInput.value.trim(),
           ref,
+          docLinks,
         });
         logEvent('updateEvent', { id: ev.id, title, start: startIso, end: endIso, allDay });
       } else {
@@ -3656,6 +3752,7 @@
           notes: notesInput.value.trim(),
           color: null,
           ref,
+          docLinks,
         });
         logEvent('addEvent', { title, start: startIso, end: endIso, allDay });
       }
@@ -3700,7 +3797,7 @@
       actions.append(gBtn, icsBtn);
     }
 
-    body.append(titleLabel, dateLabel, allDayLabel, timesWrap, notesLabel, refLabel, error, actions);
+    body.append(titleLabel, dateLabel, allDayLabel, timesWrap, notesLabel, refLabel, docSel.wrap, error, actions);
     modal.appendChild(body);
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
@@ -3745,7 +3842,8 @@
 
     const meta = document.createElement("div");
     meta.className = "meta-row";
-    meta.innerHTML = `<span>View and manage your calendar events in daily, weekly, or monthly mode.</span>`;
+    const visible = scheduleVisibleEvents(cursor, scheduleState.view);
+    meta.innerHTML = `<span>Faster navigation, keyboard shortcuts, and event-focused planning.</span><span>${visible.length} visible event${visible.length === 1 ? "" : "s"}</span>`;
     hero.appendChild(meta);
     root.appendChild(hero);
 
@@ -3777,7 +3875,13 @@
     const rangeLabel = document.createElement("div");
     rangeLabel.className = "range-label";
     rangeLabel.textContent = scheduleRangeLabel();
-    nav.append(prevBtn, todayBtn, rangeLabel, nextBtn);
+    const jumpDate = document.createElement("input");
+    jumpDate.type = "date";
+    jumpDate.className = "sched-date-jump";
+    jumpDate.title = "Jump to date";
+    jumpDate.value = isoToDateInput(cursor.toISOString());
+    jumpDate.addEventListener("change", () => scheduleJumpToDate(jumpDate.value));
+    nav.append(prevBtn, todayBtn, rangeLabel, nextBtn, jumpDate);
 
     const viewSwitcher = segControl(scheduleState.view, [
       { value: "day", label: "Day" },
@@ -3785,6 +3889,12 @@
       { value: "month", label: "Month" },
     ], scheduleSetView);
     viewSwitcher.classList.add("nav-group");
+
+    const densitySwitcher = segControl(scheduleState.density, [
+      { value: "comfortable", label: "Comfortable" },
+      { value: "compact", label: "Compact" },
+    ], (v) => { scheduleState.density = v; render(); });
+    densitySwitcher.classList.add("nav-group");
 
     const addBtn = document.createElement("button");
     addBtn.type = "button";
@@ -3812,24 +3922,40 @@
       if (!parsed || parsed.length === 0) { toast('No events found in .ics'); return; }
       for (const e of parsed) {
         const evId = uid();
-        state.events.push({ id: evId, title: e.summary || 'Event', start: e.start, end: e.end, allDay: e.allDay, notes: e.description || '', color: null, ref: null });
+        state.events.push({ id: evId, title: e.summary || 'Event', start: e.start, end: e.end, allDay: e.allDay, notes: e.description || '', color: null, ref: null, docLinks: [] });
         logEvent('importEvent', { id: evId, title: e.summary || 'Event', start: e.start, end: e.end, allDay: e.allDay });
       }
       save(); render(); toast(`Imported ${parsed.length} event(s)`);
     });
 
+    const quickToday = document.createElement("button");
+    quickToday.type = "button";
+    quickToday.className = "sched-icon-btn";
+    quickToday.textContent = "Tomorrow";
+    quickToday.title = "Jump to tomorrow";
+    quickToday.addEventListener("click", () => {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      scheduleJumpToDate(isoToDateInput(d.toISOString()));
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "nav-group";
+    actions.append(importBtn, exportAllBtn, addBtn);
     const spacer = document.createElement("div");
     spacer.className = "spacer";
-    toolbar.append(nav, spacer, viewSwitcher, exportAllBtn, addBtn);
+    toolbar.append(nav, spacer, viewSwitcher, densitySwitcher, quickToday, actions);
     // append hidden file input for import
     toolbar.appendChild(fileInput);
     root.appendChild(toolbar);
 
     const legend = document.createElement("div");
     legend.className = "sched-legend";
-    legend.innerHTML = `Click an event to edit it. Use <strong>Export .ics</strong> to download visible events, or open an event in Google via the editor.`;
+    legend.innerHTML = `Click any event to edit it. Shortcuts: <strong>←/→</strong> move, <strong>T</strong> today, <strong>D/W/M</strong> view, <strong>N</strong> new event.`;
     root.appendChild(legend);
 
+    const bodyWrap = document.createElement("div");
+    bodyWrap.className = "schedule-layout";
     const body = document.createElement("div");
     body.className = "sched-grid-wrap";
     if (scheduleState.view === "month") {
@@ -3837,7 +3963,37 @@
     } else {
       renderScheduleTimeGrid(body, cursor, scheduleState.view);
     }
-    root.appendChild(body);
+    bodyWrap.appendChild(body);
+
+    const side = document.createElement("section");
+    side.className = "schedule-side";
+    const sideHead = document.createElement("div");
+    sideHead.className = "section-head";
+    sideHead.innerHTML = `<h2>Visible events</h2><span class="head-meta">${visible.length}</span>`;
+    side.appendChild(sideHead);
+    const eventList = document.createElement("div");
+    eventList.className = "entry-list";
+    if (!visible.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No events in this range.";
+      eventList.appendChild(empty);
+    } else {
+      visible.slice(0, 120).forEach((ev) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "entry";
+        btn.style.borderLeft = `4px solid ${scheduleEventColor(ev)}`;
+        const start = ev.allDay ? "All day" : `${fmtDateShort(ev.start)} ${fmtClock(ev.start)}–${fmtClock(ev.end)}`;
+        const linkedDocs = (ev.docLinks || []).map(documentById).filter(Boolean).length;
+        btn.innerHTML = `<div class="name">${escapeHtml(ev.title)}</div><div class="meta">${escapeHtml(start)}${linkedDocs ? ` · ${linkedDocs} doc${linkedDocs === 1 ? "" : "s"}` : ""}</div>`;
+        btn.addEventListener("click", () => openScheduleEditor(ev.id, new Date(ev.start)));
+        eventList.appendChild(btn);
+      });
+    }
+    side.appendChild(eventList);
+    bodyWrap.appendChild(side);
+    root.appendChild(bodyWrap);
   }
 
   function renderScheduleTimeGrid(root, cursor, mode) {
@@ -3869,7 +4025,7 @@
     root.appendChild(alldayRow);
 
     const grid = document.createElement("div");
-    grid.className = "sched-time-grid " + mode;
+    grid.className = "sched-time-grid " + mode + (scheduleState.density === "compact" ? " compact" : "");
     const corner = document.createElement("div");
     corner.className = "sched-corner";
     grid.appendChild(corner);
@@ -3877,7 +4033,8 @@
       const head = document.createElement("div");
       head.className = "sched-day-head" + (startOfDay(day).getTime() === todayKey ? " today" : "");
       const dow = day.toLocaleDateString(undefined, { weekday: "short" });
-      head.innerHTML = `<span>${escapeHtml(dow)}</span><span class="dnum">${day.getDate()}</span>`;
+      const count = scheduleEventsForDay(day).length;
+      head.innerHTML = `<span>${escapeHtml(dow)}</span><span class="dnum">${day.getDate()}</span><small>${count} event${count === 1 ? "" : "s"}</small>`;
       grid.appendChild(head);
     });
 
@@ -3994,7 +4151,498 @@
     root.appendChild(monthGrid);
   }
 
-  function renderHome(root) {
+    function renderDocumentsView(root) {
+      if (!Array.isArray(state.documents)) state.documents = [];
+      const hero = document.createElement("div");
+      hero.className = "hero";
+      const top = document.createElement("div");
+      top.className = "hero-top";
+      const title = document.createElement("h1");
+      title.textContent = "Documents";
+      title.style.flex = "1";
+      top.appendChild(title);
+      hero.appendChild(top);
+      const meta = document.createElement("div");
+      meta.className = "meta-row";
+      meta.innerHTML = `<span>Create and edit Word-like, Excel-like, and PowerPoint-like documents.</span><span>${state.documents.length} total</span>`;
+      hero.appendChild(meta);
+
+      const createRow = document.createElement("div");
+      createRow.className = "range-row";
+      const mkCreateBtn = (type, label) => {
+        const b = document.createElement("button");
+        b.className = "chip-btn";
+        b.textContent = `+ ${label}`;
+        b.addEventListener("click", () => {
+          const doc = createDocument(type);
+          if (doc) { documentsState.openId = doc.id; render(); }
+        });
+        return b;
+      };
+      createRow.append(mkCreateBtn("word", "New Word"), mkCreateBtn("excel", "New Excel"), mkCreateBtn("powerpoint", "New PowerPoint"));
+      hero.appendChild(createRow);
+      root.appendChild(hero);
+
+      const controls = document.createElement("section");
+      controls.dataset.panelId = "documents-controls";
+      const row = document.createElement("div");
+      row.className = "filter-row";
+      const q = document.createElement("input");
+      q.type = "search";
+      q.placeholder = "Search documents…";
+      q.value = documentsState.query;
+      q.addEventListener("input", () => { documentsState.query = q.value; render(); });
+      const typeSel = document.createElement("select");
+      [["all","All types"],["word","Word"],["excel","Excel"],["powerpoint","PowerPoint"]].forEach(([v,l]) => {
+        const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.type === v) o.selected = true; typeSel.appendChild(o);
+      });
+      typeSel.addEventListener("change", () => { documentsState.type = typeSel.value; render(); });
+      const sortSel = document.createElement("select");
+      [["updated","Recently updated"],["name","Name"],["created","Recently created"]].forEach(([v,l]) => {
+        const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.sort === v) o.selected = true; sortSel.appendChild(o);
+      });
+      sortSel.addEventListener("change", () => { documentsState.sort = sortSel.value; render(); });
+      row.append(q, typeSel, sortSel);
+      controls.appendChild(row);
+      root.appendChild(controls);
+
+      const layout = document.createElement("div");
+      layout.className = "schedule-layout";
+      const listSec = document.createElement("section");
+      listSec.className = "schedule-side";
+      listSec.dataset.panelId = "documents-list";
+      listSec.innerHTML = `<div class="section-head"><h2>Library</h2></div>`;
+      const list = document.createElement("div");
+      list.className = "entry-list";
+      const docs = state.documents
+        .filter(d => (documentsState.type === "all" || d.type === documentsState.type))
+        .filter(d => !documentsState.query || d.name.toLowerCase().includes(documentsState.query.toLowerCase()))
+        .sort((a, b) => {
+          if (documentsState.sort === "name") return a.name.localeCompare(b.name);
+          if (documentsState.sort === "created") return new Date(b.createdAt) - new Date(a.createdAt);
+          return new Date(b.updatedAt) - new Date(a.updatedAt);
+        });
+      if (!docs.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "No matching documents.";
+        list.appendChild(empty);
+      } else {
+        docs.forEach((doc) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "entry" + (documentsState.openId === doc.id ? " running" : "");
+          b.innerHTML = `<div class="name">${escapeHtml(doc.name)}</div><div class="meta">${escapeHtml(doc.type.toUpperCase())} · updated ${new Date(doc.updatedAt).toLocaleString()}</div>`;
+          b.addEventListener("click", () => { documentsState.openId = doc.id; render(); });
+          list.appendChild(b);
+        });
+      }
+      listSec.appendChild(list);
+      layout.appendChild(listSec);
+
+      const editorSec = document.createElement("section");
+      editorSec.dataset.panelId = "documents-editor";
+      const openDoc = documentById(documentsState.openId) || docs[0] || null;
+      if (openDoc && !documentsState.openId) documentsState.openId = openDoc.id;
+      if (!openDoc) {
+        editorSec.innerHTML = `<h2>Editor</h2><div class="empty">Create a document to begin.</div>`;
+      } else {
+        const head = document.createElement("div");
+        head.className = "section-head";
+        head.innerHTML = `<h2>${escapeHtml(openDoc.name)}</h2><span class="head-meta">${escapeHtml(openDoc.type)}</span>`;
+        const act = document.createElement("div");
+        act.className = "row-actions";
+        const renameBtn = document.createElement("button");
+        renameBtn.textContent = "Rename";
+        renameBtn.addEventListener("click", () => {
+          const next = prompt("Rename document", openDoc.name);
+          if (next == null) return;
+          updateDocument(openDoc.id, { name: next.trim() || openDoc.name });
+          render();
+        });
+        const dupBtn = document.createElement("button");
+        dupBtn.textContent = "Duplicate";
+        dupBtn.addEventListener("click", () => {
+          const dup = duplicateDocument(openDoc.id);
+          if (dup) documentsState.openId = dup.id;
+          render();
+        });
+        const delBtn = document.createElement("button");
+        delBtn.className = "danger";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", () => {
+          if (!confirm(`Delete "${openDoc.name}"?`)) return;
+          deleteDocument(openDoc.id);
+          render();
+        });
+        act.append(renameBtn, dupBtn, delBtn);
+        editorSec.append(head, act);
+
+        const linkField = document.createElement("div");
+        linkField.className = "td-field";
+        linkField.innerHTML = `<div class="td-label">Tagged to app items</div>`;
+        const linkWrap = document.createElement("div");
+        linkWrap.className = "dep-list";
+        const selectedKeys = linkedTargetKeysForDocument(openDoc.id);
+        docLinkTargets().forEach((target) => {
+          const rowL = document.createElement("label");
+          rowL.className = "sched-check";
+          rowL.style.display = "flex";
+          rowL.style.justifyContent = "space-between";
+          const label = document.createElement("span");
+          label.textContent = target.label;
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = selectedKeys.has(target.key);
+          cb.addEventListener("change", () => {
+            if (cb.checked) selectedKeys.add(target.key); else selectedKeys.delete(target.key);
+            applyDocumentTargetKeys(openDoc.id, selectedKeys);
+          });
+          rowL.append(label, cb);
+          linkWrap.appendChild(rowL);
+        });
+        linkField.appendChild(linkWrap);
+        editorSec.appendChild(linkField);
+
+        if (openDoc.type === "word") {
+          if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("word");
+          if (typeof openDoc.content.text !== "string") openDoc.content.text = "Untitled document\n";
+          const toolbar = document.createElement("div");
+          toolbar.className = "sched-toolbar";
+          const editor = document.createElement("textarea");
+          editor.className = "settings-body";
+          editor.style.minHeight = "320px";
+          editor.style.width = "100%";
+          editor.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+          editor.value = openDoc.content.text || "";
+
+          const history = [editor.value];
+          let histIndex = 0;
+          const pushHistory = () => {
+            const v = editor.value;
+            if (history[histIndex] === v) return;
+            history.splice(histIndex + 1);
+            history.push(v);
+            histIndex = history.length - 1;
+          };
+          const applyWrap = (pre, post) => {
+            const s = editor.selectionStart || 0;
+            const e = editor.selectionEnd || 0;
+            const raw = editor.value;
+            const inner = raw.slice(s, e) || "text";
+            editor.value = raw.slice(0, s) + pre + inner + post + raw.slice(e);
+            editor.selectionStart = s + pre.length;
+            editor.selectionEnd = s + pre.length + inner.length;
+            editor.focus();
+            pushHistory();
+          };
+          const applyPrefix = (prefix) => {
+            const s = editor.selectionStart || 0;
+            const e = editor.selectionEnd || 0;
+            const raw = editor.value;
+            const a = raw.lastIndexOf("\n", Math.max(0, s - 1)) + 1;
+            const b = raw.indexOf("\n", e);
+            const end = b === -1 ? raw.length : b;
+            const block = raw.slice(a, end).split("\n").map(line => prefix + line).join("\n");
+            editor.value = raw.slice(0, a) + block + raw.slice(end);
+            editor.selectionStart = a;
+            editor.selectionEnd = a + block.length;
+            editor.focus();
+            pushHistory();
+          };
+          const mkBtn = (label, fn) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "sched-icon-btn";
+            b.textContent = label;
+            b.addEventListener("click", fn);
+            return b;
+          };
+          const undoBtn = mkBtn("Undo", () => {
+            if (histIndex <= 0) return;
+            histIndex -= 1;
+            editor.value = history[histIndex];
+          });
+          const redoBtn = mkBtn("Redo", () => {
+            if (histIndex >= history.length - 1) return;
+            histIndex += 1;
+            editor.value = history[histIndex];
+          });
+          const findInp = document.createElement("input");
+          findInp.type = "search";
+          findInp.placeholder = "Find text";
+          findInp.className = "sched-date-jump";
+          const findBtn = mkBtn("Find", () => {
+            const q = findInp.value.trim();
+            if (!q) return;
+            const startFrom = Math.max(editor.selectionEnd || 0, 0);
+            const src = editor.value.toLowerCase();
+            const term = q.toLowerCase();
+            let idx = src.indexOf(term, startFrom);
+            if (idx === -1) idx = src.indexOf(term, 0);
+            if (idx === -1) { toast("No match"); return; }
+            editor.focus();
+            editor.selectionStart = idx;
+            editor.selectionEnd = idx + term.length;
+          });
+          toolbar.append(
+            mkBtn("Bold", () => applyWrap("**", "**")),
+            mkBtn("Italic", () => applyWrap("*", "*")),
+            mkBtn("Underline", () => applyWrap("__", "__")),
+            mkBtn("H2", () => applyPrefix("## ")),
+            mkBtn("• List", () => applyPrefix("- ")),
+            mkBtn("1. List", () => applyPrefix("1. ")),
+            mkBtn("Align L", () => applyPrefix("[left] ")),
+            mkBtn("Center", () => applyPrefix("[center] ")),
+            mkBtn("Align R", () => applyPrefix("[right] ")),
+            undoBtn,
+            redoBtn,
+            findInp,
+            findBtn
+          );
+          let wordSaveTimer = null;
+          const persistWord = () => {
+            clearTimeout(wordSaveTimer);
+            pushHistory();
+            wordSaveTimer = setTimeout(() => updateDocument(openDoc.id, { content: { ...openDoc.content, text: editor.value } }), 250);
+          };
+          editor.addEventListener("input", persistWord);
+          editorSec.append(toolbar, editor);
+        } else if (openDoc.type === "excel") {
+          if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("excel");
+          if (!Array.isArray(openDoc.content.sheets) || openDoc.content.sheets.length === 0) openDoc.content.sheets = defaultDocumentContent("excel").sheets;
+          if (typeof openDoc.content.activeSheet !== "number") openDoc.content.activeSheet = 0;
+          const bar = document.createElement("div");
+          bar.className = "sched-toolbar";
+          const sheetSel = document.createElement("select");
+          openDoc.content.sheets.forEach((s, i) => {
+            const o = document.createElement("option"); o.value = String(i); o.textContent = s.name || `Sheet ${i + 1}`;
+            if (i === openDoc.content.activeSheet) o.selected = true;
+            sheetSel.appendChild(o);
+          });
+          sheetSel.addEventListener("change", () => { openDoc.content.activeSheet = Number(sheetSel.value) || 0; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
+          const addSheetBtn = document.createElement("button");
+          addSheetBtn.type = "button";
+          addSheetBtn.className = "sched-icon-btn";
+          addSheetBtn.textContent = "+ Sheet";
+          addSheetBtn.addEventListener("click", () => {
+            openDoc.content.sheets.push({ id: uid(), name: `Sheet${openDoc.content.sheets.length + 1}`, rows: 18, cols: 8, cells: {} });
+            openDoc.content.activeSheet = openDoc.content.sheets.length - 1;
+            updateDocument(openDoc.id, { content: openDoc.content });
+            render();
+          });
+          bar.append(sheetSel, addSheetBtn);
+          editorSec.appendChild(bar);
+          const active = openDoc.content.sheets[Math.max(0, Math.min(openDoc.content.activeSheet, openDoc.content.sheets.length - 1))];
+          if (!active.cells || typeof active.cells !== "object") active.cells = {};
+          const tableWrap = document.createElement("div");
+          tableWrap.className = "sched-grid-wrap";
+          const table = document.createElement("table");
+          table.style.width = "100%";
+          table.style.borderCollapse = "collapse";
+          const cols = Math.min(12, Math.max(4, Number(active.cols) || 8));
+          const rows = Math.min(40, Math.max(8, Number(active.rows) || 18));
+          const labelFor = (r, c) => `${String.fromCharCode(65 + c)}${r + 1}`;
+          function evalArithmetic(expr) {
+            const s = String(expr || "").replace(/\s+/g, "");
+            if (!s) return 0;
+            let i = 0;
+            const parseExpression = () => {
+              let v = parseTerm();
+              while (i < s.length && (s[i] === "+" || s[i] === "-")) {
+                const op = s[i++];
+                const rhs = parseTerm();
+                v = op === "+" ? v + rhs : v - rhs;
+              }
+              return v;
+            };
+            const parseTerm = () => {
+              let v = parseFactor();
+              while (i < s.length && (s[i] === "*" || s[i] === "/")) {
+                const op = s[i++];
+                const rhs = parseFactor();
+                if (op === "/") {
+                  if (rhs === 0) throw new Error("div by zero");
+                  v = v / rhs;
+                } else v = v * rhs;
+              }
+              return v;
+            };
+            const parseFactor = () => {
+              if (s[i] === "+") { i += 1; return parseFactor(); }
+              if (s[i] === "-") { i += 1; return -parseFactor(); }
+              if (s[i] === "(") {
+                i += 1;
+                const v = parseExpression();
+                if (s[i] !== ")") throw new Error("paren");
+                i += 1;
+                return v;
+              }
+              let start = i;
+              while (i < s.length && /[0-9.]/.test(s[i])) i += 1;
+              if (start === i) throw new Error("num");
+              const num = Number(s.slice(start, i));
+              if (!Number.isFinite(num)) throw new Error("num");
+              return num;
+            };
+            const out = parseExpression();
+            if (i !== s.length) throw new Error("tail");
+            return out;
+          }
+          const evalCell = (ref, depth = 0) => {
+            if (depth > 10) return "#ERR";
+            const raw = String((active.cells[ref] && active.cells[ref].v) || "");
+            if (!raw.startsWith("=")) return raw;
+            const expr = raw.slice(1).replace(/[A-Z]+[0-9]+/g, (m) => {
+              const v = evalCell(m, depth + 1);
+              const n = Number(v);
+              return Number.isFinite(n) ? String(n) : "0";
+            });
+            try {
+              if (!/^[0-9+\-*/().\s]+$/.test(expr)) return "#ERR";
+              const out = evalArithmetic(expr);
+              return Number.isFinite(out) ? String(out) : "#ERR";
+            } catch { return "#ERR"; }
+          };
+          const thead = document.createElement("thead");
+          const hrow = document.createElement("tr");
+          hrow.appendChild(document.createElement("th"));
+          for (let c = 0; c < cols; c += 1) {
+            const th = document.createElement("th");
+            th.textContent = String.fromCharCode(65 + c);
+            th.style.border = "1px solid var(--border)";
+            th.style.padding = "0.3rem";
+            hrow.appendChild(th);
+          }
+          thead.appendChild(hrow);
+          table.appendChild(thead);
+          const tbody = document.createElement("tbody");
+          for (let r = 0; r < rows; r += 1) {
+            const tr = document.createElement("tr");
+            const rowHead = document.createElement("th");
+            rowHead.textContent = String(r + 1);
+            rowHead.style.border = "1px solid var(--border)";
+            rowHead.style.padding = "0.25rem";
+            tr.appendChild(rowHead);
+            for (let c = 0; c < cols; c += 1) {
+              const key = labelFor(r, c);
+              const td = document.createElement("td");
+              td.style.border = "1px solid var(--border)";
+              td.style.padding = "0";
+              const inp = document.createElement("input");
+              inp.type = "text";
+              inp.value = String((active.cells[key] && active.cells[key].v) || "");
+              inp.style.width = "100%";
+              inp.style.border = "none";
+              inp.style.padding = "0.3rem";
+              inp.title = key;
+              inp.addEventListener("change", () => {
+                active.cells[key] = { v: inp.value };
+                updateDocument(openDoc.id, { content: openDoc.content });
+              });
+              inp.addEventListener("blur", () => {
+                if (inp.value.startsWith("=")) inp.placeholder = evalCell(key);
+              });
+              td.appendChild(inp);
+              tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+          }
+          table.appendChild(tbody);
+          tableWrap.appendChild(table);
+          editorSec.appendChild(tableWrap);
+        } else {
+          if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("powerpoint");
+          if (!Array.isArray(openDoc.content.slides) || openDoc.content.slides.length === 0) openDoc.content.slides = defaultDocumentContent("powerpoint").slides;
+          if (typeof openDoc.content.activeSlide !== "number") openDoc.content.activeSlide = 0;
+          const deckWrap = document.createElement("div");
+          deckWrap.className = "schedule-layout";
+          const left = document.createElement("div");
+          left.className = "dep-list";
+          left.style.minWidth = "230px";
+          openDoc.content.slides.forEach((s, idx) => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "dep-chip clickable" + (idx === openDoc.content.activeSlide ? " active" : "");
+            b.style.width = "100%";
+            b.style.marginBottom = "0.3rem";
+            b.innerHTML = `<span class="dep-kind">Slide ${idx + 1}</span><span class="dep-name">${escapeHtml(s.title || "(untitled)")}</span>`;
+            b.addEventListener("click", () => { openDoc.content.activeSlide = idx; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
+            left.appendChild(b);
+          });
+          const slideActions = document.createElement("div");
+          slideActions.className = "row-actions";
+          const addSlide = document.createElement("button"); addSlide.textContent = "+ Slide";
+          addSlide.addEventListener("click", () => {
+            openDoc.content.slides.push({ id: uid(), title: "New slide", body: "", bg: "#2563eb" });
+            openDoc.content.activeSlide = openDoc.content.slides.length - 1;
+            updateDocument(openDoc.id, { content: openDoc.content });
+            render();
+          });
+          const delSlide = document.createElement("button"); delSlide.className = "danger"; delSlide.textContent = "Delete slide";
+          delSlide.addEventListener("click", () => {
+            if (openDoc.content.slides.length <= 1) return;
+            openDoc.content.slides.splice(openDoc.content.activeSlide, 1);
+            openDoc.content.activeSlide = Math.max(0, openDoc.content.activeSlide - 1);
+            updateDocument(openDoc.id, { content: openDoc.content });
+            render();
+          });
+          slideActions.append(addSlide, delSlide);
+          left.appendChild(slideActions);
+          deckWrap.appendChild(left);
+
+          const slide = openDoc.content.slides[Math.max(0, Math.min(openDoc.content.activeSlide, openDoc.content.slides.length - 1))];
+          const slideEditor = document.createElement("div");
+          slideEditor.className = "task-detail";
+          const titleL = document.createElement("label");
+          titleL.textContent = "Slide title";
+          const titleI = document.createElement("input");
+          titleI.type = "text";
+          titleI.value = slide.title || "";
+          titleL.appendChild(titleI);
+          const bodyL = document.createElement("label");
+          bodyL.textContent = "Slide content";
+          const bodyI = document.createElement("textarea");
+          bodyI.value = slide.body || "";
+          bodyI.style.minHeight = "180px";
+          bodyL.appendChild(bodyI);
+          const bgL = document.createElement("label");
+          bgL.textContent = "Background";
+          const bgI = document.createElement("input");
+          bgI.type = "color";
+          bgI.value = slide.bg || "#2563eb";
+          bgL.appendChild(bgI);
+          const preview = document.createElement("div");
+          preview.className = "hero";
+          preview.style.marginTop = "0.8rem";
+          const renderPreview = () => {
+            preview.style.background = bgI.value;
+            preview.style.color = "#fff";
+            preview.innerHTML = `<h2 style="margin:0 0 0.5rem">${escapeHtml(titleI.value || "Title")}</h2><div style="white-space:pre-wrap">${escapeHtml(bodyI.value || "")}</div>`;
+          };
+          [titleI, bodyI, bgI].forEach(inp => inp.addEventListener("input", renderPreview));
+          renderPreview();
+          const saveSlide = document.createElement("button");
+          saveSlide.type = "button";
+          saveSlide.className = "primary";
+          saveSlide.textContent = "Save slide";
+          saveSlide.addEventListener("click", () => {
+            slide.title = titleI.value;
+            slide.body = bodyI.value;
+            slide.bg = bgI.value;
+            updateDocument(openDoc.id, { content: openDoc.content });
+            render();
+          });
+          slideEditor.append(titleL, bodyL, bgL, saveSlide, preview);
+          deckWrap.appendChild(slideEditor);
+          editorSec.appendChild(deckWrap);
+        }
+      }
+      layout.appendChild(editorSec);
+      root.appendChild(layout);
+    }
+
+    function renderHome(root) {
     const sec = document.createElement("section");
     sec.dataset.panelId = "portfolios";
     const head = document.createElement("div");
@@ -4684,6 +5332,28 @@
       panel.appendChild(depField);
     }
 
+    const linkedDocs = linkedDocumentsForEntity("activity", a.id);
+    if (linkedDocs.length) {
+      const docsField = document.createElement("div");
+      docsField.className = "td-field";
+      docsField.innerHTML = `<div class="td-label">Documents</div>`;
+      const docsWrap = document.createElement("div");
+      docsWrap.className = "dep-list";
+      linkedDocs.forEach((doc) => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "dep-chip clickable";
+        chip.innerHTML = `<span class="dep-kind">${escapeHtml(doc.type)}</span><span class="dep-name">${escapeHtml(doc.name)}</span>`;
+        chip.addEventListener("click", () => {
+          documentsState.openId = doc.id;
+          navigate({ name: "documents" });
+        });
+        docsWrap.appendChild(chip);
+      });
+      docsField.appendChild(docsWrap);
+      panel.appendChild(docsField);
+    }
+
     // photos (read-only here; edit to add/remove)
     if (a.images && a.images.length) {
       const imgField = document.createElement("div");
@@ -4747,6 +5417,7 @@
 
     let depsBuffer = [...(a.dependencies || [])];
     const depsEditor = buildDependencyEditor("activity", a.id, depsBuffer, (next) => { depsBuffer = next; });
+    const docSel = buildDocumentSelector(a.docLinks || []);
 
     const imgL = document.createElement("div");
     imgL.className = "full meta-field";
@@ -4767,6 +5438,7 @@
         priority: priI.value,
         notes: notesI.value,
         dependencies: depsBuffer,
+        docLinks: docSel.getSelected(),
       });
       editingTaskId = null;
       expandedTaskId = a.id;
@@ -4777,7 +5449,7 @@
     cancelBtn.addEventListener("click", () => { editingTaskId = null; render(); });
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, colorAL, priL, notesL, depsEditor, imgL, rowActs);
+    form.append(nameL, colorAL, priL, notesL, depsEditor, docSel.wrap, imgL, rowActs);
     return form;
   }
 
@@ -4963,6 +5635,7 @@
 
     let depsBuffer = [...(p.dependencies || [])];
     const depsEditor = buildDependencyEditor("portfolio", p.id, depsBuffer, (next) => { depsBuffer = next; });
+    const docSel = buildDocumentSelector(p.docLinks || []);
 
     // color picker
     let colorValue = p.color || PORTFOLIO_PALETTE[0];
@@ -4980,6 +5653,7 @@
         name: (nameI.value || "").trim() || p.name,
         notes: notesI.value,
         dependencies: depsBuffer,
+        docLinks: docSel.getSelected(),
       });
       render();
     });
@@ -4988,7 +5662,7 @@
     cancelBtn.addEventListener("click", () => render());
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, colorL, notesL, depsEditor, rowActs);
+    form.append(nameL, colorL, notesL, depsEditor, docSel.wrap, rowActs);
 
     const existing = heroEl.querySelector(".meta-form");
     if (existing) existing.remove();
@@ -5029,6 +5703,7 @@
 
     let depsBuffer = [...(p.dependencies || [])];
     const depsEditor = buildDependencyEditor('project', p.id, depsBuffer, (next) => { depsBuffer = next; });
+    const docSel = buildDocumentSelector(p.docLinks || []);
 
     const rowActs = document.createElement('div'); rowActs.className = 'row-actions';
     const saveBtn = document.createElement('button'); saveBtn.className = 'primary'; saveBtn.textContent = 'Save';
@@ -5045,6 +5720,7 @@
         estimatedHours: est === '' ? null : Number(est),
         description: descI.value,
         dependencies: depsBuffer,
+        docLinks: docSel.getSelected(),
       });
       render();
       if (becameDone) celebrateComplete('Project complete — nice work!');
@@ -5052,7 +5728,7 @@
     cancelBtn.addEventListener('click', () => render());
     rowActs.append(saveBtn, cancelBtn);
 
-    form.append(nameL, colorPL, stL, dueL, estL, descL, depsEditor, rowActs);
+    form.append(nameL, colorPL, stL, dueL, estL, descL, depsEditor, docSel.wrap, rowActs);
     const existing = heroEl.querySelector('.meta-form'); if (existing) existing.remove();
     heroEl.appendChild(form);
     nameI.focus(); nameI.select();
@@ -5265,6 +5941,7 @@
     if (kind === "portfolio") return portfolioById(id);
     if (kind === "project")   return projectById(id);
     if (kind === "activity")  return activityById(id);
+    if (kind === "event")     return scheduleEventById(id);
     return null;
   }
 
@@ -6405,12 +7082,7 @@
         return;
       }
       if (!confirm("Replace all current data with the imported file? This can't be undone.")) return;
-      state = parsed;
-      for (const e of state.entries) if (!Array.isArray(e.tags)) e.tags = [];
-      for (const p of state.portfolios) { if (typeof p.notes !== "string") p.notes = ""; if (!Array.isArray(p.dependencies)) p.dependencies = []; }
-      for (const p of state.projects)   { if (!Array.isArray(p.dependencies)) p.dependencies = []; }
-      for (const a of state.activities) { if (typeof a.notes !== "string") a.notes = ""; if (!Array.isArray(a.dependencies)) a.dependencies = []; }
-      if (!state.panelLayouts || typeof state.panelLayouts !== "object") state.panelLayouts = {};
+      state = backfillState(parsed);
       save();
       render();
       toast("Imported backup");
@@ -6422,18 +7094,26 @@
   // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
   // -------------------------------------------------------------------------
   const planState = { scope: "all", scopeId: "", searchQuery: "", viewMode: "moderate" };
+  const documentsState = { query: "", type: "all", sort: "updated", openId: null };
 
   const scheduleState = {
     view: "week",   // day | week | month
-    cursor: new Date().toISOString(),
+    cursors: {
+      day: new Date().toISOString(),
+      week: new Date().toISOString(),
+      month: new Date().toISOString(),
+    },
+    density: "comfortable", // comfortable | compact
   };
   let scheduleEditorEl = null;
 
   function scheduleCursorDate() {
-    return new Date(scheduleState.cursor);
+    const iso = scheduleState.cursors[scheduleState.view] || new Date().toISOString();
+    return new Date(iso);
   }
-  function scheduleSaveCursor(date) {
-    scheduleState.cursor = date.toISOString();
+  function scheduleSaveCursor(date, viewName) {
+    const key = viewName || scheduleState.view;
+    scheduleState.cursors[key] = date.toISOString();
   }
   function scheduleAdjustCursor(direction) {
     const cursor = scheduleCursorDate();
@@ -6447,7 +7127,21 @@
     scheduleSaveCursor(cursor);
     render();
   }
+  function scheduleJumpToDate(dateStr) {
+    if (!dateStr) return;
+    const [y, m, d] = dateStr.split("-").map(Number);
+    if (!y || !m || !d) return;
+    const next = new Date(y, m - 1, d, 12, 0, 0, 0);
+    scheduleSaveCursor(next, "day");
+    scheduleSaveCursor(next, "week");
+    scheduleSaveCursor(next, "month");
+    render();
+  }
   function scheduleSetView(view) {
+    const oldCursor = scheduleCursorDate();
+    scheduleSaveCursor(oldCursor, scheduleState.view);
+    const nextCursor = new Date(scheduleState.cursors[view] || oldCursor.toISOString());
+    scheduleSaveCursor(nextCursor, view);
     scheduleState.view = view;
     render();
   }
@@ -6508,6 +7202,164 @@
       d.setDate(start.getDate() + i);
       return d;
     });
+  }
+  function scheduleVisibleBounds(cursor, viewMode) {
+    if (viewMode === "day") {
+      const from = startOfDay(cursor).getTime();
+      return { from, to: from + MS_DAY };
+    }
+    if (viewMode === "week") {
+      const start = startOfWeek(cursor).getTime();
+      return { from: start, to: start + 7 * MS_DAY };
+    }
+    const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+    const from = startOfWeek(first).getTime();
+    return { from, to: from + 42 * MS_DAY };
+  }
+  function scheduleVisibleEvents(cursor, viewMode) {
+    const bounds = scheduleVisibleBounds(cursor, viewMode);
+    return scheduleEventsInRange(bounds.from, bounds.to);
+  }
+
+  function documentById(id) {
+    return state.documents.find(d => d.id === id) || null;
+  }
+  function defaultDocumentContent(type) {
+    if (type === "excel") {
+      return { sheets: [{ id: uid(), name: "Sheet1", rows: 18, cols: 8, cells: {} }], activeSheet: 0 };
+    }
+    if (type === "powerpoint") {
+      return { slides: [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb" }], activeSlide: 0 };
+    }
+    return { text: "## Untitled document\n\nStart writing…\n" };
+  }
+  function createDocument(type) {
+    if (!["word", "excel", "powerpoint"].includes(type)) return null;
+    const now = new Date().toISOString();
+    const id = uid();
+    const baseName = type === "word" ? "Document" : type === "excel" ? "Workbook" : "Presentation";
+    const doc = {
+      id,
+      type,
+      name: `${baseName} ${state.documents.length + 1}`,
+      createdAt: now,
+      updatedAt: now,
+      content: defaultDocumentContent(type),
+    };
+    state.documents.unshift(doc);
+    highlight(id);
+    logEvent("createDocument", { id, type, name: doc.name });
+    save();
+    return doc;
+  }
+  function updateDocument(id, patch) {
+    const doc = documentById(id);
+    if (!doc) return;
+    Object.assign(doc, patch);
+    doc.updatedAt = new Date().toISOString();
+    save();
+  }
+  function deleteDocument(id) {
+    const doc = documentById(id);
+    if (!doc) return;
+    state.documents = state.documents.filter(d => d.id !== id);
+    const clear = (arr) => { for (const item of arr) item.docLinks = (item.docLinks || []).filter(x => x !== id); };
+    clear(state.portfolios); clear(state.projects); clear(state.activities); clear(state.events);
+    if (documentsState.openId === id) documentsState.openId = null;
+    logEvent("deleteDocument", { id, name: doc.name });
+    save();
+  }
+  function duplicateDocument(id) {
+    const src = documentById(id);
+    if (!src) return null;
+    const now = new Date().toISOString();
+    const copy = JSON.parse(JSON.stringify(src));
+    copy.id = uid();
+    copy.name = `${src.name} (copy)`;
+    copy.createdAt = now;
+    copy.updatedAt = now;
+    state.documents.unshift(copy);
+    logEvent("duplicateDocument", { from: id, to: copy.id });
+    save();
+    return copy;
+  }
+  function ensureEntityDocLinks(entity) {
+    if (!entity || !Array.isArray(entity.docLinks)) entity.docLinks = [];
+    return entity.docLinks;
+  }
+  function docLinkTargets() {
+    const out = [];
+    for (const pf of state.portfolios) out.push({ key: `portfolio:${pf.id}`, kind: "portfolio", id: pf.id, label: `Portfolio · ${pf.name}` });
+    for (const p of state.projects) out.push({ key: `project:${p.id}`, kind: "project", id: p.id, label: `Project · ${p.name}` });
+    for (const a of state.activities) {
+      const p = projectById(a.projectId);
+      out.push({ key: `activity:${a.id}`, kind: "activity", id: a.id, label: `Task · ${a.name}${p ? " (" + p.name + ")" : ""}` });
+    }
+    for (const ev of state.events) out.push({ key: `event:${ev.id}`, kind: "event", id: ev.id, label: `Event · ${ev.title} (${fmtDateShort(ev.start)})` });
+    return out;
+  }
+  function linkedTargetKeysForDocument(docId) {
+    const keys = new Set();
+    for (const t of docLinkTargets()) {
+      const ent = entityByKind(t.kind, t.id);
+      if (ent && Array.isArray(ent.docLinks) && ent.docLinks.includes(docId)) keys.add(t.key);
+    }
+    return keys;
+  }
+  function applyDocumentTargetKeys(docId, keySet) {
+    for (const t of docLinkTargets()) {
+      const ent = entityByKind(t.kind, t.id);
+      if (!ent) continue;
+      const links = ensureEntityDocLinks(ent);
+      const has = links.includes(docId);
+      const should = keySet.has(t.key);
+      if (should && !has) links.push(docId);
+      if (!should && has) ent.docLinks = links.filter(x => x !== docId);
+    }
+    save();
+  }
+  function linkedDocumentsForEntity(kind, id) {
+    const ent = entityByKind(kind, id);
+    if (!ent || !Array.isArray(ent.docLinks) || ent.docLinks.length === 0) return [];
+    return ent.docLinks.map(documentById).filter(Boolean);
+  }
+  function buildDocumentSelector(initialIds) {
+    const selected = new Set((initialIds || []).filter(Boolean));
+    const wrap = document.createElement("div");
+    wrap.className = "full";
+    const heading = document.createElement("div");
+    heading.style.fontSize = "0.78rem";
+    heading.style.color = "var(--muted)";
+    heading.style.marginBottom = "0.25rem";
+    heading.textContent = "Documents";
+    const list = document.createElement("div");
+    list.className = "dep-list";
+    wrap.append(heading, list);
+    if (state.documents.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "dep-empty";
+      empty.textContent = "No documents yet. Create one in Documents view.";
+      list.appendChild(empty);
+    } else {
+      state.documents.forEach((d) => {
+        const row = document.createElement("label");
+        row.className = "sched-check";
+        row.style.display = "flex";
+        row.style.justifyContent = "space-between";
+        const left = document.createElement("span");
+        left.textContent = `${d.name} · ${d.type}`;
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.checked = selected.has(d.id);
+        cb.addEventListener("change", () => {
+          if (cb.checked) selected.add(d.id);
+          else selected.delete(d.id);
+        });
+        row.append(left, cb);
+        list.appendChild(row);
+      });
+    }
+    return { wrap, getSelected: () => [...selected] };
   }
 
   function planScopeItems() {
@@ -7586,6 +8438,12 @@
     for (const ev of state.events || []) {
       if ((ev.title||'').toLowerCase().includes(q) || (ev.notes||'').toLowerCase().includes(q)) out.push({ kind: 'event', id: ev.id, title: ev.title, snippet: ev.notes || '' });
     }
+    for (const d of state.documents || []) {
+      const text = d.type === "word"
+        ? (d.content && (d.content.text || d.content.html) ? String(d.content.text || d.content.html).replace(/<[^>]+>/g, " ") : "")
+        : JSON.stringify(d.content || {});
+      if ((d.name || "").toLowerCase().includes(q) || text.toLowerCase().includes(q)) out.push({ kind: 'document', id: d.id, title: d.name, snippet: `${d.type} document` });
+    }
     for (const e of state.entries || []) {
       const tags = (e.tags || []).join(' ');
       if ((e.notes||'').toLowerCase().includes(q) || tags.toLowerCase().includes(q)) out.push({ kind: 'entry', id: e.id, title: `Entry ${e.id}`, snippet: e.notes || '' });
@@ -7904,6 +8762,15 @@
     }
     if (isInput) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (view.name === "schedule") {
+      if (e.key === "ArrowLeft") { e.preventDefault(); scheduleAdjustCursor(-1); return; }
+      if (e.key === "ArrowRight") { e.preventDefault(); scheduleAdjustCursor(1); return; }
+      if (e.key === "t" || e.key === "T") { e.preventDefault(); scheduleJumpToDate(isoToDateInput(new Date().toISOString())); return; }
+      if (e.key === "d" || e.key === "D") { e.preventDefault(); scheduleSetView("day"); return; }
+      if (e.key === "w" || e.key === "W") { e.preventDefault(); scheduleSetView("week"); return; }
+      if (e.key === "m" || e.key === "M") { e.preventDefault(); scheduleSetView("month"); return; }
+      if (e.key === "n" || e.key === "N") { e.preventDefault(); openScheduleEditor(null, scheduleCursorDate()); return; }
+    }
     if (e.key === "n" || e.key === "N") {
       const inp = document.querySelector("section .add-row input[type=text]");
       if (inp) { e.preventDefault(); inp.focus(); }
@@ -8564,6 +9431,7 @@
         ["Portfolios", localState.portfolios, cloudState.portfolios],
         ["Projects", localState.projects, cloudState.projects],
         ["Tasks", localState.activities, cloudState.activities],
+        ["Documents", localState.documents || [], cloudState.documents || []],
       ];
       let anyChange = false;
       for (const [label, lArr, cArr] of entityDefs) {
@@ -8669,7 +9537,7 @@
       if (error) throw error;
       if (data && data.state) {
         const localHasData = state.portfolios.length || state.projects.length || state.entries.length ||
-          (state.events && state.events.length);
+          (state.events && state.events.length) || (state.documents && state.documents.length);
         const differs = !statesEquivalent(state, data.state);
         if (localHasData && differs) {
           const choice = await showSyncConflict(state, data.state, data.updated_at);
@@ -8747,8 +9615,7 @@
     clearTimeout(cloudPushTimer);          // cancel any pending debounced push
     cloudPulling = false;
     // wipe data but keep current device appearance prefs so the UI doesn't flip
-    state = { portfolios: [], projects: [], activities: [], entries: [],
-              panelLayouts: {}, settings: state.settings };
+    state = { ...freshState(), settings: state.settings };
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
     view = { name: "home" };
     location.hash = "";                    // back to the empty/home route
