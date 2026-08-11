@@ -2559,7 +2559,6 @@
     for (const p of s.portfolios) if (!Array.isArray(p.docLinks)) p.docLinks = [];
     for (const p of s.projects)   if (!Array.isArray(p.docLinks)) p.docLinks = [];
     for (const a of s.activities) if (!Array.isArray(a.docLinks)) a.docLinks = [];
-    for (const ev of s.events) if (!Array.isArray(ev.docLinks)) ev.docLinks = [];
     for (const d of s.documents) {
       if (!d.id) d.id = uid();
       if (typeof d.type !== "string" || !["word", "excel", "powerpoint"].includes(d.type)) d.type = "word";
@@ -2568,15 +2567,20 @@
       if (typeof d.updatedAt !== "string") d.updatedAt = d.createdAt;
       if (!d.content || typeof d.content !== "object") d.content = {};
       if (d.type === "word") {
-        if (typeof d.content.html !== "string") d.content.html = "<p></p>";
+        if (typeof d.content.text !== "string") {
+          if (typeof d.content.html === "string") d.content.text = d.content.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+          else d.content.text = "Untitled document\n";
+        }
       } else if (d.type === "excel") {
         if (!Array.isArray(d.content.sheets) || d.content.sheets.length === 0) {
           d.content.sheets = [{ id: uid(), name: "Sheet1", rows: 18, cols: 8, cells: {} }];
         }
+        if (typeof d.content.activeSheet !== "number") d.content.activeSheet = 0;
       } else if (d.type === "powerpoint") {
         if (!Array.isArray(d.content.slides) || d.content.slides.length === 0) {
           d.content.slides = [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb" }];
         }
+        if (typeof d.content.activeSlide !== "number") d.content.activeSlide = 0;
       }
     }
     // backfill task completion flag
@@ -4302,52 +4306,105 @@
 
         if (openDoc.type === "word") {
           if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("word");
+          if (typeof openDoc.content.text !== "string") openDoc.content.text = "Untitled document\n";
           const toolbar = document.createElement("div");
           toolbar.className = "sched-toolbar";
-          const mkCmd = (label, cmd, val) => {
+          const editor = document.createElement("textarea");
+          editor.className = "settings-body";
+          editor.style.minHeight = "320px";
+          editor.style.width = "100%";
+          editor.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
+          editor.value = openDoc.content.text || "";
+
+          const history = [editor.value];
+          let histIndex = 0;
+          const pushHistory = () => {
+            const v = editor.value;
+            if (history[histIndex] === v) return;
+            history.splice(histIndex + 1);
+            history.push(v);
+            histIndex = history.length - 1;
+          };
+          const applyWrap = (pre, post) => {
+            const s = editor.selectionStart || 0;
+            const e = editor.selectionEnd || 0;
+            const raw = editor.value;
+            const inner = raw.slice(s, e) || "text";
+            editor.value = raw.slice(0, s) + pre + inner + post + raw.slice(e);
+            editor.selectionStart = s + pre.length;
+            editor.selectionEnd = s + pre.length + inner.length;
+            editor.focus();
+            pushHistory();
+          };
+          const applyPrefix = (prefix) => {
+            const s = editor.selectionStart || 0;
+            const e = editor.selectionEnd || 0;
+            const raw = editor.value;
+            const a = raw.lastIndexOf("\n", Math.max(0, s - 1)) + 1;
+            const b = raw.indexOf("\n", e);
+            const end = b === -1 ? raw.length : b;
+            const block = raw.slice(a, end).split("\n").map(line => prefix + line).join("\n");
+            editor.value = raw.slice(0, a) + block + raw.slice(end);
+            editor.selectionStart = a;
+            editor.selectionEnd = a + block.length;
+            editor.focus();
+            pushHistory();
+          };
+          const mkBtn = (label, fn) => {
             const b = document.createElement("button");
             b.type = "button";
             b.className = "sched-icon-btn";
             b.textContent = label;
-            b.addEventListener("click", () => document.execCommand(cmd, false, val));
+            b.addEventListener("click", fn);
             return b;
           };
+          const undoBtn = mkBtn("Undo", () => {
+            if (histIndex <= 0) return;
+            histIndex -= 1;
+            editor.value = history[histIndex];
+          });
+          const redoBtn = mkBtn("Redo", () => {
+            if (histIndex >= history.length - 1) return;
+            histIndex += 1;
+            editor.value = history[histIndex];
+          });
           const findInp = document.createElement("input");
           findInp.type = "search";
           findInp.placeholder = "Find text";
           findInp.className = "sched-date-jump";
-          const findBtn = document.createElement("button");
-          findBtn.type = "button";
-          findBtn.className = "sched-icon-btn";
-          findBtn.textContent = "Find";
-          findBtn.addEventListener("click", () => {
+          const findBtn = mkBtn("Find", () => {
             const q = findInp.value.trim();
             if (!q) return;
-            if (!window.find(q, false, false, true, false, false, false)) toast("No match");
+            const startFrom = Math.max(editor.selectionEnd || 0, 0);
+            const src = editor.value.toLowerCase();
+            const term = q.toLowerCase();
+            let idx = src.indexOf(term, startFrom);
+            if (idx === -1) idx = src.indexOf(term, 0);
+            if (idx === -1) { toast("No match"); return; }
+            editor.focus();
+            editor.selectionStart = idx;
+            editor.selectionEnd = idx + term.length;
           });
           toolbar.append(
-            mkCmd("B", "bold"),
-            mkCmd("I", "italic"),
-            mkCmd("U", "underline"),
-            mkCmd("• List", "insertUnorderedList"),
-            mkCmd("1. List", "insertOrderedList"),
-            mkCmd("H2", "formatBlock", "<h2>"),
-            mkCmd("Align L", "justifyLeft"),
-            mkCmd("Center", "justifyCenter"),
-            mkCmd("Align R", "justifyRight"),
-            mkCmd("Undo", "undo"),
-            mkCmd("Redo", "redo"),
-            findInp, findBtn
+            mkBtn("Bold", () => applyWrap("**", "**")),
+            mkBtn("Italic", () => applyWrap("*", "*")),
+            mkBtn("Underline", () => applyWrap("__", "__")),
+            mkBtn("H2", () => applyPrefix("## ")),
+            mkBtn("• List", () => applyPrefix("- ")),
+            mkBtn("1. List", () => applyPrefix("1. ")),
+            mkBtn("Align L", () => applyPrefix("[left] ")),
+            mkBtn("Center", () => applyPrefix("[center] ")),
+            mkBtn("Align R", () => applyPrefix("[right] ")),
+            undoBtn,
+            redoBtn,
+            findInp,
+            findBtn
           );
-          const editor = document.createElement("div");
-          editor.className = "task-detail";
-          editor.contentEditable = "true";
-          editor.style.minHeight = "320px";
-          editor.innerHTML = openDoc.content.html || "<p></p>";
           let wordSaveTimer = null;
           const persistWord = () => {
             clearTimeout(wordSaveTimer);
-            wordSaveTimer = setTimeout(() => updateDocument(openDoc.id, { content: { ...openDoc.content, html: editor.innerHTML } }), 250);
+            pushHistory();
+            wordSaveTimer = setTimeout(() => updateDocument(openDoc.id, { content: { ...openDoc.content, text: editor.value } }), 250);
           };
           editor.addEventListener("input", persistWord);
           editorSec.append(toolbar, editor);
@@ -4386,6 +4443,52 @@
           const cols = Math.min(12, Math.max(4, Number(active.cols) || 8));
           const rows = Math.min(40, Math.max(8, Number(active.rows) || 18));
           const labelFor = (r, c) => `${String.fromCharCode(65 + c)}${r + 1}`;
+          function evalArithmetic(expr) {
+            const s = String(expr || "").replace(/\s+/g, "");
+            if (!s) return 0;
+            let i = 0;
+            const parseExpression = () => {
+              let v = parseTerm();
+              while (i < s.length && (s[i] === "+" || s[i] === "-")) {
+                const op = s[i++];
+                const rhs = parseTerm();
+                v = op === "+" ? v + rhs : v - rhs;
+              }
+              return v;
+            };
+            const parseTerm = () => {
+              let v = parseFactor();
+              while (i < s.length && (s[i] === "*" || s[i] === "/")) {
+                const op = s[i++];
+                const rhs = parseFactor();
+                if (op === "/") {
+                  if (rhs === 0) throw new Error("div by zero");
+                  v = v / rhs;
+                } else v = v * rhs;
+              }
+              return v;
+            };
+            const parseFactor = () => {
+              if (s[i] === "+") { i += 1; return parseFactor(); }
+              if (s[i] === "-") { i += 1; return -parseFactor(); }
+              if (s[i] === "(") {
+                i += 1;
+                const v = parseExpression();
+                if (s[i] !== ")") throw new Error("paren");
+                i += 1;
+                return v;
+              }
+              let start = i;
+              while (i < s.length && /[0-9.]/.test(s[i])) i += 1;
+              if (start === i) throw new Error("num");
+              const num = Number(s.slice(start, i));
+              if (!Number.isFinite(num)) throw new Error("num");
+              return num;
+            };
+            const out = parseExpression();
+            if (i !== s.length) throw new Error("tail");
+            return out;
+          }
           const evalCell = (ref, depth = 0) => {
             if (depth > 10) return "#ERR";
             const raw = String((active.cells[ref] && active.cells[ref].v) || "");
@@ -4397,7 +4500,7 @@
             });
             try {
               if (!/^[0-9+\-*/().\s]+$/.test(expr)) return "#ERR";
-              const out = Function(`"use strict"; return (${expr});`)();
+              const out = evalArithmetic(expr);
               return Number.isFinite(out) ? String(out) : "#ERR";
             } catch { return "#ERR"; }
           };
@@ -7128,7 +7231,7 @@
     if (type === "powerpoint") {
       return { slides: [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb" }], activeSlide: 0 };
     }
-    return { html: "<h2>Untitled document</h2><p>Start writing…</p>" };
+    return { text: "## Untitled document\n\nStart writing…\n" };
   }
   function createDocument(type) {
     if (!["word", "excel", "powerpoint"].includes(type)) return null;
@@ -8336,7 +8439,9 @@
       if ((ev.title||'').toLowerCase().includes(q) || (ev.notes||'').toLowerCase().includes(q)) out.push({ kind: 'event', id: ev.id, title: ev.title, snippet: ev.notes || '' });
     }
     for (const d of state.documents || []) {
-      const text = d.type === "word" ? (d.content && d.content.html ? String(d.content.html).replace(/<[^>]+>/g, " ") : "") : JSON.stringify(d.content || {});
+      const text = d.type === "word"
+        ? (d.content && (d.content.text || d.content.html) ? String(d.content.text || d.content.html).replace(/<[^>]+>/g, " ") : "")
+        : JSON.stringify(d.content || {});
       if ((d.name || "").toLowerCase().includes(q) || text.toLowerCase().includes(q)) out.push({ kind: 'document', id: d.id, title: d.name, snippet: `${d.type} document` });
     }
     for (const e of state.entries || []) {
