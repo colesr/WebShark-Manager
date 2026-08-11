@@ -2518,6 +2518,295 @@
     margin-top: 0.1rem;
   }
   .dep-chip.active { outline: 2px solid var(--accent); }
+  .refine-btn.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .sched-hour { height: 48px; }
+  .sched-month { font-size: 0.78rem; }
+  .sched-month .mcell {
+    min-height: 72px;
+  }
+  .sched-month .mday {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-align: right;
+    padding: 1px 3px;
+  }
+  .sched-month .mev {
+    font-size: 0.7rem;
+    padding: 1px 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .sched-month.has-weeknums {
+    grid-template-columns: 42px repeat(7, 1fr);
+  }
+  .sched-month .mhead.weeknum,
+  .sched-month .mweek {
+    background: var(--subtle);
+    color: var(--muted);
+    text-align: center;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.35rem 0.2rem;
+    border-top: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .sched-month .mhead.weeknum {
+    border-top: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .sched-month .mcell.week-start { border-left: none; }
+  .schedule-thumbnail {
+    margin: 0 0 0.9rem;
+    max-width: 420px;
+  }
+  .schedule-thumbnail .sched-month {
+    font-size: 0.72rem;
+  }
+  .schedule-thumbnail .sched-month .mcell {
+    min-height: 52px;
+    padding: 0.18rem;
+  }
+  .schedule-thumbnail .sched-month .mev,
+  .schedule-thumbnail .sched-month .more {
+    display: none;
+  }
+  .doc-editor-fullscreen { grid-template-columns: 1fr !important; }
+  .doc-editor-fullscreen .schedule-side { display: none; }
+  .doc-pane-resizable {
+    resize: horizontal;
+    overflow: auto;
+    min-width: 260px;
+  }
+  .doc-editor-pane {
+    min-width: 0;
+    overflow: auto;
+  }
+  .doc-actions {
+    position: relative;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .doc-share-pop {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    z-index: 20;
+    width: min(360px, 92vw);
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+  }
+  .doc-share-pop input,
+  .doc-share-pop textarea,
+  .doc-share-pop select,
+  .doc-share-pop button,
+  .doc-find-bar input,
+  .doc-find-bar select,
+  .doc-find-bar textarea,
+  .excel-formula-bar input,
+  .ppt-grid input,
+  .ppt-grid select,
+  .ppt-grid textarea,
+  .code-toolbar select,
+  .code-toolbar input {
+    font: inherit;
+  }
+  .doc-find-bar,
+  .excel-formula-bar,
+  .code-status-bar,
+  .ppt-grid,
+  .visio-toolbar {
+    margin-top: 0.6rem;
+  }
+  .doc-find-bar {
+    display: none;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--subtle);
+  }
+  .doc-find-bar.open { display: flex; }
+  .doc-find-bar input {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+  }
+  .doc-word-page {
+    max-width: 800px;
+    margin: 1rem auto;
+    background: #fff;
+    color: #000;
+    min-height: 1000px;
+    padding: 60px 80px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 6px;
+  }
+  .doc-word-editor {
+    min-height: 860px;
+    outline: none;
+    line-height: 1.6;
+  }
+  .doc-word-editor:empty::before {
+    content: attr(data-placeholder);
+    color: #6b7280;
+  }
+  .excel-toolbar,
+  .code-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .excel-toolbar .sched-icon-btn,
+  .code-toolbar .sched-icon-btn,
+  .visio-toolbar .sched-icon-btn {
+    margin: 0;
+  }
+  .excel-formula-bar {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .excel-formula-bar input {
+    padding: 0.45rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+  }
+  .excel-sheet {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  .excel-sheet th,
+  .excel-sheet td {
+    border: 1px solid var(--border);
+  }
+  .excel-sheet th {
+    background: var(--subtle);
+    font-size: 0.78rem;
+    padding: 0.35rem;
+    text-align: center;
+  }
+  .excel-sheet td { padding: 0; }
+  .excel-sheet input {
+    width: 100%;
+    border: none;
+    padding: 0.42rem 0.5rem;
+    background: transparent;
+    color: var(--text);
+  }
+  .excel-sheet input:focus { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .ppt-grid {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .ppt-grid label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  .ppt-grid input,
+  .ppt-grid select,
+  .ppt-grid textarea {
+    padding: 0.45rem 0.55rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+  }
+  .ppt-grid textarea { min-height: 120px; resize: vertical; }
+  .ppt-preview {
+    width: 100%;
+    max-width: 900px;
+    aspect-ratio: 16 / 9;
+    min-height: 320px;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.16);
+    position: relative;
+    color: #fff;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    background-size: cover;
+    background-position: center;
+  }
+  .ppt-preview.two-content .ppt-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .ppt-preview.blank .ppt-title,
+  .ppt-preview.blank .ppt-body,
+  .ppt-preview.title-only .ppt-body { display: none; }
+  .ppt-preview .ppt-title {
+    margin: 0 0 1rem;
+    white-space: pre-wrap;
+  }
+  .ppt-preview .ppt-body {
+    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  .ppt-preview .ppt-bullets {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+  .visio-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+  }
+  .visio-stage {
+    margin-top: 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: auto;
+    background: color-mix(in srgb, var(--subtle) 65%, transparent);
+  }
+  .visio-canvas {
+    display: block;
+    width: 100%;
+    min-width: 800px;
+    background: #fff;
+    cursor: crosshair;
+  }
+  .code-editor {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-size: 0.875rem;
+    tab-size: 2;
+    padding: 1rem;
+    line-height: 1.6;
+    border-radius: 4px;
+    min-height: 400px;
+    width: 100%;
+    resize: vertical;
+    border: 1px solid #111827;
+  }
+  .code-status-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
   @media (max-width: 980px) {
     .schedule-layout { grid-template-columns: 1fr; }
     .schedule-side { max-height: none; }
@@ -2752,26 +3041,73 @@
     for (const a of s.activities) if (!Array.isArray(a.docLinks)) a.docLinks = [];
     for (const d of s.documents) {
       if (!d.id) d.id = uid();
-      if (typeof d.type !== "string" || !["word", "excel", "powerpoint"].includes(d.type)) d.type = "word";
+      if (typeof d.type !== "string" || !["word", "excel", "powerpoint", "visio", "code"].includes(d.type)) d.type = "word";
       if (typeof d.name !== "string" || !d.name.trim()) d.name = `Untitled ${d.type}`;
       if (typeof d.createdAt !== "string") d.createdAt = new Date().toISOString();
       if (typeof d.updatedAt !== "string") d.updatedAt = d.createdAt;
       if (!d.content || typeof d.content !== "object") d.content = {};
       if (d.type === "word") {
+        if (typeof d.content.html !== "string") {
+          if (typeof d.content.text === "string") d.content.html = d.content.text;
+          else d.content.html = "<p>Start writing…</p>";
+        }
         if (typeof d.content.text !== "string") {
-          if (typeof d.content.html === "string") d.content.text = d.content.html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-          else d.content.text = "Untitled document\n";
+          d.content.text = String(d.content.html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
         }
       } else if (d.type === "excel") {
         if (!Array.isArray(d.content.sheets) || d.content.sheets.length === 0) {
-          d.content.sheets = [{ id: uid(), name: "Sheet1", rows: 18, cols: 8, cells: {} }];
+          d.content.sheets = [{ id: uid(), name: "Sheet1", rows: 50, cols: 26, cells: {} }];
         }
+        d.content.sheets.forEach((sheet, idx) => {
+          if (!sheet.id) sheet.id = uid();
+          if (typeof sheet.name !== "string") sheet.name = `Sheet${idx + 1}`;
+          sheet.rows = Math.max(1, Number(sheet.rows) || 50);
+          sheet.cols = Math.max(1, Number(sheet.cols) || 26);
+          if (!sheet.cells || typeof sheet.cells !== "object") sheet.cells = {};
+          Object.keys(sheet.cells).forEach((key) => {
+            const cell = sheet.cells[key];
+            if (cell && typeof cell === "object" && !Array.isArray(cell)) {
+              if (typeof cell.v !== "string") cell.v = cell.v == null ? "" : String(cell.v);
+              if (typeof cell.bold !== "boolean") cell.bold = false;
+              if (typeof cell.italic !== "boolean") cell.italic = false;
+              if (typeof cell.color !== "string") cell.color = "";
+              if (typeof cell.bg !== "string") cell.bg = "";
+              if (!["general", "currency", "percent"].includes(cell.format)) cell.format = "general";
+            } else {
+              sheet.cells[key] = { v: cell == null ? "" : String(cell), bold: false, italic: false, color: "", bg: "", format: "general" };
+            }
+          });
+        });
         if (typeof d.content.activeSheet !== "number") d.content.activeSheet = 0;
       } else if (d.type === "powerpoint") {
         if (!Array.isArray(d.content.slides) || d.content.slides.length === 0) {
-          d.content.slides = [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb" }];
+          d.content.slides = [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb", bgImage: "", layout: "title-content", titleFontSize: 32, bodyFontSize: 20, notes: "", titleBold: true, bodyBold: false, titleItalic: false, bodyItalic: false, titleColor: "#ffffff", bodyColor: "#ffffff" }];
         }
+        d.content.slides.forEach((slide) => {
+          if (!slide.id) slide.id = uid();
+          if (typeof slide.title !== "string") slide.title = "";
+          if (typeof slide.body !== "string") slide.body = "";
+          if (typeof slide.bg !== "string") slide.bg = "#2563eb";
+          if (typeof slide.bgImage !== "string") slide.bgImage = "";
+          if (!["title-only", "title-content", "blank", "two-content", "title-bullets"].includes(slide.layout)) slide.layout = "title-content";
+          if (!Number.isFinite(Number(slide.titleFontSize))) slide.titleFontSize = 32;
+          if (!Number.isFinite(Number(slide.bodyFontSize))) slide.bodyFontSize = 20;
+          if (typeof slide.notes !== "string") slide.notes = "";
+          if (typeof slide.titleBold !== "boolean") slide.titleBold = true;
+          if (typeof slide.bodyBold !== "boolean") slide.bodyBold = false;
+          if (typeof slide.titleItalic !== "boolean") slide.titleItalic = false;
+          if (typeof slide.bodyItalic !== "boolean") slide.bodyItalic = false;
+          if (typeof slide.titleColor !== "string") slide.titleColor = "#ffffff";
+          if (typeof slide.bodyColor !== "string") slide.bodyColor = "#ffffff";
+        });
         if (typeof d.content.activeSlide !== "number") d.content.activeSlide = 0;
+      } else if (d.type === "visio") {
+        if (!Array.isArray(d.content.shapes)) d.content.shapes = [];
+        if (!Array.isArray(d.content.arrows)) d.content.arrows = [];
+        if (typeof d.content.selectedTool !== "string") d.content.selectedTool = "rect";
+      } else if (d.type === "code") {
+        if (typeof d.content.code !== "string") d.content.code = "// Start coding...\n";
+        if (typeof d.content.language !== "string") d.content.language = "javascript";
       }
       if (!("folderId" in d)) d.folderId = null;
     }
@@ -4162,6 +4498,18 @@
     setTimeout(() => el.remove(), 180);
   }
 
+  function scheduleHourLabel(hour, minute = 0) {
+    const suffix = hour < 12 ? "am" : "pm";
+    const base = hour % 12 || 12;
+    return minute ? `${base}:${pad(minute)}${suffix}` : `${base}${suffix}`;
+  }
+  function scheduleWeekNumber(date) {
+    const d = startOfDay(new Date(date));
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+    const yearStart = new Date(d.getFullYear(), 0, 1);
+    return Math.ceil((((d - yearStart) / MS_DAY) + 1) / 7);
+  }
+
   function renderScheduleView(root) {
     const cursor = scheduleCursorDate();
     const hero = document.createElement("div");
@@ -4231,6 +4579,15 @@
     ], (v) => { scheduleState.density = v; render(); });
     densitySwitcher.classList.add("nav-group");
 
+    const miniToggle = document.createElement("button");
+    miniToggle.type = "button";
+    miniToggle.className = "sched-icon-btn" + (scheduleState.miniCalendar ? " active" : "");
+    miniToggle.textContent = "Mini calendar";
+    miniToggle.addEventListener("click", () => {
+      scheduleState.miniCalendar = !scheduleState.miniCalendar;
+      render();
+    });
+
     const addBtn = document.createElement("button");
     addBtn.type = "button";
     addBtn.className = "sched-icon-btn primary";
@@ -4250,10 +4607,9 @@
     importBtn.title = "Import events from an .ics file";
     const fileInput = document.createElement('input'); fileInput.type = 'file'; fileInput.accept = '.ics'; fileInput.style.display = 'none';
     importBtn.addEventListener('click', () => { fileInput.click(); });
-    fileInput.addEventListener('change', async (ev) => {
+    fileInput.addEventListener('change', async () => {
       const f = fileInput.files && fileInput.files[0]; if (!f) return;
-      const text = await f.text();
-      const parsed = parseIcs(text);
+      const parsed = parseIcs(await f.text());
       if (!parsed || parsed.length === 0) { toast('No events found in .ics'); return; }
       for (const e of parsed) {
         const evId = uid();
@@ -4279,8 +4635,7 @@
     actions.append(importBtn, exportAllBtn, addBtn);
     const spacer = document.createElement("div");
     spacer.className = "spacer";
-    toolbar.append(nav, spacer, viewSwitcher, densitySwitcher, quickToday, actions);
-    // append hidden file input for import
+    toolbar.append(nav, spacer, viewSwitcher, densitySwitcher, miniToggle, quickToday, actions);
     toolbar.appendChild(fileInput);
     root.appendChild(toolbar);
 
@@ -4289,15 +4644,19 @@
     legend.innerHTML = `Click any event to edit it. Shortcuts: <strong>←/→</strong> move, <strong>T</strong> today, <strong>D/W/M</strong> view, <strong>N</strong> new event.`;
     root.appendChild(legend);
 
+    if (scheduleState.miniCalendar) {
+      const thumb = document.createElement("div");
+      thumb.className = "schedule-thumbnail";
+      renderScheduleMonth(thumb, cursor);
+      root.appendChild(thumb);
+    }
+
     const bodyWrap = document.createElement("div");
     bodyWrap.className = "schedule-layout";
     const body = document.createElement("div");
     body.className = "sched-grid-wrap";
-    if (scheduleState.view === "month") {
-      renderScheduleMonth(body, cursor);
-    } else {
-      renderScheduleTimeGrid(body, cursor, scheduleState.view);
-    }
+    if (scheduleState.view === "month") renderScheduleMonth(body, cursor);
+    else renderScheduleTimeGrid(body, cursor, scheduleState.view);
     bodyWrap.appendChild(body);
 
     const side = document.createElement("section");
@@ -4334,6 +4693,7 @@
   function renderScheduleTimeGrid(root, cursor, mode) {
     const days = mode === "day" ? [cursor] : scheduleWeekDays(cursor);
     const todayKey = startOfDay(new Date()).getTime();
+    const hourPx = scheduleState.density === "compact" ? 38 : 48;
     const alldayRow = document.createElement("div");
     alldayRow.className = "sched-allday-row " + mode;
     const labelCell = document.createElement("div");
@@ -4373,19 +4733,13 @@
       grid.appendChild(head);
     });
 
-    // when in day view, render half-hour rows for finer labels
     const slots = scheduleState.view === "day" ? 24 * 2 : 24;
     for (let s = 0; s < slots; s += 1) {
       const isHalf = scheduleState.view === "day" && (s % 2 === 1);
       const label = document.createElement("div");
-      label.className = isHalf ? "sched-half-label" : "sched-hour-label";
-      if (isHalf) {
-        const hr = Math.floor(s / 2);
-        label.textContent = `${hr}:30`;
-      } else {
-        const hr = Math.floor(s / (scheduleState.view === "day" ? 2 : 1));
-        label.textContent = `${hr}:00`;
-      }
+      label.className = isHalf ? "sched-half-label" : "sched-hour-label sched-hour";
+      const hr = Math.floor(s / (scheduleState.view === "day" ? 2 : 1));
+      label.textContent = scheduleHourLabel(hr, isHalf ? 30 : 0);
       grid.appendChild(label);
       days.forEach(() => {
         const col = document.createElement("div");
@@ -4395,8 +4749,6 @@
     }
 
     const dayCols = Array.from(grid.querySelectorAll(".sched-day-col"));
-
-    // replace placeholder day columns with actual columns for event rendering
     for (let i = 0; i < days.length; i += 1) {
       const day = days[i];
       const dayStart = startOfDay(day).getTime();
@@ -4407,8 +4759,8 @@
       events.forEach((ev) => {
         const evStart = Math.max(new Date(ev.start).getTime(), dayStart);
         const evEnd = Math.min(new Date(ev.end).getTime(), dayEnd);
-        const top = ((evStart - dayStart) / MS_HOUR) * 48;
-        const height = Math.max(22, ((evEnd - evStart) / MS_HOUR) * 48);
+        const top = ((evStart - dayStart) / MS_HOUR) * hourPx;
+        const height = Math.max(22, ((evEnd - evStart) / MS_HOUR) * hourPx);
         const block = document.createElement("button");
         block.type = "button";
         block.className = "sched-event";
@@ -4423,28 +4775,25 @@
       if (now >= dayStart && now < dayEnd) {
         const nowLine = document.createElement("div");
         nowLine.className = "sched-now-line";
-        nowLine.style.top = `${((now - dayStart) / MS_HOUR) * 48}px`;
+        nowLine.style.top = `${((now - dayStart) / MS_HOUR) * hourPx}px`;
         dayCol.appendChild(nowLine);
       }
     }
-
     root.appendChild(grid);
   }
 
   function renderScheduleMonth(root, cursor) {
     const firstOfMonth = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
     const firstDay = startOfWeek(firstOfMonth);
-    const cells = Array.from({ length: 42 }, (_, index) => {
-      const d = new Date(firstDay);
-      d.setDate(firstDay.getDate() + index);
-      return d;
-    });
-
     const monthGrid = document.createElement("div");
-    monthGrid.className = "sched-month";
+    monthGrid.className = "sched-month has-weeknums";
     const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const sundayStart = (state.settings && state.settings.weekStart) === "sunday";
     const orderedDayNames = sundayStart ? dayNames : ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const weekHead = document.createElement("div");
+    weekHead.className = "mhead weeknum";
+    weekHead.textContent = "Wk";
+    monthGrid.appendChild(weekHead);
     orderedDayNames.forEach((name) => {
       const head = document.createElement("div");
       head.className = "mhead";
@@ -4453,638 +4802,1179 @@
     });
 
     const todayKey = startOfDay(new Date()).getTime();
-    cells.forEach((day) => {
-      const cell = document.createElement("div");
-      cell.className = "mcell";
-      if (day.getMonth() !== cursor.getMonth()) cell.classList.add("out");
-      if (startOfDay(day).getTime() === todayKey) cell.classList.add("today");
-      const label = document.createElement("div");
-      label.className = "mday";
-      label.textContent = String(day.getDate());
-      cell.appendChild(label);
-      const events = scheduleEventsForDay(day).slice(0, 3);
-      cell.addEventListener("click", () => openScheduleEditor(null, day));
-      events.forEach((ev) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "mev";
-        btn.style.background = scheduleEventColor(ev);
-        btn.textContent = ev.title;
-        btn.title = `${ev.title} • ${fmtClock(ev.start)} – ${fmtClock(ev.end)}`;
-        btn.addEventListener("click", (e) => { e.stopPropagation(); openScheduleEditor(ev.id, day); });
-        cell.appendChild(btn);
-      });
-      const total = scheduleEventsForDay(day).length;
-      if (total > 3) {
-        const more = document.createElement("div");
-        more.className = "more";
-        more.textContent = `+${total - 3} more`;
-        cell.appendChild(more);
+    for (let week = 0; week < 6; week += 1) {
+      const rowStart = new Date(firstDay);
+      rowStart.setDate(firstDay.getDate() + week * 7);
+      const weekLabel = document.createElement("div");
+      weekLabel.className = "mweek";
+      weekLabel.textContent = String(scheduleWeekNumber(rowStart));
+      monthGrid.appendChild(weekLabel);
+      for (let offset = 0; offset < 7; offset += 1) {
+        const day = new Date(rowStart);
+        day.setDate(rowStart.getDate() + offset);
+        const cell = document.createElement("div");
+        cell.className = "mcell" + (offset === 0 ? " week-start" : "");
+        if (day.getMonth() !== cursor.getMonth()) cell.classList.add("out");
+        if (startOfDay(day).getTime() === todayKey) cell.classList.add("today");
+        const label = document.createElement("div");
+        label.className = "mday";
+        label.textContent = day.getDate() === 1 ? day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : String(day.getDate());
+        cell.appendChild(label);
+        const events = scheduleEventsForDay(day);
+        cell.addEventListener("click", () => openScheduleEditor(null, day));
+        events.slice(0, 4).forEach((ev) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "mev";
+          btn.style.background = scheduleEventColor(ev);
+          btn.textContent = ev.title;
+          btn.title = `${ev.title} • ${fmtClock(ev.start)} – ${fmtClock(ev.end)}`;
+          btn.addEventListener("click", (e) => { e.stopPropagation(); openScheduleEditor(ev.id, day); });
+          cell.appendChild(btn);
+        });
+        if (events.length > 4) {
+          const more = document.createElement("div");
+          more.className = "more";
+          more.textContent = `+${events.length - 4} more`;
+          cell.appendChild(more);
+        }
+        monthGrid.appendChild(cell);
       }
-      monthGrid.appendChild(cell);
-    });
+    }
     root.appendChild(monthGrid);
   }
 
-    function renderDocumentsView(root) {
-      if (!Array.isArray(state.documents)) state.documents = [];
-      const hero = document.createElement("div");
-      hero.className = "hero";
-      const top = document.createElement("div");
-      top.className = "hero-top";
-      const title = document.createElement("h1");
-      title.textContent = "Documents";
-      title.style.flex = "1";
-      top.appendChild(title);
-      hero.appendChild(top);
-      const meta = document.createElement("div");
-      meta.className = "meta-row";
-      meta.innerHTML = `<span>Create and edit Word-like, Excel-like, and PowerPoint-like documents.</span><span>${state.documents.length} total</span>`;
-      hero.appendChild(meta);
-
-      const createRow = document.createElement("div");
-      createRow.className = "range-row";
-      const mkCreateBtn = (type, label) => {
-        const b = document.createElement("button");
-        b.className = "chip-btn";
-        b.textContent = `+ ${label}`;
-        b.addEventListener("click", () => {
-          const doc = createDocument(type);
-          if (doc) { documentsState.openId = doc.id; render(); }
-        });
-        return b;
-      };
-      createRow.append(mkCreateBtn("word", "New Word"), mkCreateBtn("excel", "New Excel"), mkCreateBtn("powerpoint", "New PowerPoint"));
-      hero.appendChild(createRow);
-      root.appendChild(hero);
-
-      const controls = document.createElement("section");
-      controls.dataset.panelId = "documents-controls";
-      const row = document.createElement("div");
-      row.className = "filter-row";
-      const q = document.createElement("input");
-      q.type = "search";
-      q.placeholder = "Search documents…";
-      q.value = documentsState.query;
-      q.addEventListener("input", () => { documentsState.query = q.value; render(); });
-      const typeSel = document.createElement("select");
-      [["all","All types"],["word","Word"],["excel","Excel"],["powerpoint","PowerPoint"]].forEach(([v,l]) => {
-        const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.type === v) o.selected = true; typeSel.appendChild(o);
+  function createDocToolButton(label, handler, className = "sched-icon-btn") {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = className;
+    btn.textContent = label;
+    btn.addEventListener("click", handler);
+    return btn;
+  }
+  function createInlineFindBar(config) {
+    const wrap = document.createElement("div");
+    wrap.className = "doc-find-bar";
+    const findInput = document.createElement("input");
+    findInput.type = "search";
+    findInput.placeholder = config.placeholder || "Find";
+    const replaceInput = document.createElement("input");
+    replaceInput.type = "text";
+    replaceInput.placeholder = "Replace";
+    const findBtn = createDocToolButton("Find", () => config.onFind(findInput.value, replaceInput.value));
+    const replaceBtn = createDocToolButton("Replace", () => config.onReplace(findInput.value, replaceInput.value));
+    const closeBtn = createDocToolButton("✕", () => wrap.classList.remove("open"));
+    wrap.append(findInput, replaceInput, findBtn, replaceBtn, closeBtn);
+    return { wrap, findInput, replaceInput, open: () => wrap.classList.add("open") };
+  }
+  function renderDocumentLinksSection(editorSec, openDoc) {
+    const selectedKeys = linkedTargetKeysForDocument(openDoc.id);
+    const linkDetails = document.createElement("details");
+    linkDetails.className = "td-field";
+    const linkSummary = document.createElement("summary");
+    linkSummary.textContent = `Tagged to app items (${selectedKeys.size} linked)`;
+    linkSummary.style.cursor = "pointer";
+    const linkSearch = document.createElement("input");
+    linkSearch.type = "search";
+    linkSearch.placeholder = "Filter items…";
+    linkSearch.style.cssText = "margin: 0.5rem 0; width: 100%; padding: 0.3rem; border: 1px solid var(--border); border-radius: 4px;";
+    const linkWrap = document.createElement("div");
+    linkWrap.className = "dep-list";
+    const rows = [];
+    docLinkTargets().forEach((target) => {
+      const rowL = document.createElement("label");
+      rowL.className = "sched-check";
+      rowL.style.display = "flex";
+      rowL.style.justifyContent = "space-between";
+      const label = document.createElement("span");
+      label.textContent = target.label;
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = selectedKeys.has(target.key);
+      cb.addEventListener("change", () => {
+        if (cb.checked) selectedKeys.add(target.key); else selectedKeys.delete(target.key);
+        linkSummary.textContent = `Tagged to app items (${selectedKeys.size} linked)`;
+        applyDocumentTargetKeys(openDoc.id, selectedKeys);
       });
-      typeSel.addEventListener("change", () => { documentsState.type = typeSel.value; render(); });
-      const folderSel = document.createElement("select");
-      [["current","Current location"],["all","All folders"],["root","Root only"]].forEach(([v,l]) => {
-        const o = document.createElement("option");
-        o.value = v;
-        o.textContent = l;
-        if ((documentsState.folder || "current") === v) o.selected = true;
-        folderSel.appendChild(o);
-      });
-      (state.folders || []).forEach((folder) => {
-        const o = document.createElement("option");
-        o.value = folder.id;
-        o.textContent = folderLabel(folder.id);
-        if (documentsState.folder === folder.id) o.selected = true;
-        folderSel.appendChild(o);
-      });
-      folderSel.addEventListener("change", () => { documentsState.folder = folderSel.value; render(); });
-      const sortSel = document.createElement("select");
-      [["updated","Recently updated"],["name","Name"],["created","Recently created"]].forEach(([v,l]) => {
-        const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.sort === v) o.selected = true; sortSel.appendChild(o);
-      });
-      sortSel.addEventListener("change", () => { documentsState.sort = sortSel.value; render(); });
-      row.append(q, typeSel, folderSel, sortSel);
-      controls.appendChild(row);
-      root.appendChild(controls);
-
-      const layout = document.createElement("div");
-      layout.className = "schedule-layout";
-      const listSec = document.createElement("section");
-      listSec.className = "schedule-side";
-      listSec.dataset.panelId = "documents-list";
-      listSec.innerHTML = `<div class="section-head"><h2>Library</h2></div>`;
-      const list = document.createElement("div");
-      list.className = "entry-list";
-      const newFolderBtn = document.createElement("button");
-      newFolderBtn.type = "button";
-      newFolderBtn.textContent = "+ New folder";
-      newFolderBtn.addEventListener("click", () => showNewFolderForm(list));
-      list.appendChild(newFolderBtn);
-      if (currentFolderId) {
-        const crumb = document.createElement("div");
-        crumb.className = "folder-breadcrumb";
-        const rootLink = document.createElement("a");
-        rootLink.textContent = "Documents";
-        rootLink.onclick = () => { currentFolderId = null; selectedDocIds.clear(); render(); };
-        crumb.appendChild(rootLink);
-        folderPath(currentFolderId).forEach((folder) => {
-          crumb.appendChild(document.createTextNode(" / "));
-          const part = document.createElement(folder.id === currentFolderId ? "span" : "a");
-          part.textContent = folder.name;
-          if (folder.id !== currentFolderId) part.onclick = () => { currentFolderId = folder.id; selectedDocIds.clear(); render(); };
-          crumb.appendChild(part);
-        });
-        list.appendChild(crumb);
-      }
-      const folderTree = document.createElement("div");
-      renderFolderTree(currentFolderId, folderTree);
-      list.appendChild(folderTree);
-      const docs = state.documents
-        .filter(d => (documentsState.type === "all" || d.type === documentsState.type))
-        .filter(d => !documentsState.query || d.name.toLowerCase().includes(documentsState.query.toLowerCase()))
-        .filter(d => {
-          const mode = documentsState.folder || "current";
-          if (mode === "all") return true;
-          if (mode === "root") return (d.folderId || null) === null;
-          if (mode === "current") return (d.folderId || null) === (currentFolderId || null);
-          return (d.folderId || null) === mode;
-        })
-        .sort((a, b) => {
-          if (documentsState.sort === "name") return a.name.localeCompare(b.name);
-          if (documentsState.sort === "created") return new Date(b.createdAt) - new Date(a.createdAt);
-          return new Date(b.updatedAt) - new Date(a.updatedAt);
-        });
-      if (!docs.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty";
-        empty.textContent = "No matching documents.";
-        list.appendChild(empty);
-      } else {
-        docs.forEach((doc) => {
-          const rowEl = document.createElement("div");
-          rowEl.className = "entry" + (documentsState.openId === doc.id ? " running" : "");
-          rowEl.setAttribute("draggable", "true");
-          rowEl.style.gridTemplateColumns = "18px 1fr auto auto";
-          const checkbox = document.createElement("input");
-          checkbox.type = "checkbox";
-          checkbox.className = "doc-checkbox";
-          checkbox.checked = selectedDocIds.has(doc.id);
-          checkbox.addEventListener("click", (e) => e.stopPropagation());
-          checkbox.addEventListener("change", () => {
-            if (checkbox.checked) selectedDocIds.add(doc.id);
-            else selectedDocIds.delete(doc.id);
-            render();
-          });
-          const info = document.createElement("div");
-          const name = document.createElement("div");
-          name.className = "name";
-          name.textContent = doc.name;
-          const metaEl = document.createElement("div");
-          metaEl.className = "meta";
-          const updatedLabel = state.settings.relativeTime ? syncRelAgo(doc.updatedAt) : new Date(doc.updatedAt).toLocaleString();
-          metaEl.textContent = `${doc.type.toUpperCase()} · updated ${updatedLabel}`;
-          info.append(name, metaEl);
-          const folderMove = document.createElement("select");
-          folderMove.className = "doc-move-select";
-          renderFolderOptions(folderMove, "Root");
-          folderMove.value = doc.folderId || "__root__";
-          folderMove.addEventListener("click", (e) => e.stopPropagation());
-          folderMove.addEventListener("change", () => moveDocsToFolder(new Set([doc.id]), folderMove.value === "__root__" ? null : folderMove.value));
-          const openBtn = document.createElement("button");
-          openBtn.type = "button";
-          openBtn.textContent = "Open";
-          openBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            documentsState.openId = doc.id;
-            render();
-          });
-          rowEl.addEventListener("click", () => { documentsState.openId = doc.id; render(); });
-          rowEl.addEventListener("dragstart", (e) => {
-            e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("text/doc-id", doc.id);
-          });
-          rowEl.append(checkbox, info, folderMove, openBtn);
-          list.appendChild(rowEl);
-        });
-      }
-      listSec.appendChild(list);
-      layout.appendChild(listSec);
-
-      const editorSec = document.createElement("section");
-      editorSec.dataset.panelId = "documents-editor";
-      const openDoc = docs.find(d => d.id === documentsState.openId) || docs[0] || null;
-      if (openDoc && !documentsState.openId) documentsState.openId = openDoc.id;
-      if (!openDoc) {
-        editorSec.innerHTML = `<h2>Editor</h2><div class="empty">Create a document to begin.</div>`;
-      } else {
-        const head = document.createElement("div");
-        head.className = "section-head";
-        head.innerHTML = `<h2>${escapeHtml(openDoc.name)}</h2><span class="head-meta">${escapeHtml(openDoc.type)}</span>`;
-        const act = document.createElement("div");
-        act.className = "row-actions";
-        const renameBtn = document.createElement("button");
-        renameBtn.textContent = "Rename";
-        renameBtn.addEventListener("click", () => {
-          const next = prompt("Rename document", openDoc.name);
-          if (next == null) return;
-          updateDocument(openDoc.id, { name: next.trim() || openDoc.name });
-          render();
-        });
-        const dupBtn = document.createElement("button");
-        dupBtn.textContent = "Duplicate";
-        dupBtn.addEventListener("click", () => {
-          const dup = duplicateDocument(openDoc.id);
-          if (dup) documentsState.openId = dup.id;
-          render();
-        });
-        const delBtn = document.createElement("button");
-        delBtn.className = "danger";
-        delBtn.textContent = "Delete";
-        delBtn.addEventListener("click", () => {
-          if (!confirm(`Delete "${openDoc.name}"?`)) return;
-          deleteDocument(openDoc.id);
-          render();
-        });
-        act.append(renameBtn, dupBtn, delBtn);
-        editorSec.append(head, act);
-
-        const linkField = document.createElement("div");
-        linkField.className = "td-field";
-        linkField.innerHTML = `<div class="td-label">Tagged to app items</div>`;
-        const linkWrap = document.createElement("div");
-        linkWrap.className = "dep-list";
-        const selectedKeys = linkedTargetKeysForDocument(openDoc.id);
-        docLinkTargets().forEach((target) => {
-          const rowL = document.createElement("label");
-          rowL.className = "sched-check";
-          rowL.style.display = "flex";
-          rowL.style.justifyContent = "space-between";
-          const label = document.createElement("span");
-          label.textContent = target.label;
-          const cb = document.createElement("input");
-          cb.type = "checkbox";
-          cb.checked = selectedKeys.has(target.key);
-          cb.addEventListener("change", () => {
-            if (cb.checked) selectedKeys.add(target.key); else selectedKeys.delete(target.key);
-            applyDocumentTargetKeys(openDoc.id, selectedKeys);
-          });
-          rowL.append(label, cb);
-          linkWrap.appendChild(rowL);
-        });
-        linkField.appendChild(linkWrap);
-        editorSec.appendChild(linkField);
-
-        if (openDoc.type === "word") {
-          if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("word");
-          if (typeof openDoc.content.text !== "string") openDoc.content.text = "Untitled document\n";
-          const toolbar = document.createElement("div");
-          toolbar.className = "sched-toolbar";
-          const editor = document.createElement("textarea");
-          editor.className = "settings-body";
-          editor.style.minHeight = "320px";
-          editor.style.width = "100%";
-          editor.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace";
-          editor.value = openDoc.content.text || "";
-
-          const history = [editor.value];
-          let histIndex = 0;
-          const pushHistory = () => {
-            const v = editor.value;
-            if (history[histIndex] === v) return;
-            history.splice(histIndex + 1);
-            history.push(v);
-            histIndex = history.length - 1;
-          };
-          const applyWrap = (pre, post) => {
-            const s = editor.selectionStart || 0;
-            const e = editor.selectionEnd || 0;
-            const raw = editor.value;
-            const inner = raw.slice(s, e) || "text";
-            editor.value = raw.slice(0, s) + pre + inner + post + raw.slice(e);
-            editor.selectionStart = s + pre.length;
-            editor.selectionEnd = s + pre.length + inner.length;
-            editor.focus();
-            pushHistory();
-          };
-          const applyPrefix = (prefix) => {
-            const s = editor.selectionStart || 0;
-            const e = editor.selectionEnd || 0;
-            const raw = editor.value;
-            const a = raw.lastIndexOf("\n", Math.max(0, s - 1)) + 1;
-            const b = raw.indexOf("\n", e);
-            const end = b === -1 ? raw.length : b;
-            const block = raw.slice(a, end).split("\n").map(line => prefix + line).join("\n");
-            editor.value = raw.slice(0, a) + block + raw.slice(end);
-            editor.selectionStart = a;
-            editor.selectionEnd = a + block.length;
-            editor.focus();
-            pushHistory();
-          };
-          const mkBtn = (label, fn) => {
-            const b = document.createElement("button");
-            b.type = "button";
-            b.className = "sched-icon-btn";
-            b.textContent = label;
-            b.addEventListener("click", fn);
-            return b;
-          };
-          const undoBtn = mkBtn("Undo", () => {
-            if (histIndex <= 0) return;
-            histIndex -= 1;
-            editor.value = history[histIndex];
-          });
-          const redoBtn = mkBtn("Redo", () => {
-            if (histIndex >= history.length - 1) return;
-            histIndex += 1;
-            editor.value = history[histIndex];
-          });
-          const findInp = document.createElement("input");
-          findInp.type = "search";
-          findInp.placeholder = "Find text";
-          findInp.className = "sched-date-jump";
-          const findBtn = mkBtn("Find", () => {
-            const q = findInp.value.trim();
-            if (!q) return;
-            const startFrom = Math.max(editor.selectionEnd || 0, 0);
-            const src = editor.value.toLowerCase();
-            const term = q.toLowerCase();
-            let idx = src.indexOf(term, startFrom);
-            if (idx === -1) idx = src.indexOf(term, 0);
-            if (idx === -1) { toast("No match"); return; }
-            editor.focus();
-            editor.selectionStart = idx;
-            editor.selectionEnd = idx + term.length;
-          });
-          toolbar.append(
-            mkBtn("Bold", () => applyWrap("**", "**")),
-            mkBtn("Italic", () => applyWrap("*", "*")),
-            mkBtn("Underline", () => applyWrap("__", "__")),
-            mkBtn("H2", () => applyPrefix("## ")),
-            mkBtn("• List", () => applyPrefix("- ")),
-            mkBtn("1. List", () => applyPrefix("1. ")),
-            mkBtn("Align L", () => applyPrefix("[left] ")),
-            mkBtn("Center", () => applyPrefix("[center] ")),
-            mkBtn("Align R", () => applyPrefix("[right] ")),
-            undoBtn,
-            redoBtn,
-            findInp,
-            findBtn
-          );
-          let wordSaveTimer = null;
-          const persistWord = () => {
-            clearTimeout(wordSaveTimer);
-            pushHistory();
-            wordSaveTimer = setTimeout(() => updateDocument(openDoc.id, { content: { ...openDoc.content, text: editor.value } }), 250);
-          };
-          editor.addEventListener("input", persistWord);
-          editorSec.append(toolbar, editor);
-        } else if (openDoc.type === "excel") {
-          if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("excel");
-          if (!Array.isArray(openDoc.content.sheets) || openDoc.content.sheets.length === 0) openDoc.content.sheets = defaultDocumentContent("excel").sheets;
-          if (typeof openDoc.content.activeSheet !== "number") openDoc.content.activeSheet = 0;
-          const bar = document.createElement("div");
-          bar.className = "sched-toolbar";
-          const sheetSel = document.createElement("select");
-          openDoc.content.sheets.forEach((s, i) => {
-            const o = document.createElement("option"); o.value = String(i); o.textContent = s.name || `Sheet ${i + 1}`;
-            if (i === openDoc.content.activeSheet) o.selected = true;
-            sheetSel.appendChild(o);
-          });
-          sheetSel.addEventListener("change", () => { openDoc.content.activeSheet = Number(sheetSel.value) || 0; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
-          const addSheetBtn = document.createElement("button");
-          addSheetBtn.type = "button";
-          addSheetBtn.className = "sched-icon-btn";
-          addSheetBtn.textContent = "+ Sheet";
-          addSheetBtn.addEventListener("click", () => {
-            openDoc.content.sheets.push({ id: uid(), name: `Sheet${openDoc.content.sheets.length + 1}`, rows: 18, cols: 8, cells: {} });
-            openDoc.content.activeSheet = openDoc.content.sheets.length - 1;
-            updateDocument(openDoc.id, { content: openDoc.content });
-            render();
-          });
-          bar.append(sheetSel, addSheetBtn);
-          editorSec.appendChild(bar);
-          const active = openDoc.content.sheets[Math.max(0, Math.min(openDoc.content.activeSheet, openDoc.content.sheets.length - 1))];
-          if (!active.cells || typeof active.cells !== "object") active.cells = {};
-          const tableWrap = document.createElement("div");
-          tableWrap.className = "sched-grid-wrap";
-          const table = document.createElement("table");
-          table.style.width = "100%";
-          table.style.borderCollapse = "collapse";
-          const cols = Math.min(12, Math.max(4, Number(active.cols) || 8));
-          const rows = Math.min(40, Math.max(8, Number(active.rows) || 18));
-          const labelFor = (r, c) => `${String.fromCharCode(65 + c)}${r + 1}`;
-          function evalArithmetic(expr) {
-            const s = String(expr || "").replace(/\s+/g, "");
-            if (!s) return 0;
-            let i = 0;
-            const parseExpression = () => {
-              let v = parseTerm();
-              while (i < s.length && (s[i] === "+" || s[i] === "-")) {
-                const op = s[i++];
-                const rhs = parseTerm();
-                v = op === "+" ? v + rhs : v - rhs;
-              }
-              return v;
-            };
-            const parseTerm = () => {
-              let v = parseFactor();
-              while (i < s.length && (s[i] === "*" || s[i] === "/")) {
-                const op = s[i++];
-                const rhs = parseFactor();
-                if (op === "/") {
-                  if (rhs === 0) throw new Error("div by zero");
-                  v = v / rhs;
-                } else v = v * rhs;
-              }
-              return v;
-            };
-            const parseFactor = () => {
-              if (s[i] === "+") { i += 1; return parseFactor(); }
-              if (s[i] === "-") { i += 1; return -parseFactor(); }
-              if (s[i] === "(") {
-                i += 1;
-                const v = parseExpression();
-                if (s[i] !== ")") throw new Error("paren");
-                i += 1;
-                return v;
-              }
-              let start = i;
-              while (i < s.length && /[0-9.]/.test(s[i])) i += 1;
-              if (start === i) throw new Error("num");
-              const num = Number(s.slice(start, i));
-              if (!Number.isFinite(num)) throw new Error("num");
-              return num;
-            };
-            const out = parseExpression();
-            if (i !== s.length) throw new Error("tail");
-            return out;
-          }
-          const evalCell = (ref, depth = 0) => {
-            if (depth > 10) return "#ERR";
-            const raw = String((active.cells[ref] && active.cells[ref].v) || "");
-            if (!raw.startsWith("=")) return raw;
-            const expr = raw.slice(1).replace(/[A-Z]+[0-9]+/g, (m) => {
-              const v = evalCell(m, depth + 1);
-              const n = Number(v);
-              return Number.isFinite(n) ? String(n) : "0";
-            });
-            try {
-              if (!/^[0-9+\-*/().\s]+$/.test(expr)) return "#ERR";
-              const out = evalArithmetic(expr);
-              return Number.isFinite(out) ? String(out) : "#ERR";
-            } catch { return "#ERR"; }
-          };
-          const thead = document.createElement("thead");
-          const hrow = document.createElement("tr");
-          hrow.appendChild(document.createElement("th"));
-          for (let c = 0; c < cols; c += 1) {
-            const th = document.createElement("th");
-            th.textContent = String.fromCharCode(65 + c);
-            th.style.border = "1px solid var(--border)";
-            th.style.padding = "0.3rem";
-            hrow.appendChild(th);
-          }
-          thead.appendChild(hrow);
-          table.appendChild(thead);
-          const tbody = document.createElement("tbody");
-          for (let r = 0; r < rows; r += 1) {
-            const tr = document.createElement("tr");
-            const rowHead = document.createElement("th");
-            rowHead.textContent = String(r + 1);
-            rowHead.style.border = "1px solid var(--border)";
-            rowHead.style.padding = "0.25rem";
-            tr.appendChild(rowHead);
-            for (let c = 0; c < cols; c += 1) {
-              const key = labelFor(r, c);
-              const td = document.createElement("td");
-              td.style.border = "1px solid var(--border)";
-              td.style.padding = "0";
-              const inp = document.createElement("input");
-              inp.type = "text";
-              inp.value = String((active.cells[key] && active.cells[key].v) || "");
-              inp.style.width = "100%";
-              inp.style.border = "none";
-              inp.style.padding = "0.3rem";
-              inp.title = key;
-              inp.addEventListener("change", () => {
-                active.cells[key] = { v: inp.value };
-                updateDocument(openDoc.id, { content: openDoc.content });
-              });
-              inp.addEventListener("blur", () => {
-                if (inp.value.startsWith("=")) inp.placeholder = evalCell(key);
-              });
-              td.appendChild(inp);
-              tr.appendChild(td);
-            }
-            tbody.appendChild(tr);
-          }
-          table.appendChild(tbody);
-          tableWrap.appendChild(table);
-          editorSec.appendChild(tableWrap);
-        } else {
-          if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("powerpoint");
-          if (!Array.isArray(openDoc.content.slides) || openDoc.content.slides.length === 0) openDoc.content.slides = defaultDocumentContent("powerpoint").slides;
-          if (typeof openDoc.content.activeSlide !== "number") openDoc.content.activeSlide = 0;
-          const deckWrap = document.createElement("div");
-          deckWrap.className = "schedule-layout";
-          const left = document.createElement("div");
-          left.className = "dep-list";
-          left.style.minWidth = "230px";
-          openDoc.content.slides.forEach((s, idx) => {
-            const b = document.createElement("button");
-            b.type = "button";
-            b.className = "dep-chip clickable" + (idx === openDoc.content.activeSlide ? " active" : "");
-            b.style.width = "100%";
-            b.style.marginBottom = "0.3rem";
-            b.innerHTML = `<span class="dep-kind">Slide ${idx + 1}</span><span class="dep-name">${escapeHtml(s.title || "(untitled)")}</span>`;
-            b.addEventListener("click", () => { openDoc.content.activeSlide = idx; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
-            left.appendChild(b);
-          });
-          const slideActions = document.createElement("div");
-          slideActions.className = "row-actions";
-          const addSlide = document.createElement("button"); addSlide.textContent = "+ Slide";
-          addSlide.addEventListener("click", () => {
-            openDoc.content.slides.push({ id: uid(), title: "New slide", body: "", bg: "#2563eb" });
-            openDoc.content.activeSlide = openDoc.content.slides.length - 1;
-            updateDocument(openDoc.id, { content: openDoc.content });
-            render();
-          });
-          const delSlide = document.createElement("button"); delSlide.className = "danger"; delSlide.textContent = "Delete slide";
-          delSlide.addEventListener("click", () => {
-            if (openDoc.content.slides.length <= 1) return;
-            openDoc.content.slides.splice(openDoc.content.activeSlide, 1);
-            openDoc.content.activeSlide = Math.max(0, openDoc.content.activeSlide - 1);
-            updateDocument(openDoc.id, { content: openDoc.content });
-            render();
-          });
-          slideActions.append(addSlide, delSlide);
-          left.appendChild(slideActions);
-          deckWrap.appendChild(left);
-
-          const slide = openDoc.content.slides[Math.max(0, Math.min(openDoc.content.activeSlide, openDoc.content.slides.length - 1))];
-          const slideEditor = document.createElement("div");
-          slideEditor.className = "task-detail";
-          const titleL = document.createElement("label");
-          titleL.textContent = "Slide title";
-          const titleI = document.createElement("input");
-          titleI.type = "text";
-          titleI.value = slide.title || "";
-          titleL.appendChild(titleI);
-          const bodyL = document.createElement("label");
-          bodyL.textContent = "Slide content";
-          const bodyI = document.createElement("textarea");
-          bodyI.value = slide.body || "";
-          bodyI.style.minHeight = "180px";
-          bodyL.appendChild(bodyI);
-          const bgL = document.createElement("label");
-          bgL.textContent = "Background";
-          const bgI = document.createElement("input");
-          bgI.type = "color";
-          bgI.value = slide.bg || "#2563eb";
-          bgL.appendChild(bgI);
-          const preview = document.createElement("div");
-          preview.className = "hero";
-          preview.style.marginTop = "0.8rem";
-          const renderPreview = () => {
-            preview.style.background = bgI.value;
-            preview.style.color = "#fff";
-            preview.innerHTML = `<h2 style="margin:0 0 0.5rem">${escapeHtml(titleI.value || "Title")}</h2><div style="white-space:pre-wrap">${escapeHtml(bodyI.value || "")}</div>`;
-          };
-          [titleI, bodyI, bgI].forEach(inp => inp.addEventListener("input", renderPreview));
-          renderPreview();
-          const saveSlide = document.createElement("button");
-          saveSlide.type = "button";
-          saveSlide.className = "primary";
-          saveSlide.textContent = "Save slide";
-          saveSlide.addEventListener("click", () => {
-            slide.title = titleI.value;
-            slide.body = bodyI.value;
-            slide.bg = bgI.value;
-            updateDocument(openDoc.id, { content: openDoc.content });
-            render();
-          });
-          slideEditor.append(titleL, bodyL, bgL, saveSlide, preview);
-          deckWrap.appendChild(slideEditor);
-          editorSec.appendChild(deckWrap);
+      rowL.append(label, cb);
+      linkWrap.appendChild(rowL);
+      rows.push({ rowL, text: target.label.toLowerCase() });
+    });
+    linkSearch.addEventListener("input", () => {
+      const q = linkSearch.value.trim().toLowerCase();
+      rows.forEach(({ rowL, text }) => { rowL.style.display = !q || text.includes(q) ? "flex" : "none"; });
+    });
+    linkDetails.append(linkSummary, linkSearch, linkWrap);
+    editorSec.appendChild(linkDetails);
+  }
+  function renderWordEditor(editorSec, openDoc) {
+    if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("word");
+    if (typeof openDoc.content.html !== "string") openDoc.content.html = typeof openDoc.content.text === "string" ? openDoc.content.text : "<p>Start writing…</p>";
+    const toolbar = document.createElement("div");
+    toolbar.className = "excel-toolbar";
+    const page = document.createElement("div");
+    page.className = "doc-word-page";
+    const editor = document.createElement("div");
+    editor.className = "doc-word-editor";
+    editor.contentEditable = "true";
+    editor.dataset.placeholder = "Start writing…";
+    editor.innerHTML = openDoc.content.html || "<p>Start writing…</p>";
+    page.appendChild(editor);
+    const persist = () => updateDocument(openDoc.id, { content: { ...openDoc.content, html: editor.innerHTML, text: editor.textContent || "" } });
+    const exec = (command, value = null) => {
+      editor.focus();
+      try { document.execCommand("styleWithCSS", false, true); } catch {}
+      document.execCommand(command, false, value);
+      persist();
+    };
+    const addExecButton = (label, command, value = null) => {
+      const btn = createDocToolButton(label, () => exec(command, value));
+      btn.addEventListener("mousedown", (e) => e.preventDefault());
+      toolbar.appendChild(btn);
+      return btn;
+    };
+    const fontSel = document.createElement("select");
+    [["serif","Serif"],["sans-serif","Sans"],["monospace","Mono"]].forEach(([v,l]) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = l; fontSel.appendChild(o);
+    });
+    fontSel.addEventListener("change", () => exec("fontName", fontSel.value));
+    const sizeSel = document.createElement("select");
+    [[10,1],[12,2],[14,3],[16,4],[18,5],[24,6],[32,7]].forEach(([label,val]) => {
+      const o = document.createElement("option"); o.value = String(val); o.textContent = `${label} pt`; sizeSel.appendChild(o);
+    });
+    sizeSel.value = "4";
+    sizeSel.addEventListener("change", () => exec("fontSize", sizeSel.value));
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.title = "Text color";
+    colorInput.addEventListener("input", () => exec("foreColor", colorInput.value));
+    const highlightInput = document.createElement("input");
+    highlightInput.type = "color";
+    highlightInput.title = "Highlight color";
+    highlightInput.value = "#fff59d";
+    highlightInput.addEventListener("input", () => exec("hiliteColor", highlightInput.value));
+    toolbar.append(fontSel, sizeSel, colorInput, highlightInput);
+    addExecButton("B", "bold");
+    addExecButton("I", "italic");
+    addExecButton("U", "underline");
+    addExecButton("S", "strikeThrough");
+    addExecButton("H1", "formatBlock", "<h1>");
+    addExecButton("H2", "formatBlock", "<h2>");
+    addExecButton("H3", "formatBlock", "<h3>");
+    addExecButton("• List", "insertUnorderedList");
+    addExecButton("1. List", "insertOrderedList");
+    addExecButton("Left", "justifyLeft");
+    addExecButton("Center", "justifyCenter");
+    addExecButton("Right", "justifyRight");
+    addExecButton("Justify", "justifyFull");
+    addExecButton("HR", "insertHorizontalRule");
+    addExecButton("Undo", "undo");
+    addExecButton("Redo", "redo");
+    const finder = createInlineFindBar({
+      placeholder: "Find text",
+      onFind: (findValue) => {
+        if (!findValue.trim()) return;
+        editor.focus();
+        const found = window.find(findValue, false, false, true, false, false, false);
+        if (!found) toast("No match");
+      },
+      onReplace: (findValue, replaceValue) => {
+        if (!findValue.trim()) return;
+        editor.focus();
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || String(sel).toLowerCase() !== findValue.toLowerCase()) {
+          const found = window.find(findValue, false, false, true, false, false, false);
+          if (!found) { toast("No match"); return; }
         }
+        document.execCommand("insertText", false, replaceValue);
+        persist();
       }
-      layout.appendChild(editorSec);
-      root.appendChild(layout);
-      document.querySelectorAll(".multi-select-bar").forEach(el => el.remove());
-      if (selectedDocIds.size > 0) {
-        const bar = document.createElement("div");
-        bar.className = "multi-select-bar";
-        const lbl = document.createElement("span");
-        lbl.textContent = `${selectedDocIds.size} selected`;
-        const moveSel = document.createElement("select");
-        const placeholder = document.createElement("option");
-        placeholder.value = "";
-        placeholder.textContent = "Move to…";
-        moveSel.appendChild(placeholder);
-        renderFolderOptions(moveSel, "Root (no folder)");
-        moveSel.onchange = () => {
-          if (!moveSel.value) return;
-          moveDocsToFolder(new Set([...selectedDocIds]), moveSel.value === "__root__" ? null : moveSel.value);
-          moveSel.value = "";
-        };
-        const clearBtn = document.createElement("button");
-        clearBtn.type = "button";
-        clearBtn.textContent = "✕ Clear";
-        clearBtn.onclick = () => { selectedDocIds.clear(); render(); };
-        bar.append(lbl, moveSel, clearBtn);
-        document.body.appendChild(bar);
+    });
+    const findBtn = createDocToolButton("Find", () => finder.open());
+    toolbar.appendChild(findBtn);
+    editor.addEventListener("input", persist);
+    editorSec.append(toolbar, finder.wrap, page);
+  }
+  function renderExcelEditor(editorSec, openDoc) {
+    if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("excel");
+    if (!Array.isArray(openDoc.content.sheets) || openDoc.content.sheets.length === 0) openDoc.content.sheets = defaultDocumentContent("excel").sheets;
+    if (typeof openDoc.content.activeSheet !== "number") openDoc.content.activeSheet = 0;
+    const bar = document.createElement("div");
+    bar.className = "excel-toolbar";
+    const sheetSel = document.createElement("select");
+    openDoc.content.sheets.forEach((s, i) => {
+      const o = document.createElement("option"); o.value = String(i); o.textContent = s.name || `Sheet ${i + 1}`;
+      if (i === openDoc.content.activeSheet) o.selected = true;
+      sheetSel.appendChild(o);
+    });
+    sheetSel.addEventListener("change", () => { openDoc.content.activeSheet = Number(sheetSel.value) || 0; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
+    const addSheetBtn = createDocToolButton("+ Sheet", () => {
+      openDoc.content.sheets.push({ id: uid(), name: `Sheet${openDoc.content.sheets.length + 1}`, rows: 50, cols: 26, cells: {} });
+      openDoc.content.activeSheet = openDoc.content.sheets.length - 1;
+      updateDocument(openDoc.id, { content: openDoc.content });
+      render();
+    });
+    const active = openDoc.content.sheets[Math.max(0, Math.min(openDoc.content.activeSheet, openDoc.content.sheets.length - 1))];
+    if (!active.cells || typeof active.cells !== "object") active.cells = {};
+    active.rows = Math.max(1, Number(active.rows) || 50);
+    active.cols = Math.max(1, Number(active.cols) || 26);
+    const rowsInput = document.createElement("input");
+    rowsInput.type = "number"; rowsInput.min = "1"; rowsInput.value = String(active.rows); rowsInput.style.width = "72px";
+    const colsInput = document.createElement("input");
+    colsInput.type = "number"; colsInput.min = "1"; colsInput.value = String(active.cols); colsInput.style.width = "72px";
+    const saveDims = () => {
+      active.rows = Math.max(1, Number(rowsInput.value) || active.rows);
+      active.cols = Math.max(1, Number(colsInput.value) || active.cols);
+      updateDocument(openDoc.id, { content: openDoc.content });
+      render();
+    };
+    rowsInput.addEventListener("change", saveDims);
+    colsInput.addEventListener("change", saveDims);
+    const addRowBtn = createDocToolButton("Add row", () => { active.rows += 1; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
+    const addColBtn = createDocToolButton("Add column", () => { active.cols += 1; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
+    const formulaBar = document.createElement("div");
+    formulaBar.className = "excel-formula-bar";
+    const refInput = document.createElement("input");
+    refInput.readOnly = true;
+    let selectedRef = "A1";
+    let anchorRef = "A1";
+    const valueInput = document.createElement("input");
+    valueInput.placeholder = "Formula or value";
+    const ensureCell = (ref) => {
+      const current = active.cells[ref];
+      if (current && typeof current === "object" && !Array.isArray(current)) {
+        if (typeof current.v !== "string") current.v = current.v == null ? "" : String(current.v);
+        if (typeof current.bold !== "boolean") current.bold = false;
+        if (typeof current.italic !== "boolean") current.italic = false;
+        if (typeof current.color !== "string") current.color = "";
+        if (typeof current.bg !== "string") current.bg = "";
+        if (!["general", "currency", "percent"].includes(current.format)) current.format = "general";
+        return current;
       }
+      const next = { v: current == null ? "" : String(current), bold: false, italic: false, color: "", bg: "", format: "general" };
+      active.cells[ref] = next;
+      return next;
+    };
+    const parseNumericValue = (ref, depth = 0) => {
+      const value = evalCell(ref, depth);
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    };
+    function evalArithmetic(expr) {
+      const s = String(expr || "").replace(/\s+/g, "");
+      if (!s) return 0;
+      let i = 0;
+      const parseExpression = () => {
+        let v = parseTerm();
+        while (i < s.length && (s[i] === "+" || s[i] === "-")) {
+          const op = s[i++];
+          const rhs = parseTerm();
+          v = op === "+" ? v + rhs : v - rhs;
+        }
+        return v;
+      };
+      const parseTerm = () => {
+        let v = parseFactor();
+        while (i < s.length && (s[i] === "*" || s[i] === "/")) {
+          const op = s[i++];
+          const rhs = parseFactor();
+          v = op === "/" ? v / rhs : v * rhs;
+        }
+        return v;
+      };
+      const parseFactor = () => {
+        if (s[i] === "+") { i += 1; return parseFactor(); }
+        if (s[i] === "-") { i += 1; return -parseFactor(); }
+        if (s[i] === "(") {
+          i += 1;
+          const v = parseExpression();
+          if (s[i] !== ")") throw new Error("paren");
+          i += 1;
+          return v;
+        }
+        const start = i;
+        while (i < s.length && /[0-9.]/.test(s[i])) i += 1;
+        if (start === i) throw new Error("num");
+        const num = Number(s.slice(start, i));
+        if (!Number.isFinite(num)) throw new Error("num");
+        return num;
+      };
+      const out = parseExpression();
+      if (i !== s.length) throw new Error("tail");
+      return out;
     }
+    const evalCell = (ref, depth = 0) => {
+      if (depth > 10) return "#ERR";
+      const raw = String((ensureCell(ref) && ensureCell(ref).v) || "");
+      if (!raw.startsWith("=")) return raw;
+      const sumMatch = raw.match(/^=SUM\(([^:]+):([^\)]+)\)$/i);
+      if (sumMatch) {
+        const refs = excelRangeRefs(sumMatch[1], sumMatch[2]);
+        const total = refs.reduce((sum, cellRef) => sum + parseNumericValue(cellRef, depth + 1), 0);
+        return String(total);
+      }
+      const expr = raw.slice(1).replace(/[A-Z]+[0-9]+/g, (m) => String(parseNumericValue(m, depth + 1)));
+      try {
+        if (!/^[0-9+\-*/().\s]+$/.test(expr)) return "#ERR";
+        const out = evalArithmetic(expr);
+        return Number.isFinite(out) ? String(out) : "#ERR";
+      } catch { return "#ERR"; }
+    };
+    const formatCellValue = (ref) => {
+      const cell = ensureCell(ref);
+      const display = evalCell(ref);
+      const num = Number(display);
+      if (!Number.isFinite(num)) return display;
+      if (cell.format === "currency") return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD" }).format(num);
+      if (cell.format === "percent") return `${(num * 100).toFixed(2).replace(/\.00$/, "")} %`;
+      return String(display);
+    };
+    const tableWrap = document.createElement("div");
+    tableWrap.className = "sched-grid-wrap";
+    const table = document.createElement("table");
+    table.className = "excel-sheet";
+    const cellInputs = new Map();
+    const applyCellStyles = (ref, inp) => {
+      const cell = ensureCell(ref);
+      inp.style.fontWeight = cell.bold ? "700" : "400";
+      inp.style.fontStyle = cell.italic ? "italic" : "normal";
+      inp.style.color = cell.color || "var(--text)";
+      inp.style.background = cell.bg || "transparent";
+    };
+    const persist = () => updateDocument(openDoc.id, { content: openDoc.content });
+    const refreshCellDisplays = () => {
+      cellInputs.forEach((inp, ref) => {
+        if (document.activeElement !== inp) inp.value = formatCellValue(ref);
+        applyCellStyles(ref, inp);
+        inp.classList.toggle("active", ref === selectedRef);
+      });
+      refInput.value = selectedRef;
+      valueInput.value = ensureCell(selectedRef).v || "";
+    };
+    const setSelectedValue = (value) => {
+      ensureCell(selectedRef).v = value;
+      persist();
+      refreshCellDisplays();
+    };
+    const cycleFormat = () => {
+      const cell = ensureCell(selectedRef);
+      const order = ["general", "currency", "percent"];
+      cell.format = order[(order.indexOf(cell.format) + 1) % order.length];
+      persist();
+      refreshCellDisplays();
+      formatBtn.textContent = `Format: ${cell.format}`;
+    };
+    const mkToggle = (label, key) => createDocToolButton(label, () => {
+      const cell = ensureCell(selectedRef);
+      cell[key] = !cell[key];
+      persist();
+      refreshCellDisplays();
+    });
+    const boldBtn = mkToggle("Bold", "bold");
+    const italicBtn = mkToggle("Italic", "italic");
+    const textColor = document.createElement("input");
+    textColor.type = "color";
+    textColor.value = "#111827";
+    textColor.addEventListener("input", () => { ensureCell(selectedRef).color = textColor.value; persist(); refreshCellDisplays(); });
+    const bgColor = document.createElement("input");
+    bgColor.type = "color";
+    bgColor.value = "#ffffff";
+    bgColor.addEventListener("input", () => { ensureCell(selectedRef).bg = bgColor.value; persist(); refreshCellDisplays(); });
+    const sumBtn = createDocToolButton("Sum", () => {
+      const refs = excelRangeRefs(anchorRef, selectedRef);
+      if (!refs.length) return;
+      setSelectedValue(`=SUM(${refs[0]}:${refs[refs.length - 1]})`);
+    });
+    const formatBtn = createDocToolButton("Format: general", cycleFormat);
+    bar.append(sheetSel, addSheetBtn, document.createTextNode("Rows"), rowsInput, document.createTextNode("Cols"), colsInput, addRowBtn, addColBtn, boldBtn, italicBtn, textColor, bgColor, sumBtn, formatBtn);
+    refInput.value = selectedRef;
+    formulaBar.append(refInput, valueInput);
+    valueInput.addEventListener("change", () => setSelectedValue(valueInput.value));
+    const thead = document.createElement("thead");
+    const hrow = document.createElement("tr");
+    hrow.appendChild(document.createElement("th"));
+    for (let c = 0; c < active.cols; c += 1) {
+      const th = document.createElement("th");
+      th.textContent = excelColumnLabel(c);
+      hrow.appendChild(th);
+    }
+    thead.appendChild(hrow);
+    table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    for (let r = 0; r < active.rows; r += 1) {
+      const tr = document.createElement("tr");
+      const rowHead = document.createElement("th");
+      rowHead.textContent = String(r + 1);
+      tr.appendChild(rowHead);
+      for (let c = 0; c < active.cols; c += 1) {
+        const ref = `${excelColumnLabel(c)}${r + 1}`;
+        ensureCell(ref);
+        const td = document.createElement("td");
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.value = formatCellValue(ref);
+        inp.title = ref;
+        inp.addEventListener("focus", (e) => {
+          selectedRef = ref;
+          if (!e.shiftKey) anchorRef = ref;
+          inp.value = ensureCell(ref).v;
+          textColor.value = ensureCell(ref).color || "#111827";
+          bgColor.value = ensureCell(ref).bg || "#ffffff";
+          formatBtn.textContent = `Format: ${ensureCell(ref).format}`;
+          refreshCellDisplays();
+        });
+        inp.addEventListener("change", () => {
+          ensureCell(ref).v = inp.value;
+          persist();
+          refreshCellDisplays();
+        });
+        inp.addEventListener("blur", () => {
+          persist();
+          refreshCellDisplays();
+        });
+        applyCellStyles(ref, inp);
+        cellInputs.set(ref, inp);
+        td.appendChild(inp);
+        tr.appendChild(td);
+      }
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    tableWrap.appendChild(table);
+    editorSec.append(bar, formulaBar, tableWrap);
+    refreshCellDisplays();
+  }
+  function renderPowerPointEditor(editorSec, openDoc) {
+    if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("powerpoint");
+    if (!Array.isArray(openDoc.content.slides) || openDoc.content.slides.length === 0) openDoc.content.slides = defaultDocumentContent("powerpoint").slides;
+    if (typeof openDoc.content.activeSlide !== "number") openDoc.content.activeSlide = 0;
+    const deckWrap = document.createElement("div");
+    deckWrap.className = "schedule-layout";
+    const left = document.createElement("div");
+    left.className = "dep-list";
+    left.style.minWidth = "230px";
+    openDoc.content.slides.forEach((s, idx) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "dep-chip clickable" + (idx === openDoc.content.activeSlide ? " active" : "");
+      b.style.width = "100%";
+      b.style.marginBottom = "0.3rem";
+      b.innerHTML = `<span class="dep-kind">Slide ${idx + 1}</span><span class="dep-name">${escapeHtml(s.title || "(untitled)")}</span>`;
+      b.addEventListener("click", () => { openDoc.content.activeSlide = idx; updateDocument(openDoc.id, { content: openDoc.content }); render(); });
+      left.appendChild(b);
+    });
+    const slideActions = document.createElement("div");
+    slideActions.className = "row-actions";
+    const addSlide = createDocToolButton("+ Slide", () => {
+      openDoc.content.slides.push({ id: uid(), title: "New slide", body: "", bg: "#2563eb", bgImage: "", layout: "title-content", titleFontSize: 32, bodyFontSize: 20, notes: "", titleBold: true, bodyBold: false, titleItalic: false, bodyItalic: false, titleColor: "#ffffff", bodyColor: "#ffffff" });
+      openDoc.content.activeSlide = openDoc.content.slides.length - 1;
+      updateDocument(openDoc.id, { content: openDoc.content });
+      render();
+    });
+    const dupSlide = createDocToolButton("Duplicate slide", () => {
+      const src = openDoc.content.slides[openDoc.content.activeSlide];
+      if (!src) return;
+      openDoc.content.slides.splice(openDoc.content.activeSlide + 1, 0, { ...JSON.parse(JSON.stringify(src)), id: uid() });
+      openDoc.content.activeSlide += 1;
+      updateDocument(openDoc.id, { content: openDoc.content });
+      render();
+    });
+    const delSlide = createDocToolButton("Delete slide", () => {
+      if (openDoc.content.slides.length <= 1) return;
+      openDoc.content.slides.splice(openDoc.content.activeSlide, 1);
+      openDoc.content.activeSlide = Math.max(0, openDoc.content.activeSlide - 1);
+      updateDocument(openDoc.id, { content: openDoc.content });
+      render();
+    }, "sched-icon-btn danger");
+    slideActions.append(addSlide, dupSlide, delSlide);
+    left.appendChild(slideActions);
+    deckWrap.appendChild(left);
+
+    const slide = openDoc.content.slides[Math.max(0, Math.min(openDoc.content.activeSlide, openDoc.content.slides.length - 1))];
+    const slideEditor = document.createElement("div");
+    slideEditor.className = "task-detail";
+    const grid = document.createElement("div");
+    grid.className = "ppt-grid";
+    const mkLabel = (label, input) => {
+      const el = document.createElement("label");
+      el.textContent = label;
+      el.appendChild(input);
+      return el;
+    };
+    const titleI = document.createElement("input"); titleI.type = "text"; titleI.value = slide.title || "";
+    const bodyI = document.createElement("textarea"); bodyI.value = slide.body || "";
+    const layoutSel = document.createElement("select");
+    [["title-only","Title Only"],["title-content","Title + Content"],["blank","Blank"],["two-content","Two Content"],["title-bullets","Title + Bullets"]].forEach(([v,l]) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = l; if (slide.layout === v) o.selected = true; layoutSel.appendChild(o);
+    });
+    const bgI = document.createElement("input"); bgI.type = "color"; bgI.value = slide.bg || "#2563eb";
+    const bgImageI = document.createElement("input"); bgImageI.type = "url"; bgImageI.placeholder = "https://example.com/background.jpg"; bgImageI.value = slide.bgImage || "";
+    const titleSizeI = document.createElement("input"); titleSizeI.type = "number"; titleSizeI.min = "12"; titleSizeI.value = String(slide.titleFontSize || 32);
+    const bodySizeI = document.createElement("input"); bodySizeI.type = "number"; bodySizeI.min = "10"; bodySizeI.value = String(slide.bodyFontSize || 20);
+    const titleBoldI = document.createElement("input"); titleBoldI.type = "checkbox"; titleBoldI.checked = !!slide.titleBold;
+    const bodyBoldI = document.createElement("input"); bodyBoldI.type = "checkbox"; bodyBoldI.checked = !!slide.bodyBold;
+    const titleItalicI = document.createElement("input"); titleItalicI.type = "checkbox"; titleItalicI.checked = !!slide.titleItalic;
+    const bodyItalicI = document.createElement("input"); bodyItalicI.type = "checkbox"; bodyItalicI.checked = !!slide.bodyItalic;
+    const titleColorI = document.createElement("input"); titleColorI.type = "color"; titleColorI.value = slide.titleColor || "#ffffff";
+    const bodyColorI = document.createElement("input"); bodyColorI.type = "color"; bodyColorI.value = slide.bodyColor || "#ffffff";
+    const notesI = document.createElement("textarea"); notesI.value = slide.notes || ""; notesI.placeholder = "Speaker notes";
+    [
+      mkLabel("Layout", layoutSel), mkLabel("Title", titleI), mkLabel("Content", bodyI), mkLabel("Background color", bgI), mkLabel("Background image URL", bgImageI),
+      mkLabel("Title font size", titleSizeI), mkLabel("Body font size", bodySizeI), mkLabel("Title bold", titleBoldI), mkLabel("Body bold", bodyBoldI),
+      mkLabel("Title italic", titleItalicI), mkLabel("Body italic", bodyItalicI), mkLabel("Title color", titleColorI), mkLabel("Body color", bodyColorI), mkLabel("Speaker notes", notesI)
+    ].forEach((el) => grid.appendChild(el));
+    const previewWrap = document.createElement("div");
+    previewWrap.style.marginTop = "1rem";
+    const saveSlide = createDocToolButton("Save slide", () => {
+      slide.title = titleI.value;
+      slide.body = bodyI.value;
+      slide.bg = bgI.value;
+      slide.bgImage = bgImageI.value;
+      slide.layout = layoutSel.value;
+      slide.titleFontSize = Number(titleSizeI.value) || 32;
+      slide.bodyFontSize = Number(bodySizeI.value) || 20;
+      slide.notes = notesI.value;
+      slide.titleBold = titleBoldI.checked;
+      slide.bodyBold = bodyBoldI.checked;
+      slide.titleItalic = titleItalicI.checked;
+      slide.bodyItalic = bodyItalicI.checked;
+      slide.titleColor = titleColorI.value;
+      slide.bodyColor = bodyColorI.value;
+      updateDocument(openDoc.id, { content: openDoc.content });
+      render();
+    }, "sched-icon-btn primary");
+    const renderPreview = () => {
+      const draft = {
+        ...slide,
+        title: titleI.value,
+        body: bodyI.value,
+        bg: bgI.value,
+        bgImage: bgImageI.value,
+        layout: layoutSel.value,
+        titleFontSize: Number(titleSizeI.value) || 32,
+        bodyFontSize: Number(bodySizeI.value) || 20,
+        notes: notesI.value,
+        titleBold: titleBoldI.checked,
+        bodyBold: bodyBoldI.checked,
+        titleItalic: titleItalicI.checked,
+        bodyItalic: bodyItalicI.checked,
+        titleColor: titleColorI.value,
+        bodyColor: bodyColorI.value,
+      };
+      previewWrap.innerHTML = powerpointSlideHtml(draft);
+    };
+    [titleI, bodyI, layoutSel, bgI, bgImageI, titleSizeI, bodySizeI, titleBoldI, bodyBoldI, titleItalicI, bodyItalicI, titleColorI, bodyColorI, notesI].forEach((inp) => inp.addEventListener("input", renderPreview));
+    renderPreview();
+    slideEditor.append(grid, saveSlide, previewWrap);
+    deckWrap.appendChild(slideEditor);
+    editorSec.appendChild(deckWrap);
+  }
+  function renderVisioEditor(editorSec, openDoc) {
+    if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("visio");
+    if (!Array.isArray(openDoc.content.shapes)) openDoc.content.shapes = [];
+    if (!Array.isArray(openDoc.content.arrows)) openDoc.content.arrows = [];
+    const toolbar = document.createElement("div");
+    toolbar.className = "visio-toolbar";
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.value = "#dbeafe";
+    let selectedTool = openDoc.content.selectedTool || "rect";
+    let selectedId = null;
+    let connectorFrom = null;
+    let dragState = null;
+    const history = [];
+    const future = [];
+    const snapshot = () => { history.push(JSON.stringify({ shapes: openDoc.content.shapes, arrows: openDoc.content.arrows })); if (history.length > 40) history.shift(); future.length = 0; };
+    const persist = () => updateDocument(openDoc.id, { content: { ...openDoc.content, selectedTool } });
+    const stage = document.createElement("div");
+    stage.className = "visio-stage";
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 900 700");
+    svg.setAttribute("width", "900");
+    svg.setAttribute("height", "700");
+    svg.classList.add("visio-canvas");
+    stage.appendChild(svg);
+    const toolButtons = [];
+    const setTool = (tool) => {
+      selectedTool = tool;
+      openDoc.content.selectedTool = tool;
+      toolButtons.forEach((b) => b.classList.toggle("active", b.dataset.tool === tool));
+      persist();
+    };
+    [
+      ["rect", "Rectangle"], ["diamond", "Diamond"], ["oval", "Oval/Circle"], ["connector", "Arrow/Connector"], ["text", "Text label"]
+    ].forEach(([tool, label]) => {
+      const btn = createDocToolButton(label, () => setTool(tool));
+      btn.dataset.tool = tool;
+      btn.classList.toggle("active", selectedTool === tool);
+      toolButtons.push(btn);
+      toolbar.appendChild(btn);
+    });
+    toolbar.appendChild(colorInput);
+    const byId = () => new Map(openDoc.content.shapes.map((shape) => [shape.id, shape]));
+    const shapeCenter = (shape) => ({ x: Number(shape.x || 0) + Number(shape.w || 0) / 2, y: Number(shape.y || 0) + Number(shape.h || 0) / 2 });
+    const svgPoint = (evt) => {
+      const rect = svg.getBoundingClientRect();
+      return { x: ((evt.clientX - rect.left) / rect.width) * 900, y: ((evt.clientY - rect.top) / rect.height) * 700 };
+    };
+    const draw = () => {
+      svg.innerHTML = `<defs><marker id="visioArrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#334155"/></marker></defs><rect width="900" height="700" fill="#ffffff"></rect>`;
+      const shapeMap = byId();
+      openDoc.content.arrows.forEach((arrow) => {
+        const from = shapeMap.get(arrow.fromId), to = shapeMap.get(arrow.toId);
+        if (!from || !to) return;
+        const a = shapeCenter(from), b = shapeCenter(to);
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", a.x); line.setAttribute("y1", a.y); line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
+        line.setAttribute("stroke", "#334155"); line.setAttribute("stroke-width", "2.4"); line.setAttribute("marker-end", "url(#visioArrow)");
+        svg.appendChild(line);
+      });
+      openDoc.content.shapes.forEach((shape) => {
+        const group = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        group.dataset.shapeId = shape.id;
+        const x = Number(shape.x || 0), y = Number(shape.y || 0), w = Number(shape.w || 120), h = Number(shape.h || 72);
+        let node;
+        if (shape.type === "diamond") {
+          node = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+          node.setAttribute("points", `${x + w / 2},${y} ${x + w},${y + h / 2} ${x + w / 2},${y + h} ${x},${y + h / 2}`);
+        } else if (shape.type === "oval") {
+          node = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+          node.setAttribute("cx", x + w / 2); node.setAttribute("cy", y + h / 2); node.setAttribute("rx", w / 2); node.setAttribute("ry", h / 2);
+        } else if (shape.type === "text") {
+          node = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          node.setAttribute("x", x); node.setAttribute("y", y - 18); node.setAttribute("width", Math.max(w, 140)); node.setAttribute("height", 36); node.setAttribute("rx", 8);
+        } else {
+          node = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+          node.setAttribute("x", x); node.setAttribute("y", y); node.setAttribute("width", w); node.setAttribute("height", h); node.setAttribute("rx", 12);
+        }
+        node.setAttribute("fill", shape.color || "#dbeafe");
+        node.setAttribute("stroke", selectedId === shape.id ? "#2563eb" : "#334155");
+        node.setAttribute("stroke-width", selectedId === shape.id ? "3" : "2");
+        group.appendChild(node);
+        const textNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        textNode.setAttribute("x", x + w / 2);
+        textNode.setAttribute("y", y + h / 2);
+        textNode.setAttribute("text-anchor", "middle");
+        textNode.setAttribute("dominant-baseline", "middle");
+        textNode.setAttribute("font-size", "16");
+        textNode.textContent = shape.text || (shape.type === "text" ? "Label" : shape.type);
+        group.appendChild(textNode);
+        if (selectedId === shape.id) {
+          [[x + w / 2, y], [x + w, y + h / 2], [x + w / 2, y + h], [x, y + h / 2]].forEach(([cx, cy]) => {
+            const handle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            handle.setAttribute("cx", cx); handle.setAttribute("cy", cy); handle.setAttribute("r", "6");
+            handle.setAttribute("fill", "#2563eb");
+            handle.dataset.connectorHandle = shape.id;
+            group.appendChild(handle);
+          });
+        }
+        svg.appendChild(group);
+      });
+      persist();
+    };
+    const undo = () => {
+      if (!history.length) return;
+      future.push(JSON.stringify({ shapes: openDoc.content.shapes, arrows: openDoc.content.arrows }));
+      const prev = JSON.parse(history.pop());
+      openDoc.content.shapes = prev.shapes || [];
+      openDoc.content.arrows = prev.arrows || [];
+      selectedId = null;
+      draw();
+    };
+    const redo = () => {
+      if (!future.length) return;
+      history.push(JSON.stringify({ shapes: openDoc.content.shapes, arrows: openDoc.content.arrows }));
+      const next = JSON.parse(future.pop());
+      openDoc.content.shapes = next.shapes || [];
+      openDoc.content.arrows = next.arrows || [];
+      draw();
+    };
+    toolbar.append(
+      createDocToolButton("Delete selected", () => {
+        if (!selectedId) return;
+        snapshot();
+        openDoc.content.shapes = openDoc.content.shapes.filter((shape) => shape.id !== selectedId);
+        openDoc.content.arrows = openDoc.content.arrows.filter((arrow) => arrow.fromId !== selectedId && arrow.toId !== selectedId);
+        selectedId = null;
+        draw();
+      }),
+      createDocToolButton("Undo", undo),
+      createDocToolButton("Redo", redo),
+      createDocToolButton("Export as SVG", () => download(new Blob([visioSvgMarkup(openDoc.content)], { type: "image/svg+xml" }), safeDocumentFilename(openDoc.name, "svg")))
+    );
+    svg.addEventListener("dblclick", (evt) => {
+      const group = evt.target.closest("[data-shape-id]");
+      if (!group) return;
+      const shape = openDoc.content.shapes.find((item) => item.id === group.dataset.shapeId);
+      if (!shape) return;
+      const next = prompt("Edit label", shape.text || "");
+      if (next == null) return;
+      snapshot();
+      shape.text = next;
+      draw();
+    });
+    svg.addEventListener("pointerdown", (evt) => {
+      const point = svgPoint(evt);
+      const handle = evt.target.dataset && evt.target.dataset.connectorHandle;
+      if (handle) {
+        connectorFrom = handle;
+        selectedId = handle;
+        draw();
+        return;
+      }
+      const group = evt.target.closest("[data-shape-id]");
+      if (group) {
+        const shape = openDoc.content.shapes.find((item) => item.id === group.dataset.shapeId);
+        if (!shape) return;
+        if (selectedTool === "connector") {
+          if (connectorFrom && connectorFrom !== shape.id) {
+            snapshot();
+            openDoc.content.arrows.push({ id: uid(), fromId: connectorFrom, toId: shape.id, label: "" });
+            connectorFrom = null;
+            draw();
+          } else {
+            connectorFrom = shape.id;
+            selectedId = shape.id;
+            draw();
+          }
+          return;
+        }
+        selectedId = shape.id;
+        dragState = { id: shape.id, offsetX: point.x - Number(shape.x || 0), offsetY: point.y - Number(shape.y || 0) };
+        snapshot();
+        draw();
+        return;
+      }
+      if (!["rect", "diamond", "oval", "text"].includes(selectedTool)) return;
+      snapshot();
+      const shapeLabel = { rect: "Rectangle", diamond: "Decision", oval: "Oval", text: "Label" }[selectedTool] || "Shape";
+      const base = { id: uid(), type: selectedTool, x: point.x - 60, y: point.y - 36, w: selectedTool === "text" ? 160 : 120, h: selectedTool === "text" ? 36 : 72, text: shapeLabel, color: colorInput.value };
+      openDoc.content.shapes.push(base);
+      selectedId = base.id;
+      draw();
+    });
+    window.addEventListener("pointermove", (evt) => {
+      if (!dragState) return;
+      const shape = openDoc.content.shapes.find((item) => item.id === dragState.id);
+      if (!shape) return;
+      const point = svgPoint(evt);
+      shape.x = Math.max(10, point.x - dragState.offsetX);
+      shape.y = Math.max(10, point.y - dragState.offsetY);
+      draw();
+    });
+    window.addEventListener("pointerup", (evt) => {
+      if (dragState) { dragState = null; persist(); }
+      const group = evt.target && evt.target.closest ? evt.target.closest("[data-shape-id]") : null;
+      if (connectorFrom && group && group.dataset.shapeId !== connectorFrom) {
+        snapshot();
+        openDoc.content.arrows.push({ id: uid(), fromId: connectorFrom, toId: group.dataset.shapeId, label: "" });
+      }
+      connectorFrom = null;
+      draw();
+    });
+    editorSec.append(toolbar, stage);
+    draw();
+  }
+  function renderCodeEditor(editorSec, openDoc) {
+    if (!openDoc.content || typeof openDoc.content !== "object") openDoc.content = defaultDocumentContent("code");
+    if (typeof openDoc.content.code !== "string") openDoc.content.code = "// Start coding...\n";
+    if (typeof openDoc.content.language !== "string") openDoc.content.language = "javascript";
+    const toolbar = document.createElement("div");
+    toolbar.className = "code-toolbar";
+    const langSel = document.createElement("select");
+    codeLanguageOptions().forEach(([value, label]) => {
+      const o = document.createElement("option"); o.value = value; o.textContent = label; if (openDoc.content.language === value) o.selected = true; langSel.appendChild(o);
+    });
+    const editor = document.createElement("textarea");
+    editor.className = "code-editor";
+    editor.value = openDoc.content.code || "";
+    editor.style.whiteSpace = documentsState.codeWrap ? "pre-wrap" : "pre";
+    const persist = () => updateDocument(openDoc.id, { content: { ...openDoc.content, code: editor.value, language: langSel.value } });
+    const status = document.createElement("div");
+    status.className = "code-status-bar";
+    const refreshStatus = () => {
+      const lines = editor.value.length ? editor.value.split("\n").length : 1;
+      status.innerHTML = `<span>${lines} line${lines === 1 ? "" : "s"}</span><span>${escapeHtml((codeLanguageOptions().find(([v]) => v === langSel.value) || ["", "Plain Text"])[1])}</span>`;
+    };
+    const finder = createInlineFindBar({
+      placeholder: "Find code",
+      onFind: (findValue) => {
+        if (!findValue) return;
+        const startFrom = Math.max(editor.selectionEnd || 0, 0);
+        const src = editor.value.toLowerCase();
+        const term = findValue.toLowerCase();
+        let idx = src.indexOf(term, startFrom);
+        if (idx === -1) idx = src.indexOf(term, 0);
+        if (idx === -1) { toast("No match"); return; }
+        editor.focus();
+        editor.selectionStart = idx;
+        editor.selectionEnd = idx + term.length;
+      },
+      onReplace: (findValue, replaceValue) => {
+        if (!findValue) return;
+        if (editor.selectionStart === editor.selectionEnd || editor.value.slice(editor.selectionStart, editor.selectionEnd).toLowerCase() !== findValue.toLowerCase()) {
+          finder.open();
+          finder.findInput.value = findValue;
+          const startFrom = Math.max(editor.selectionEnd || 0, 0);
+          const src = editor.value.toLowerCase();
+          const term = findValue.toLowerCase();
+          let idx = src.indexOf(term, startFrom);
+          if (idx === -1) idx = src.indexOf(term, 0);
+          if (idx === -1) { toast("No match"); return; }
+          editor.focus();
+          editor.selectionStart = idx;
+          editor.selectionEnd = idx + term.length;
+        }
+        editor.setRangeText(replaceValue, editor.selectionStart, editor.selectionEnd, "end");
+        persist();
+        refreshStatus();
+      }
+    });
+    const wrapBtn = createDocToolButton(documentsState.codeWrap ? "Wrap: on" : "Wrap: off", () => {
+      documentsState.codeWrap = !documentsState.codeWrap;
+      editor.style.whiteSpace = documentsState.codeWrap ? "pre-wrap" : "pre";
+      wrapBtn.textContent = documentsState.codeWrap ? "Wrap: on" : "Wrap: off";
+    });
+    toolbar.append(
+      langSel,
+      createDocToolButton("Undo", () => { editor.focus(); document.execCommand("undo"); }),
+      createDocToolButton("Redo", () => { editor.focus(); document.execCommand("redo"); }),
+      createDocToolButton("Copy all", () => { navigator.clipboard && navigator.clipboard.writeText(editor.value); toast("Copied to clipboard"); }),
+      createDocToolButton("Find", () => finder.open()),
+      wrapBtn
+    );
+    editor.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const start = editor.selectionStart || 0;
+        const end = editor.selectionEnd || 0;
+        editor.setRangeText("  ", start, end, "end");
+        persist();
+        refreshStatus();
+      }
+    });
+    editor.addEventListener("input", () => { persist(); refreshStatus(); });
+    langSel.addEventListener("change", () => { persist(); refreshStatus(); });
+    refreshStatus();
+    editorSec.append(toolbar, finder.wrap, editor, status);
+  }
+  function renderDocumentsView(root) {
+    if (!Array.isArray(state.documents)) state.documents = [];
+    const hero = document.createElement("div");
+    hero.className = "hero";
+    const top = document.createElement("div");
+    top.className = "hero-top";
+    const title = document.createElement("h1");
+    title.textContent = "Documents";
+    title.style.flex = "1";
+    top.appendChild(title);
+    hero.appendChild(top);
+    const meta = document.createElement("div");
+    meta.className = "meta-row";
+    meta.innerHTML = `<span>Create and edit Word, Excel, PowerPoint, Visio, and Code documents.</span><span>${state.documents.length} total</span>`;
+    hero.appendChild(meta);
+
+    const createRow = document.createElement("div");
+    createRow.className = "range-row";
+    const createNewWrap = document.createElement("div");
+    createNewWrap.style.cssText = "display:flex;align-items:center;gap:0.5rem";
+    const createNewLabel = document.createElement("span");
+    createNewLabel.textContent = "Create New:";
+    createNewLabel.style.fontWeight = "600";
+    const createTypeSel = document.createElement("select");
+    [["word","Word Document"],["excel","Excel Workbook"],["powerpoint","PowerPoint Presentation"],["visio","Visio Diagram"],["code","Code Snippet"]].forEach(([v,l]) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = l; createTypeSel.appendChild(o);
+    });
+    const createNewBtn = document.createElement("button");
+    createNewBtn.className = "chip-btn primary";
+    createNewBtn.textContent = "+ Create";
+    createNewBtn.addEventListener("click", () => {
+      const type = createTypeSel.value;
+      const doc = createDocument(type);
+      if (doc) { documentsState.openId = doc.id; documentsState.fullscreen = false; render(); }
+    });
+    createNewWrap.append(createNewLabel, createTypeSel, createNewBtn);
+    const uploadBtn = document.createElement("button");
+    uploadBtn.className = "chip-btn";
+    uploadBtn.textContent = "⬆ Upload";
+    uploadBtn.addEventListener("click", () => {
+      const inp = document.createElement("input");
+      inp.type = "file";
+      inp.accept = ".txt,.html,.htm,.md,.csv,.json,.js,.ts,.py,.css,.sql,.sh,.java,.cs,.cpp,.go,.rs,.php,.rb,.yaml,.yml";
+      inp.addEventListener("change", () => {
+        const file = inp.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const ext = file.name.split(".").pop().toLowerCase();
+          const type = ["html","htm","md","txt"].includes(ext) ? "word" : ["csv"].includes(ext) ? "excel" : ["js","ts","py","css","sql","sh","java","cs","cpp","go","rs","php","rb","yaml","yml","json"].includes(ext) ? "code" : "word";
+          const doc = createDocument(type);
+          if (!doc) return;
+          doc.name = file.name.replace(/\.[^.]+$/, "");
+          if (type === "word") {
+            doc.content = { html: ext === "html" || ext === "htm" ? e.target.result : `<pre>${escapeHtml(e.target.result)}</pre>` };
+          } else if (type === "code") {
+            const langMap = { js: "javascript", ts: "typescript", py: "python", css: "css", sql: "sql", sh: "bash", java: "java", cs: "csharp", cpp: "cpp", go: "go", rs: "rust", php: "php", rb: "ruby", yaml: "yaml", yml: "yaml", json: "json" };
+            doc.content = { code: e.target.result, language: langMap[ext] || "plaintext" };
+          } else if (type === "excel") {
+            const rows = e.target.result.split("\n");
+            const cells = {};
+            rows.forEach((row, ri) => {
+              row.split(",").forEach((val, ci) => {
+                if (ci < 26) cells[`${String.fromCharCode(65+ci)}${ri+1}`] = { v: val.trim(), bold: false, italic: false, color: "", bg: "", format: "general" };
+              });
+            });
+            doc.content = { sheets: [{ id: uid(), name: "Sheet1", rows: Math.max(18, rows.length+2), cols: 8, cells }], activeSheet: 0 };
+          }
+          updateDocument(doc.id, { content: doc.content, name: doc.name });
+          documentsState.openId = doc.id;
+          render();
+        };
+        reader.readAsText(file);
+      });
+      inp.click();
+    });
+    createRow.append(createNewWrap, uploadBtn);
+    hero.appendChild(createRow);
+    root.appendChild(hero);
+
+    const controls = document.createElement("section");
+    controls.dataset.panelId = "documents-controls";
+    const row = document.createElement("div");
+    row.className = "filter-row";
+    const q = document.createElement("input");
+    q.type = "search";
+    q.placeholder = "Search documents…";
+    q.value = documentsState.query;
+    q.addEventListener("input", () => { documentsState.query = q.value; render(); });
+    const typeSel = document.createElement("select");
+    [["all","All types"],["word","Word"],["excel","Excel"],["powerpoint","PowerPoint"],["visio","Visio"],["code","Code"]].forEach(([v,l]) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.type === v) o.selected = true; typeSel.appendChild(o);
+    });
+    typeSel.addEventListener("change", () => { documentsState.type = typeSel.value; render(); });
+    const folderSel = document.createElement("select");
+    [["current","Current location"],["all","All folders"],["root","Root only"]].forEach(([v,l]) => {
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = l;
+      if ((documentsState.folder || "current") === v) o.selected = true;
+      folderSel.appendChild(o);
+    });
+    (state.folders || []).forEach((folder) => {
+      const o = document.createElement("option");
+      o.value = folder.id;
+      o.textContent = folderLabel(folder.id);
+      if (documentsState.folder === folder.id) o.selected = true;
+      folderSel.appendChild(o);
+    });
+    folderSel.addEventListener("change", () => { documentsState.folder = folderSel.value; render(); });
+    const sortSel = document.createElement("select");
+    [["updated","Recently updated"],["name","Name"],["created","Recently created"]].forEach(([v,l]) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.sort === v) o.selected = true; sortSel.appendChild(o);
+    });
+    sortSel.addEventListener("change", () => { documentsState.sort = sortSel.value; render(); });
+    row.append(q, typeSel, folderSel, sortSel);
+    controls.appendChild(row);
+    root.appendChild(controls);
+
+    const layout = document.createElement("div");
+    layout.className = "schedule-layout" + (documentsState.fullscreen ? " doc-editor-fullscreen" : "");
+    layout.style.gridTemplateColumns = documentsState.fullscreen ? "1fr" : "auto minmax(0, 1fr)";
+    const listSec = document.createElement("section");
+    listSec.className = "schedule-side doc-pane-resizable";
+    listSec.style.width = "320px";
+    listSec.dataset.panelId = "documents-list";
+    listSec.innerHTML = `<div class="section-head"><h2>Library</h2></div>`;
+    const list = document.createElement("div");
+    list.className = "entry-list";
+    const newFolderBtn = document.createElement("button");
+    newFolderBtn.type = "button";
+    newFolderBtn.textContent = "+ New folder";
+    newFolderBtn.addEventListener("click", () => showNewFolderForm(list));
+    list.appendChild(newFolderBtn);
+    if (currentFolderId) {
+      const crumb = document.createElement("div");
+      crumb.className = "folder-breadcrumb";
+      const rootLink = document.createElement("a");
+      rootLink.textContent = "Documents";
+      rootLink.onclick = () => { currentFolderId = null; selectedDocIds.clear(); render(); };
+      crumb.appendChild(rootLink);
+      folderPath(currentFolderId).forEach((folder) => {
+        crumb.appendChild(document.createTextNode(" / "));
+        const part = document.createElement(folder.id === currentFolderId ? "span" : "a");
+        part.textContent = folder.name;
+        if (folder.id !== currentFolderId) part.onclick = () => { currentFolderId = folder.id; selectedDocIds.clear(); render(); };
+        crumb.appendChild(part);
+      });
+      list.appendChild(crumb);
+    }
+    const folderTree = document.createElement("div");
+    renderFolderTree(currentFolderId, folderTree);
+    list.appendChild(folderTree);
+    const docs = state.documents
+      .filter(d => (documentsState.type === "all" || d.type === documentsState.type))
+      .filter(d => !documentsState.query || d.name.toLowerCase().includes(documentsState.query.toLowerCase()))
+      .filter(d => {
+        const mode = documentsState.folder || "current";
+        if (mode === "all") return true;
+        if (mode === "root") return (d.folderId || null) === null;
+        if (mode === "current") return (d.folderId || null) === (currentFolderId || null);
+        return (d.folderId || null) === mode;
+      })
+      .sort((a, b) => {
+        if (documentsState.sort === "name") return a.name.localeCompare(b.name);
+        if (documentsState.sort === "created") return new Date(b.createdAt) - new Date(a.createdAt);
+        return new Date(b.updatedAt) - new Date(a.updatedAt);
+      });
+    if (!docs.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.textContent = "No matching documents.";
+      list.appendChild(empty);
+    } else {
+      docs.forEach((doc) => {
+        const rowEl = document.createElement("div");
+        rowEl.className = "entry" + (documentsState.openId === doc.id ? " running" : "");
+        rowEl.setAttribute("draggable", "true");
+        rowEl.style.gridTemplateColumns = "18px 1fr auto auto";
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "doc-checkbox";
+        checkbox.checked = selectedDocIds.has(doc.id);
+        checkbox.addEventListener("click", (e) => e.stopPropagation());
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) selectedDocIds.add(doc.id);
+          else selectedDocIds.delete(doc.id);
+          render();
+        });
+        const info = document.createElement("div");
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = doc.name;
+        const metaEl = document.createElement("div");
+        metaEl.className = "meta";
+        const updatedLabel = state.settings.relativeTime ? syncRelAgo(doc.updatedAt) : new Date(doc.updatedAt).toLocaleString();
+        metaEl.textContent = `${doc.type.toUpperCase()} · updated ${updatedLabel}`;
+        info.append(name, metaEl);
+        const folderMove = document.createElement("select");
+        folderMove.className = "doc-move-select";
+        renderFolderOptions(folderMove, "Root");
+        folderMove.value = doc.folderId || "__root__";
+        folderMove.addEventListener("click", (e) => e.stopPropagation());
+        folderMove.addEventListener("change", () => moveDocsToFolder(new Set([doc.id]), folderMove.value === "__root__" ? null : folderMove.value));
+        const openBtn = document.createElement("button");
+        openBtn.type = "button";
+        openBtn.textContent = "Open";
+        openBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          documentsState.openId = doc.id;
+          documentsState.fullscreen = false;
+          render();
+        });
+        rowEl.addEventListener("click", () => { documentsState.openId = doc.id; render(); });
+        rowEl.addEventListener("dragstart", (e) => {
+          e.dataTransfer.effectAllowed = "move";
+          e.dataTransfer.setData("text/doc-id", doc.id);
+        });
+        rowEl.append(checkbox, info, folderMove, openBtn);
+        list.appendChild(rowEl);
+      });
+    }
+    listSec.appendChild(list);
+    layout.appendChild(listSec);
+
+    const editorSec = document.createElement("section");
+    editorSec.className = "doc-editor-pane doc-pane-resizable";
+    editorSec.style.width = documentsState.fullscreen ? "100%" : "auto";
+    editorSec.dataset.panelId = "documents-editor";
+    const openDoc = docs.find(d => d.id === documentsState.openId) || docs[0] || null;
+    if (openDoc && !documentsState.openId) documentsState.openId = openDoc.id;
+    if (!openDoc) {
+      editorSec.innerHTML = `<h2>Editor</h2><div class="empty">Create a document to begin.</div>`;
+    } else {
+      const head = document.createElement("div");
+      head.className = "section-head";
+      head.innerHTML = `<h2>${escapeHtml(openDoc.name)}</h2><span class="head-meta">${escapeHtml(openDoc.type)}</span>`;
+      const act = document.createElement("div");
+      act.className = "row-actions doc-actions";
+      const renameBtn = createDocToolButton("Rename", () => {
+        const next = prompt("Rename document", openDoc.name);
+        if (next == null) return;
+        updateDocument(openDoc.id, { name: next.trim() || openDoc.name });
+        render();
+      });
+      const dupBtn = createDocToolButton("Duplicate", () => {
+        const dup = duplicateDocument(openDoc.id);
+        if (dup) documentsState.openId = dup.id;
+        render();
+      });
+      const exportBtn = createDocToolButton("⬇ Export", () => downloadDocumentFile(openDoc));
+      const shareBtn = createDocToolButton("Share", () => {
+        documentsState.shareOpenId = documentsState.shareOpenId === openDoc.id ? null : openDoc.id;
+        render();
+      });
+      const fullBtn = documentsState.fullscreen
+        ? createDocToolButton("← Back", () => { documentsState.fullscreen = false; render(); })
+        : createDocToolButton("⛶ Full screen", () => { documentsState.fullscreen = true; render(); });
+      const delBtn = createDocToolButton("Delete", () => {
+        if (!confirm(`Delete "${openDoc.name}"?`)) return;
+        deleteDocument(openDoc.id);
+        documentsState.fullscreen = false;
+        render();
+      }, "sched-icon-btn danger");
+      act.append(renameBtn, dupBtn, exportBtn, shareBtn, fullBtn, delBtn);
+      if (documentsState.shareOpenId === openDoc.id) {
+        const pop = document.createElement("div");
+        pop.className = "doc-share-pop";
+        const shareUrl = `${location.origin}${location.pathname}?share=${encodeSharePayload(openDoc)}${location.hash || "#/documents"}`;
+        const urlInput = document.createElement("input");
+        urlInput.type = "text";
+        urlInput.readOnly = true;
+        urlInput.value = shareUrl;
+        urlInput.style.width = "100%";
+        const copyLink = createDocToolButton("Copy link", () => { navigator.clipboard && navigator.clipboard.writeText(shareUrl); toast("Copied to clipboard"); });
+        const copyJson = createDocToolButton("Copy as JSON", () => { navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(openDoc, null, 2)); toast("Copied to clipboard"); });
+        const emailBtn = createDocToolButton("Email", () => {
+          location.href = `mailto:?subject=${encodeURIComponent(openDoc.name)}&body=${encodeURIComponent(`Shared from TimePlanner: ${openDoc.name}\n\n${shareUrl}`)}`;
+        });
+        pop.append(document.createTextNode("Share via link"), urlInput, copyLink, copyJson, emailBtn);
+        act.appendChild(pop);
+      }
+      editorSec.append(head, act);
+      renderDocumentLinksSection(editorSec, openDoc);
+      if (openDoc.type === "word") renderWordEditor(editorSec, openDoc);
+      else if (openDoc.type === "excel") renderExcelEditor(editorSec, openDoc);
+      else if (openDoc.type === "powerpoint") renderPowerPointEditor(editorSec, openDoc);
+      else if (openDoc.type === "visio") renderVisioEditor(editorSec, openDoc);
+      else renderCodeEditor(editorSec, openDoc);
+    }
+    layout.appendChild(editorSec);
+    root.appendChild(layout);
+    document.querySelectorAll(".multi-select-bar").forEach(el => el.remove());
+    if (selectedDocIds.size > 0) {
+      const bar = document.createElement("div");
+      bar.className = "multi-select-bar";
+      const lbl = document.createElement("span");
+      lbl.textContent = `${selectedDocIds.size} selected`;
+      const moveSel = document.createElement("select");
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "Move to…";
+      moveSel.appendChild(placeholder);
+      renderFolderOptions(moveSel, "Root (no folder)");
+      moveSel.onchange = () => {
+        if (!moveSel.value) return;
+        moveDocsToFolder(new Set([...selectedDocIds]), moveSel.value === "__root__" ? null : moveSel.value);
+        moveSel.value = "";
+      };
+      const clearBtn = document.createElement("button");
+      clearBtn.type = "button";
+      clearBtn.textContent = "✕ Clear";
+      clearBtn.onclick = () => { selectedDocIds.clear(); render(); };
+      bar.append(lbl, moveSel, clearBtn);
+      document.body.appendChild(bar);
+    }
+  }
 
     function renderHome(root) {
     const sec = document.createElement("section");
@@ -7538,7 +8428,7 @@
   // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
   // -------------------------------------------------------------------------
   const planState = { scope: "all", scopeId: "", searchQuery: "", viewMode: "moderate" };
-  const documentsState = { query: "", type: "all", sort: "updated", folder: "current", openId: null };
+  const documentsState = { query: "", type: "all", sort: "updated", folder: "current", openId: null, fullscreen: false, codeWrap: true, shareOpenId: null };
   let currentFolderId = null;
   let selectedDocIds = new Set();
 
@@ -7550,6 +8440,7 @@
       month: new Date().toISOString(),
     },
     density: "comfortable", // comfortable | compact
+    miniCalendar: false,
   };
   let scheduleEditorEl = null;
 
@@ -7670,20 +8561,66 @@
   function documentById(id) {
     return state.documents.find(d => d.id === id) || null;
   }
+  function documentTypeLabel(type) {
+    return ({ word: "Word", excel: "Excel", powerpoint: "PowerPoint", visio: "Visio", code: "Code" })[type] || "Document";
+  }
+  function safeDocumentFilename(name, ext) {
+    const base = String(name || "document").trim().replace(/[\/:*?"<>|]+/g, "-") || "document";
+    return `${base}.${ext}`;
+  }
+  function excelColumnLabel(index) {
+    let n = Number(index) || 0;
+    let out = "";
+    do {
+      out = String.fromCharCode(65 + (n % 26)) + out;
+      n = Math.floor(n / 26) - 1;
+    } while (n >= 0);
+    return out;
+  }
+  function excelColumnIndex(label) {
+    let out = 0;
+    String(label || "").toUpperCase().split("").forEach((ch) => {
+      if (ch >= "A" && ch <= "Z") out = out * 26 + (ch.charCodeAt(0) - 64);
+    });
+    return Math.max(0, out - 1);
+  }
+  function excelParseRef(ref) {
+    const m = String(ref || "").toUpperCase().match(/^([A-Z]+)(\d+)$/);
+    if (!m) return null;
+    return { col: excelColumnIndex(m[1]), row: Math.max(0, Number(m[2]) - 1), ref: `${m[1]}${Number(m[2])}` };
+  }
+  function excelRangeRefs(a, b) {
+    const pa = excelParseRef(a);
+    const pb = excelParseRef(b || a);
+    if (!pa || !pb) return [];
+    const rows = [pa.row, pb.row].sort((x, y) => x - y);
+    const cols = [pa.col, pb.col].sort((x, y) => x - y);
+    const out = [];
+    for (let r = rows[0]; r <= rows[1]; r += 1) {
+      for (let c = cols[0]; c <= cols[1]; c += 1) out.push(`${excelColumnLabel(c)}${r + 1}`);
+    }
+    return out;
+  }
   function defaultDocumentContent(type) {
     if (type === "excel") {
-      return { sheets: [{ id: uid(), name: "Sheet1", rows: 18, cols: 8, cells: {} }], activeSheet: 0 };
+      return { sheets: [{ id: uid(), name: "Sheet1", rows: 50, cols: 26, cells: {} }], activeSheet: 0 };
     }
     if (type === "powerpoint") {
-      return { slides: [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb" }], activeSlide: 0 };
+      return { slides: [{ id: uid(), title: "Title slide", body: "", bg: "#2563eb", bgImage: "", layout: "title-content", titleFontSize: 32, bodyFontSize: 20, notes: "", titleBold: true, bodyBold: false, titleItalic: false, bodyItalic: false, titleColor: "#ffffff", bodyColor: "#ffffff" }], activeSlide: 0 };
     }
-    return { text: "## Untitled document\n\nStart writing…\n" };
+    if (type === "visio") {
+      return { shapes: [], arrows: [], selectedTool: "rect" };
+    }
+    if (type === "code") {
+      return { code: "// Start coding...\n", language: "javascript" };
+    }
+    return { html: "<p>Start writing…</p>" };
   }
   function createDocument(type) {
-    if (!["word", "excel", "powerpoint"].includes(type)) return null;
+    if (!["word", "excel", "powerpoint", "visio", "code"].includes(type)) return null;
     const now = new Date().toISOString();
     const id = uid();
-    const baseName = type === "word" ? "Document" : type === "excel" ? "Workbook" : "Presentation";
+    const baseName = ({ word: "Document", excel: "Workbook", powerpoint: "Presentation", visio: "Diagram", code: "Snippet" })[type] || "Document";
     const doc = {
       id,
       type,
@@ -7698,6 +8635,163 @@
     logEvent("createDocument", { id, type, name: doc.name });
     save();
     return doc;
+  }
+  function codeLanguageOptions() {
+    return [
+      ["plaintext", "Plain Text"], ["javascript", "JavaScript"], ["typescript", "TypeScript"], ["python", "Python"],
+      ["html", "HTML"], ["css", "CSS"], ["json", "JSON"], ["sql", "SQL"], ["bash", "Bash"],
+      ["java", "Java"], ["csharp", "C#"], ["cpp", "C++"], ["go", "Go"], ["rust", "Rust"],
+      ["php", "PHP"], ["ruby", "Ruby"], ["markdown", "Markdown"], ["yaml", "YAML"],
+    ];
+  }
+  function codeLanguageExtension(language) {
+    return {
+      plaintext: "txt", javascript: "js", typescript: "ts", python: "py", html: "html", css: "css", json: "json",
+      sql: "sql", bash: "sh", java: "java", csharp: "cs", cpp: "cpp", go: "go", rust: "rs", php: "php",
+      ruby: "rb", markdown: "md", yaml: "yml"
+    }[language] || "txt";
+  }
+  function visioSvgMarkup(content) {
+    const shapes = Array.isArray(content && content.shapes) ? content.shapes : [];
+    const arrows = Array.isArray(content && content.arrows) ? content.arrows : [];
+    const byId = new Map(shapes.map((shape) => [shape.id, shape]));
+    const center = (shape) => ({ x: Number(shape.x || 0) + Number(shape.w || 0) / 2, y: Number(shape.y || 0) + Number(shape.h || 0) / 2 });
+    const shapeSvg = shapes.map((shape) => {
+      const x = Number(shape.x || 0), y = Number(shape.y || 0), w = Number(shape.w || 120), h = Number(shape.h || 72);
+      const fill = shape.color || "#dbeafe";
+      const textX = x + w / 2;
+      const textY = y + h / 2;
+      const label = escapeHtml(shape.text || shape.type || "Shape");
+      if (shape.type === "diamond") {
+        const pts = `${x + w / 2},${y} ${x + w},${y + h / 2} ${x + w / 2},${y + h} ${x},${y + h / 2}`;
+        return `<g><polygon points="${pts}" fill="${fill}" stroke="#334155" stroke-width="2"/><text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="middle" font-size="16" font-family="Arial">${label}</text></g>`;
+      }
+      if (shape.type === "oval") {
+        return `<g><ellipse cx="${textX}" cy="${textY}" rx="${w / 2}" ry="${h / 2}" fill="${fill}" stroke="#334155" stroke-width="2"/><text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="middle" font-size="16" font-family="Arial">${label}</text></g>`;
+      }
+      if (shape.type === "text") {
+        return `<g><text x="${x}" y="${y + 20}" font-size="18" font-family="Arial" fill="#111827">${label}</text></g>`;
+      }
+      return `<g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" ry="12" fill="${fill}" stroke="#334155" stroke-width="2"/><text x="${textX}" y="${textY}" text-anchor="middle" dominant-baseline="middle" font-size="16" font-family="Arial">${label}</text></g>`;
+    }).join("");
+    const arrowSvg = arrows.map((arrow) => {
+      const from = byId.get(arrow.fromId);
+      const to = byId.get(arrow.toId);
+      if (!from || !to) return "";
+      const a = center(from), b = center(to);
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - 8;
+      return `<g><line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="#334155" stroke-width="2.4" marker-end="url(#arrowhead)"/>${arrow.label ? `<text x="${mx}" y="${my}" text-anchor="middle" font-size="14" font-family="Arial" fill="#334155">${escapeHtml(arrow.label)}</text>` : ""}</g>`;
+    }).join("");
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+  <defs><marker id="arrowhead" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#334155"/></marker></defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  ${arrowSvg}
+  ${shapeSvg}
+</svg>`;
+  }
+  function powerpointBodyHtml(slide) {
+    const rawBody = String(slide.body || "");
+    const body = escapeHtml(rawBody);
+    if (slide.layout === "title-bullets") {
+      const items = body.split(/\n+/).filter(Boolean).map((line) => `<li>${line}</li>`).join("");
+      return `<ul class="ppt-bullets">${items || "<li>Add bullet points…</li>"}</ul>`;
+    }
+    if (slide.layout === "two-content") {
+      const parts = rawBody.split(/\n\n+/);
+      return `<div class="ppt-columns"><div>${escapeHtml(parts[0] || "Left content")}</div><div>${escapeHtml(parts.slice(1).join("\n\n") || "Right content")}</div></div>`;
+    }
+    return `<div class="ppt-body">${body.replace(/\n/g, "<br>")}</div>`;
+  }
+  function powerpointSlideHtml(slide) {
+    const cls = slide.layout === "title-only" ? "title-only" : slide.layout === "blank" ? "blank" : slide.layout === "two-content" ? "two-content" : slide.layout === "title-bullets" ? "title-bullets" : "title-content";
+    const bgStyle = slide.bgImage ? `background-image:url('${String(slide.bgImage).replace(/'/g, "%27")}');background-size:cover;background-position:center;` : "";
+    return `<section class="ppt-preview ${cls}" style="background:${slide.bg || "#2563eb"};${bgStyle}color:#fff;"><h1 class="ppt-title" style="font-size:${Number(slide.titleFontSize) || 32}px;font-weight:${slide.titleBold ? 700 : 400};font-style:${slide.titleItalic ? "italic" : "normal"};color:${slide.titleColor || "#fff"}">${escapeHtml(slide.title || "Title")}</h1>${slide.layout === "blank" ? "" : `<div style="font-size:${Number(slide.bodyFontSize) || 20}px;font-weight:${slide.bodyBold ? 700 : 400};font-style:${slide.bodyItalic ? "italic" : "normal"};color:${slide.bodyColor || "#fff"}">${powerpointBodyHtml(slide)}</div>`}</section>`;
+  }
+  function workbookCsv(doc) {
+    const sheets = (doc.content && doc.content.sheets) || [];
+    return sheets.map((sheet) => {
+      const rows = Math.max(1, Number(sheet.rows) || 1);
+      const cols = Math.max(1, Number(sheet.cols) || 1);
+      const lines = [`# ${sheet.name || "Sheet"}`];
+      for (let r = 0; r < rows; r += 1) {
+        const vals = [];
+        for (let c = 0; c < cols; c += 1) {
+          const key = `${excelColumnLabel(c)}${r + 1}`;
+          const cell = sheet.cells && sheet.cells[key] ? sheet.cells[key] : { v: "" };
+          const raw = typeof cell === "object" ? cell.v : cell;
+          vals.push('"' + String(raw == null ? "" : raw).replace(/"/g, '""') + '"');
+        }
+        lines.push(vals.join(','));
+      }
+      return lines.join('\n');
+    }).join('\n\n');
+  }
+  function downloadDocumentFile(doc) {
+    if (!doc) return;
+    if (doc.type === "word") {
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(doc.name)}</title></head><body>${(doc.content && doc.content.html) || ""}</body></html>`;
+      download(new Blob([html], { type: "text/html" }), safeDocumentFilename(doc.name, "html"));
+      return;
+    }
+    if (doc.type === "excel") {
+      download(new Blob([workbookCsv(doc)], { type: "text/csv;charset=utf-8" }), safeDocumentFilename(doc.name, "csv"));
+      return;
+    }
+    if (doc.type === "powerpoint") {
+      const slides = ((doc.content && doc.content.slides) || []).map((slide) => powerpointSlideHtml(slide)).join("\n");
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(doc.name)}</title><style>body{font-family:Arial,sans-serif;background:#0f172a;margin:0;padding:24px;display:grid;gap:24px}.ppt-preview{max-width:900px;margin:0 auto;aspect-ratio:16/9;padding:2rem;border-radius:14px;box-shadow:0 12px 28px rgba(0,0,0,.18);background-size:cover;background-position:center}.ppt-title{margin:0 0 1rem}.ppt-columns{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}.ppt-bullets{padding-left:1.1rem}</style></head><body>${slides}</body></html>`;
+      download(new Blob([html], { type: "text/html" }), safeDocumentFilename(doc.name, "html"));
+      return;
+    }
+    if (doc.type === "visio") {
+      download(new Blob([visioSvgMarkup(doc.content)], { type: "image/svg+xml" }), safeDocumentFilename(doc.name, "svg"));
+      return;
+    }
+    const code = (doc.content && doc.content.code) || "";
+    const language = (doc.content && doc.content.language) || "plaintext";
+    download(new Blob([code], { type: "text/plain;charset=utf-8" }), safeDocumentFilename(doc.name, codeLanguageExtension(language)));
+  }
+  function encodeSharePayload(obj) {
+    try {
+      const bytes = new TextEncoder().encode(JSON.stringify(obj));
+      let bin = "";
+      bytes.forEach((b) => { bin += String.fromCharCode(b); });
+      return btoa(bin);
+    } catch {
+      return "";
+    }
+  }
+  function decodeSharePayload(raw) {
+    try {
+      const bin = atob(raw);
+      const bytes = Uint8Array.from(bin, (ch) => ch.charCodeAt(0));
+      return JSON.parse(new TextDecoder().decode(bytes));
+    } catch {
+      return null;
+    }
+  }
+  function importSharedDocumentFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const share = params.get("share");
+    if (!share) return;
+    const decoded = decodeSharePayload(share);
+    if (!decoded || typeof decoded !== "object") return;
+    const temp = backfillState({ ...freshState(), documents: [decoded] });
+    const imported = temp.documents[0];
+    if (!imported) return;
+    imported.id = uid();
+    imported.createdAt = new Date().toISOString();
+    imported.updatedAt = imported.createdAt;
+    imported.folderId = null;
+    imported.name = `${imported.name || "Shared document"}`;
+    state.documents.unshift(imported);
+    documentsState.openId = imported.id;
+    save();
+    params.delete("share");
+    const search = params.toString();
+    history.replaceState(null, "", `${location.pathname}${search ? "?" + search : ""}${location.hash}`);
+    toast('Imported shared document');
   }
   function updateDocument(id, patch) {
     const doc = documentById(id);
@@ -8480,7 +9574,10 @@
   // AI planning guru — chat UI + local heuristics engine
   // -------------------------------------------------------------------------
   const CHAT_KEY = "timeplanner.chat.v1";
+  const CHAT_FEEDBACK_KEY = "timeplanner.chat.feedback";
   let chatHistory = loadChatHistory();
+  let guruFeedback = loadGuruFeedback();
+  let guruFeedbackMap = buildGuruFeedbackMap(guruFeedback);
   let chatOpen = false;
 
   function loadChatHistory() {
@@ -8491,8 +9588,49 @@
       return Array.isArray(arr) ? arr.slice(-50) : [];
     } catch { return []; }
   }
+  function loadGuruFeedback() {
+    try {
+      const raw = localStorage.getItem(CHAT_FEEDBACK_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+  }
+  function buildGuruFeedbackMap(entries) {
+    const map = new Map();
+    (entries || []).forEach((entry) => {
+      const key = String(entry.trigger || "").toLowerCase().trim();
+      if (!key) return;
+      const cur = map.get(key) || { liked: 0, disliked: 0, preferredReply: "" };
+      if (entry.liked) { cur.liked += 1; cur.preferredReply = entry.reply || cur.preferredReply; }
+      if (entry.disliked) cur.disliked += 1;
+      map.set(key, cur);
+    });
+    return map;
+  }
   function saveChatHistory() {
     try { localStorage.setItem(CHAT_KEY, JSON.stringify(chatHistory.slice(-50))); } catch {}
+  }
+  function saveGuruFeedback() {
+    guruFeedbackMap = buildGuruFeedbackMap(guruFeedback);
+    try { localStorage.setItem(CHAT_FEEDBACK_KEY, JSON.stringify(guruFeedback.slice(-100))); } catch {}
+  }
+  function recordGuruFeedback(entry, liked) {
+    if (!entry || !entry.trigger || entry.liked || entry.disliked) return;
+    if (liked) entry.liked = true;
+    else entry.disliked = true;
+    guruFeedback.push({ trigger: entry.trigger, reply: entry.text, liked: !!liked, disliked: !liked, ts: Date.now() });
+    saveChatHistory();
+    saveGuruFeedback();
+    toast("Thanks for your feedback!");
+  }
+  function guruFinalizeResponse(trigger, reply) {
+    const pref = guruFeedbackMap.get(String(trigger || "").toLowerCase().trim());
+    if (pref && pref.liked > pref.disliked && pref.preferredReply) return pref.preferredReply;
+    if (pref && pref.disliked > pref.liked && pref.preferredReply && pref.preferredReply === reply) {
+      return alternativeGuruResponse(trigger, reply);
+    }
+    return reply;
   }
 
   function guruAvatarSvg() {
@@ -8544,7 +9682,7 @@
       chatHistory.push({ role: "guru", text: greet, ts: Date.now() });
       saveChatHistory();
     }
-    for (const m of chatHistory) appendChatMessage(m.role, m.text, false, { trigger: m.trigger });
+    for (const m of chatHistory) appendChatMessage(m.role, m.text, false, { trigger: m.trigger, entry: m });
 
     renderChatSuggestions();
     return panel;
@@ -8559,6 +9697,9 @@
       "Plan my week",
       "How am I doing?",
       "What's at risk?",
+      "Show my documents",
+      "Upcoming events",
+      "My settings",
     ];
     for (const s of items) {
       const chip = document.createElement("button");
@@ -8598,15 +9739,17 @@
 
   function sendUserMessage(text) {
     if (!text) return;
-    appendChatMessage("user", text, true);
-    chatHistory.push({ role: "user", text, ts: Date.now() });
+    const userEntry = { role: "user", text, ts: Date.now() };
+    chatHistory.push(userEntry);
+    appendChatMessage("user", text, true, { entry: userEntry });
     saveChatHistory();
     showTyping();
     setTimeout(() => {
       hideTyping();
-      const reply = guruRespond(text);
-      appendChatMessage("guru", reply, true, { trigger: text });
-      chatHistory.push({ role: "guru", text: reply, ts: Date.now(), trigger: text });
+      const reply = guruFinalizeResponse(text, guruRespond(text));
+      const guruEntry = { role: "guru", text: reply, ts: Date.now(), trigger: text };
+      chatHistory.push(guruEntry);
+      appendChatMessage("guru", reply, true, { trigger: text, entry: guruEntry });
       saveChatHistory();
     }, 380 + Math.random() * 280);
   }
@@ -8615,11 +9758,12 @@
     showTyping();
     setTimeout(() => {
       hideTyping();
-      const reply = direction === "up"
+      const reply = guruFinalizeResponse(triggerText, direction === "up"
         ? expandGuruResponse(triggerText, prevReply)
-        : alternativeGuruResponse(triggerText, prevReply);
-      appendChatMessage("guru", reply, true, { trigger: triggerText });
-      chatHistory.push({ role: "guru", text: reply, ts: Date.now(), trigger: triggerText });
+        : alternativeGuruResponse(triggerText, prevReply));
+      const guruEntry = { role: "guru", text: reply, ts: Date.now(), trigger: triggerText };
+      chatHistory.push(guruEntry);
+      appendChatMessage("guru", reply, true, { trigger: triggerText, entry: guruEntry });
       saveChatHistory();
     }, 300 + Math.random() * 220);
   }
@@ -8683,7 +9827,29 @@
       down.type = "button"; down.className = "refine-btn";
       down.textContent = "▼"; down.title = "Try a different angle";
       down.addEventListener("click", () => refineGuru("down", opts.trigger, text));
-      ctrls.append(up, down);
+      const like = document.createElement("button");
+      like.type = "button"; like.className = "refine-btn" + (opts.entry && opts.entry.liked ? " active" : "");
+      like.textContent = opts.entry && opts.entry.liked ? "👍" : "👍";
+      like.title = "Helpful";
+      like.disabled = !!(opts.entry && (opts.entry.liked || opts.entry.disliked));
+      like.addEventListener("click", () => {
+        recordGuruFeedback(opts.entry, true);
+        like.classList.add("active");
+        like.disabled = true;
+        dislike.disabled = true;
+      });
+      const dislike = document.createElement("button");
+      dislike.type = "button"; dislike.className = "refine-btn" + (opts.entry && opts.entry.disliked ? " active" : "");
+      dislike.textContent = "👎";
+      dislike.title = "Not helpful";
+      dislike.disabled = !!(opts.entry && (opts.entry.liked || opts.entry.disliked));
+      dislike.addEventListener("click", () => {
+        recordGuruFeedback(opts.entry, false);
+        dislike.classList.add("active");
+        like.disabled = true;
+        dislike.disabled = true;
+      });
+      ctrls.append(up, down, like, dislike);
       bubble.appendChild(ctrls);
     }
     row.appendChild(bubble);
@@ -8743,25 +9909,20 @@
   function guruRespond(text) {
     const t = (text || "").toLowerCase().trim();
     if (!t) return "What would you like help with?";
+    const preferred = guruFeedbackMap.get(t);
+    if (preferred && preferred.liked > preferred.disliked && preferred.preferredReply) return preferred.preferredReply;
 
-    // greetings
-    if (/^(hi|hey|hello|yo|sup|howdy)\b/.test(t) || /^good (morning|afternoon|evening)\b/.test(t)) {
-      return greetingMessage();
-    }
-    if (/\b(thanks|thank you|ty|cool|nice|awesome|got it|sweet)\b/.test(t)) {
-      return "Anytime. Let me know when you want to plan, prioritize, or review.";
-    }
-    if (/\b(help|menu|what can you|capabilities|commands)\b/.test(t)) {
-      return greetingMessage();
-    }
+    if (/^(hi|hey|hello|yo|sup|howdy)\b/.test(t) || /^good (morning|afternoon|evening)\b/.test(t)) return greetingMessage();
+    if (/\b(thanks|thank you|ty|cool|nice|awesome|got it|sweet)\b/.test(t)) return "Anytime. Let me know when you want to plan, prioritize, or review.";
+    if (/\b(help|menu|what can you|capabilities|commands)\b/.test(t)) return greetingMessage();
+    if (/\b(document|file|word|excel|powerpoint|spreadsheet|slide)\b/.test(t)) return summarizeDocuments();
+    if (/\b(event|schedule|calendar|appointment|meeting)\b/.test(t)) return summarizeSchedule();
+    if (/\b(setting|preference|theme|profile)\b/.test(t)) return summarizeSettings();
 
-    // entity summary — "summarize X" / "overview of X" / "tell me about X"
     if (/\b(summ?ar(y|ise|ize)|overview|recap|tell me about|break ?down|what's in)\b/.test(t)) {
       const match = findEntityByText(t);
       if (match) return summarizeEntity(match.kind, match.id);
     }
-
-    // search requests: "search for X" / "find X" etc.
     if (/\b(search for|search|find|lookup|show me)\b/.test(t)) {
       const q = t.replace(/^(search for|search|find|lookup|show me)\s*/, '').trim();
       if (!q) return "What would you like me to search for?";
@@ -8771,40 +9932,20 @@
       return `Search results for "${q}":\n\n` + lines.join('\n');
     }
 
-    // intent routing — order matters: more specific keywords first
     if (/\b(at risk|risk|risks|behind|overcommit|overload|trouble|stuck|red flag|concern)\b/.test(t)) return findRisks();
     if (/\b(plan|allocate|schedule|distribute|week|weekly|days? a week|hours? a day)\b/.test(t)) {
       if (/\b(week|weekly|days? a week|hours? a day|allocate|distribute|schedule)\b/.test(t)) return planWeek();
-      // "plan a project" / "how do i plan" → wisdom
       if (/\bproject\b/.test(t) || /\bhow (do|should) i plan\b/.test(t)) return planningWisdom();
       return planWeek();
     }
-    if (/\b(focus|priorit|important|most important|first|where (to|should) (i )?start|what (should|do) i (do|work)|next)\b/.test(t)) {
-      return suggestPriorities();
-    }
-    if (/\b(how am i|doing|review|summary|status|progress|recap|this week|last week)\b/.test(t)) {
-      return diagnose();
-    }
-    if (/\boverwhelm|too much|stress|panic|burn(ed|t)? out\b/.test(t)) {
-      return overwhelmedAdvice();
-    }
-    if (/\b(new project|start a project|create a project|add a project)\b/.test(t) || /\bhow (do|should) i (plan|set up)\b/.test(t)) {
-      return planningWisdom();
-    }
-    if (/\b(estimat|how many hours|how long)\b/.test(t)) {
-      return estimationWisdom();
-    }
-    if (/\b(deadline|due date)\b/.test(t)) {
-      return deadlineWisdom();
-    }
-    if (/\b(activit(y|ies)|tasks?|track what)\b/.test(t)) {
-      return activitiesWisdom();
-    }
-    if (/\b(portfolio|portfolios|group)\b/.test(t)) {
-      return portfolioWisdom();
-    }
-
-    // fallback: give them their snapshot + nudge
+    if (/\b(focus|priorit|important|most important|first|where (to|should) (i )?start|what (should|do) i (do|work)|next)\b/.test(t)) return suggestPriorities();
+    if (/\b(how am i|doing|review|summary|status|progress|recap|this week|last week)\b/.test(t)) return diagnose();
+    if (/\boverwhelm|too much|stress|panic|burn(ed|t)? out\b/.test(t)) return overwhelmedAdvice();
+    if (/\b(new project|start a project|create a project|add a project)\b/.test(t) || /\bhow (do|should) i (plan|set up)\b/.test(t)) return planningWisdom();
+    if (/\b(estimat|how many hours|how long)\b/.test(t)) return estimationWisdom();
+    if (/\b(deadline|due date)\b/.test(t)) return deadlineWisdom();
+    if (/\b(activit(y|ies)|tasks?|track what)\b/.test(t)) return activitiesWisdom();
+    if (/\b(portfolio|portfolios|group)\b/.test(t)) return portfolioWisdom();
     return diagnose() + "\n\nIf you want something more specific, try **\"what should I focus on?\"**, **\"plan my week\"**, or **\"what's at risk?\"**.";
   }
 
@@ -8819,6 +9960,40 @@
   function projectHoursInRange(p, fromMs, toMs) {
     const ids = projectActivityIds(p);
     return totalForFilterInRange(e => ids.has(e.activityId), fromMs, toMs) / MS_HOUR;
+  }
+  function summarizeDocuments() {
+    const docs = state.documents || [];
+    if (!docs.length) return "You don't have any documents yet. Create a Word, Excel, PowerPoint, Visio, or Code document to get started.";
+    const counts = docs.reduce((acc, doc) => { acc[doc.type] = (acc[doc.type] || 0) + 1; return acc; }, {});
+    const summary = Object.entries(counts).map(([type, count]) => `${count} ${documentTypeLabel(type)}`).join(" · ");
+    const recent = [...docs].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 3);
+    const linked = docs.filter((doc) => linkedTargetKeysForDocument(doc.id).size > 0).length;
+    return [
+      `You have **${docs.length}** document${docs.length === 1 ? "" : "s"}: ${summary}.`,
+      linked ? `${linked} document${linked === 1 ? " is" : "s are"} linked to app items.` : "None of your documents are tagged to app items yet.",
+      recent.length ? "Recently updated:\n" + recent.map((doc) => `- **${doc.name}** (${documentTypeLabel(doc.type)}) · ${state.settings.relativeTime ? syncRelAgo(doc.updatedAt) : new Date(doc.updatedAt).toLocaleString()}`).join("\n") : "",
+    ].filter(Boolean).join("\n\n");
+  }
+  function summarizeSchedule() {
+    const events = [...(state.events || [])].sort((a, b) => new Date(a.start) - new Date(b.start));
+    if (!events.length) return "Your schedule is empty right now. Add an event in the Schedule tab and I can summarize what's coming up.";
+    const now = Date.now();
+    const upcoming = events.filter((ev) => new Date(ev.end).getTime() >= now);
+    const overdue = events.filter((ev) => !ev.allDay && new Date(ev.end).getTime() < now).length;
+    const next = upcoming[0];
+    return [
+      `You have **${upcoming.length}** upcoming event${upcoming.length === 1 ? "" : "s"} and **${overdue}** past-due/finished item${overdue === 1 ? "" : "s"}.`,
+      next ? `Next up: **${next.title}** on ${fmtDateShort(next.start)}${next.allDay ? " (all day)" : ` at ${fmtClock(next.start)}`}.` : "No future events are scheduled.",
+      upcoming.slice(0, 3).length ? "Soonest events:\n" + upcoming.slice(0, 3).map((ev) => `- **${ev.title}** · ${ev.allDay ? fmtDateShort(ev.start) + " (all day)" : fmtDateShort(ev.start) + " " + fmtClock(ev.start)}`).join("\n") : "",
+    ].filter(Boolean).join("\n\n");
+  }
+  function summarizeSettings() {
+    const s = state.settings || DEFAULT_SETTINGS;
+    return [
+      `Theme: **${s.theme}** · Accent: **${s.accentColor || "default"}** · Time format: **${s.timeFormat}**.`,
+      `Week starts on **${s.weekStart}** and the default landing view is **${s.landingView}**.`,
+      `Display name: **${s.displayName || "not set"}** · Density: **${s.density || "comfortable"}** · Relative time: **${s.relativeTime ? "on" : "off"}**.`,
+    ].join("\n\n");
   }
 
   function suggestPriorities() {
@@ -9024,8 +10199,9 @@
     setTimeout(() => {
       hideTyping();
       const reply = summarizeEntity(kind, id);
-      appendChatMessage("guru", reply, true);
-      chatHistory.push({ role: "guru", text: reply, ts: Date.now() });
+      const guruEntry = { role: "guru", text: reply, ts: Date.now() };
+      appendChatMessage("guru", reply, true, { entry: guruEntry });
+      chatHistory.push(guruEntry);
       saveChatHistory();
     }, 460 + Math.random() * 320);
   }
@@ -10528,6 +11704,7 @@
       view = parseHash();
     }
   }
+  importSharedDocumentFromUrl();
   render();
   renderAuthUI();
 })();
