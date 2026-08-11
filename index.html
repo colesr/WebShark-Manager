@@ -30,6 +30,8 @@
     --t-fast: 140ms;
     --t-base: 220ms;
     --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+    --font-scale: 1;
+    --panel-bg-opacity: 1;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
@@ -39,7 +41,11 @@
     color: var(--text);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    font-size: calc(1rem * var(--font-scale));
   }
+  html[data-radius="sharp"]   { --radius: 0.2rem; }
+  html[data-radius="rounded"] { --radius: 0.5rem; }
+  html[data-radius="pill"]    { --radius: 1.5rem; }
   .wrap {
     /* Expand the main container to fill the viewport width so windows
        and panels span the entire page. Keep padding for comfortable gutters. */
@@ -183,6 +189,7 @@
   /* sections */
   section {
     background: var(--card);
+    background: color-mix(in srgb, var(--card) calc(var(--panel-bg-opacity) * 100%), transparent);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 1.1rem 1.15rem 0.9rem;
@@ -218,6 +225,7 @@
   /* hero (portfolio / project header) */
   .hero {
     background: var(--card);
+    background: color-mix(in srgb, var(--card) calc(var(--panel-bg-opacity) * 100%), transparent);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 1.25rem 1.25rem 1.1rem;
@@ -332,6 +340,7 @@
   .card-list { display: flex; flex-direction: column; gap: 0.5rem; }
   .card {
     background: var(--card);
+    background: color-mix(in srgb, var(--card) calc(var(--panel-bg-opacity) * 100%), transparent);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 0.85rem 0.95rem;
@@ -488,6 +497,10 @@
     background: var(--accent); color: #fff; border-color: var(--accent);
   }
   button.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  button.danger {
+    background: var(--danger); color: #fff; border-color: var(--danger);
+  }
+  button.danger:hover { background: color-mix(in srgb, var(--danger) 85%, black); border-color: color-mix(in srgb, var(--danger) 85%, black); }
   button.stop {
     background: #fff; color: var(--accent); border-color: var(--accent);
   }
@@ -659,12 +672,81 @@
     0%   { background-color: rgba(37, 99, 235, 0.10); }
     100% { background-color: transparent; }
   }
+  /* ====== HIGH ANIMATION MODE ====== */
+  @keyframes bouncePop {
+    0%   { transform: scale(0.8); }
+    60%  { transform: scale(1.12); }
+    80%  { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+  @keyframes wiggleIn {
+    0%   { transform: rotate(-4deg) scale(0.92); opacity: 0; }
+    40%  { transform: rotate(3deg) scale(1.04); opacity: 1; }
+    70%  { transform: rotate(-1.5deg) scale(0.99); }
+    100% { transform: rotate(0deg) scale(1); }
+  }
+  @keyframes glowPulse {
+    0%,100% { box-shadow: 0 0 0 0 var(--accent, #2563eb); }
+    50%      { box-shadow: 0 0 0 8px transparent; }
+  }
+  @keyframes rubberBand {
+    0%   { transform: scale(1,1); }
+    30%  { transform: scale(1.25, 0.75); }
+    40%  { transform: scale(0.75, 1.25); }
+    60%  { transform: scale(1.15, 0.85); }
+    80%  { transform: scale(0.95, 1.05); }
+    100% { transform: scale(1,1); }
+  }
+  @keyframes toastBounce {
+    0%   { transform: translateY(120%) scale(0.9); opacity: 0; }
+    55%  { transform: translateY(-8px) scale(1.03); opacity: 1; }
+    75%  { transform: translateY(4px) scale(0.98); }
+    100% { transform: translateY(0) scale(1); }
+  }
+  @keyframes springSlideR {
+    0%   { transform: translateX(60px); opacity: 0; }
+    60%  { transform: translateX(-8px); opacity: 1; }
+    80%  { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes springSlideL {
+    0%   { transform: translateX(-60px); opacity: 0; }
+    60%  { transform: translateX(8px); opacity: 1; }
+    80%  { transform: translateX(-4px); }
+    100% { transform: translateX(0); }
+  }
+  @keyframes modalSpringIn {
+    0%   { transform: scale(0.7) rotate(-3deg); opacity: 0; }
+    60%  { transform: scale(1.05) rotate(1deg); opacity: 1; }
+    80%  { transform: scale(0.97) rotate(-0.5deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  @keyframes panelSquish {
+    0%   { transform: scaleY(1); }
+    40%  { transform: scaleY(0.92); }
+    70%  { transform: scaleY(1.04); }
+    100% { transform: scaleY(1); }
+  }
+  html[data-animation="high"] .card.new-row { animation: bouncePop 420ms cubic-bezier(0.34,1.56,0.64,1) both !important; }
+  html[data-animation="high"] .activity.new-row { animation: wiggleIn 380ms cubic-bezier(0.34,1.56,0.64,1) both !important; }
+  html[data-animation="high"] button:active { animation: rubberBand 400ms ease both; }
+  html[data-animation="high"] .toast { animation: toastBounce 500ms cubic-bezier(0.34,1.56,0.64,1) forwards !important; }
+  html[data-animation="high"] .view.view-forward { animation: springSlideR 480ms cubic-bezier(0.34,1.56,0.64,1) !important; }
+  html[data-animation="high"] .view.view-back { animation: springSlideL 480ms cubic-bezier(0.34,1.56,0.64,1) !important; }
+  html[data-animation="high"] .settings-modal { animation: modalSpringIn 360ms cubic-bezier(0.34,1.56,0.64,1) forwards !important; }
+  html[data-animation="high"] section[data-panel-id] { transition: transform 300ms cubic-bezier(0.34,1.56,0.64,1); }
+  html[data-animation="high"] section[data-panel-id].panel-minimized { animation: panelSquish 350ms ease; }
+  html[data-animation="high"] .entry.running .activity-pulse { animation: pulseRing 0.7s ease-out infinite !important; }
+  html[data-animation="high"] .dropdown-menu,
+  html[data-animation="high"] .user-menu { animation: wiggleIn 250ms cubic-bezier(0.34,1.56,0.64,1) both; }
+  html[data-animation="high"] .panel-min-btn:hover { animation: glowPulse 600ms ease; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
     }
+    html[data-animation="high"] * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   }
 
   /* reports — stat cards */
@@ -861,6 +943,69 @@
   .filter-row .lbl {
     font-size: 0.82rem;
     color: var(--muted);
+  }
+  /* ====== RESIZABLE PANELS ====== */
+  .panel-resize-handle {
+    height: 6px; cursor: ns-resize; background: transparent; position: relative; z-index: 5;
+    margin: 0; flex-shrink: 0; transition: background 150ms;
+  }
+  .panel-resize-handle::after {
+    content: ""; display: block; height: 2px;
+    background: var(--border); border-radius: 2px;
+    margin: 2px auto; width: 40px; transition: background 150ms, width 150ms;
+  }
+  .panel-resize-handle:hover::after, .panel-resize-handle.dragging::after {
+    background: var(--accent, #2563eb); width: 80px;
+  }
+  .panel-resize-handle.horizontal { height: auto; width: 6px; cursor: ew-resize; align-self: stretch; }
+  .panel-resize-handle.horizontal::after { width: 2px; height: 40px; margin: auto 2px; }
+  .view-panels-grid { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 0; }
+  .view-panels-grid > section[data-panel-id] { box-sizing: border-box; }
+  .layout-toggle-btn {
+    background: none; border: 1px solid var(--border); border-radius: 6px;
+    padding: 0.25rem 0.5rem; cursor: pointer; font-size: 0.8rem; color: var(--muted, #6b7280);
+    display: inline-flex; align-items: center; gap: 0.25rem; margin: 0 0 0.65rem;
+  }
+  .layout-toggle-btn:hover { background: var(--subtle); color: var(--text); }
+
+  /* ====== FOLDERS ====== */
+  .folder-row {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem;
+    border-radius: var(--radius, 0.5rem); cursor: pointer;
+    border: 1px solid var(--border); margin-bottom: 0.35rem;
+    background: var(--card); transition: background 150ms;
+    user-select: none;
+  }
+  .folder-row:hover { background: var(--subtle); }
+  .folder-row.drag-over { border-color: var(--accent, #2563eb); background: var(--accent-soft, #eff6ff); }
+  .folder-swatch { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
+  .folder-chevron { font-size: 0.75rem; transition: transform 200ms; flex-shrink: 0; }
+  .folder-chevron.open { transform: rotate(90deg); }
+  .folder-name { flex: 1; font-weight: 500; font-size: 0.9rem; }
+  .folder-name-input { flex: 1; border: none; border-bottom: 1px solid var(--accent); background: transparent; font-size: 0.9rem; font-weight: 500; outline: none; color: var(--text); padding: 0; }
+  .folder-delete-btn { background: none; border: none; cursor: pointer; color: var(--muted, #6b7280); font-size: 0.8rem; padding: 0.1rem 0.3rem; border-radius: 4px; }
+  .folder-delete-btn:hover { background: var(--danger-soft, #fef2f2); color: var(--danger, #dc2626); }
+  .folder-new-form { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; }
+  .folder-new-form input[type=text] { flex: 1; }
+  .folder-new-form input[type=color] { width: 36px; height: 32px; padding: 1px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; }
+  .doc-checkbox { width: 14px; height: 14px; cursor: pointer; margin-right: 0.25rem; flex-shrink: 0; }
+  .doc-move-select { font-size: 0.78rem; border: 1px solid var(--border); border-radius: 4px; padding: 0.15rem 0.4rem; background: var(--card); color: var(--text); }
+  .multi-select-bar {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    background: var(--accent, #2563eb); color: #fff; padding: 0.6rem 1.25rem;
+    border-radius: 2rem; display: flex; gap: 0.75rem; align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25); z-index: 9000;
+    animation: fadeUp var(--t-base) var(--ease);
+  }
+  .multi-select-bar select { background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 4px; padding: 0.2rem 0.5rem; font-size: 0.85rem; cursor: pointer; }
+  .multi-select-bar button { background: rgba(255,255,255,0.2); border: none; color: #fff; border-radius: 4px; padding: 0.2rem 0.6rem; cursor: pointer; font-size: 0.85rem; }
+  .folder-breadcrumb { display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; color: var(--muted, #6b7280); margin-bottom: 0.5rem; }
+  .folder-breadcrumb a { color: var(--accent, #2563eb); text-decoration: none; cursor: pointer; }
+  .folder-breadcrumb a:hover { text-decoration: underline; }
+
+  @media (max-width: 600px) {
+    .panel-resize-handle { display: none !important; }
+    .view-panels-grid > section[data-panel-id] { width: 100% !important; flex-basis: 100% !important; }
   }
 
   /* reports — export buttons */
@@ -1353,6 +1498,10 @@
   /* ui scale — rem-based sizes scale with the root font-size */
   :root[data-scale="small"] { font-size: 15px; }
   :root[data-scale="large"] { font-size: 18px; }
+  html[data-header="accent"] #app-header { background: var(--accent) !important; color: #fff !important; }
+  html[data-header="accent"] #app-header .header-link { color: rgba(255,255,255,0.9) !important; }
+  html[data-header="dark"] #app-header { background: #111827 !important; color: #f9fafb !important; }
+  html[data-header="dark"] #app-header .header-link { color: rgba(249,250,251,0.9) !important; }
   /* reduce motion — kill animations + transitions globally */
   :root[data-motion="reduced"] *,
   :root[data-motion="reduced"] *::before,
@@ -1410,6 +1559,33 @@
     text-overflow: ellipsis;
     max-width: 220px;
   }
+  /* --- auth error banner --- */
+  .auth-banner {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+    background: var(--danger, #dc2626); color: #fff;
+    padding: 0.6rem 1rem; display: flex; align-items: center; gap: 0.75rem;
+    font-size: 0.875rem; animation: fadeUp var(--t-base) var(--ease);
+  }
+  .auth-banner button { background: rgba(255,255,255,0.2); border: none; border-radius: 4px; color: #fff; cursor: pointer; padding: 0.2rem 0.6rem; }
+
+  /* --- richer user menu --- */
+  .dropdown-menu { min-width: 220px; }
+  .dropdown-item { width: 100%; }
+  .user-menu-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .user-menu-info { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+  .user-menu-name { font-weight: 600; font-size: 0.9rem; }
+  .user-menu-email { font-size: 0.75rem; color: var(--muted, #6b7280); }
+  .user-menu-edit-name { width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 0.25rem 0.5rem; font-size: 0.8rem; background: var(--card); color: var(--text); margin-top: 0.25rem; }
+  .user-menu-signout-confirm { padding: 0.5rem 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+  .user-menu-signout-confirm p { margin: 0; font-size: 0.8rem; color: var(--muted, #6b7280); }
+  .user-menu-signout-confirm .btn-row { display: flex; gap: 0.5rem; }
+
+  /* --- display name modal --- */
+  .display-name-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; }
+  .display-name-modal { background: var(--card); border-radius: 12px; padding: 1.5rem; width: min(400px, 92vw); display: flex; flex-direction: column; gap: 1rem; }
+  .display-name-modal h2 { margin: 0; font-size: 1.1rem; }
+  .display-name-modal input { width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 0.5rem 0.75rem; font-size: 1rem; background: var(--card); color: var(--text); }
+  .display-name-modal .btn-row { display: flex; justify-content: flex-end; gap: 0.5rem; }
 
   /* -------- settings modal -------- */
   .settings-overlay {
@@ -1429,6 +1605,7 @@
   @keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
   .settings-modal {
     background: var(--card);
+    background: color-mix(in srgb, var(--card) calc(var(--panel-bg-opacity) * 100%), transparent);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: 0 24px 60px rgba(0,0,0,0.28);
@@ -2386,13 +2563,18 @@
       if (p.uiScale && p.uiScale !== "medium") root.setAttribute("data-scale", p.uiScale);
       if (p.reduceMotion) root.setAttribute("data-motion", "reduced");
       if (p.activePulse === false) root.setAttribute("data-pulse", "off");
+      root.dataset.animation = p.animationLevel === "high" ? "high" : "low";
+      root.dataset.radius = p.borderRadius || "rounded";
+      root.dataset.header = p.headerScheme || "theme";
+      root.style.setProperty("--font-scale", String((p.fontScale || 100) / 100));
+      root.style.setProperty("--panel-bg-opacity", String((p.panelOpacity ?? 100) / 100));
     } catch (e) {}
   })();
 </script>
 </head>
 <body>
 <div class="wrap">
-  <header class="app">
+  <header class="app" id="app-header">
     <div class="brand-row">
       <a class="brand" href="#/" id="brandLink" aria-label="WebShark Manager — home">
         <span class="brand-logo" aria-hidden="true">
@@ -2491,6 +2673,14 @@
     landingView: "home",    // home | plan | reports | schedule
     weekStart: "monday",    // monday | sunday
     timeFormat: "24h",      // 24h | 12h
+    displayName: "",
+    animationLevel: "low",      // low | high
+    borderRadius: "rounded",    // sharp | rounded | pill
+    panelOpacity: 100,          // 60-100
+    headerScheme: "theme",      // theme | accent | dark
+    fontScale: 100,             // 90-130
+    relativeTime: false,
+    defaultSort: "manual",      // manual | alpha | priority | due
     reduceMotion: false,
     activePulse: true,
   };
@@ -2515,6 +2705,7 @@
       entries: [],
       events: [],
       documents: [],
+      folders: [],
       panelLayouts: {},
       settings: { ...DEFAULT_SETTINGS },
       appLogs: []
@@ -2525,7 +2716,7 @@
   // so the two stay in lockstep — see CLAUDE.md "Persistence & migrations".
   function backfillState(s) {
     if (!s || typeof s !== "object") return freshState();
-    for (const k of ["portfolios", "projects", "activities", "entries", "events", "documents"]) {
+    for (const k of ["portfolios", "projects", "activities", "entries", "events", "documents", "folders"]) {
       if (!Array.isArray(s[k])) s[k] = [];
     }
     // schedule events (calendar module)
@@ -2582,6 +2773,14 @@
         }
         if (typeof d.content.activeSlide !== "number") d.content.activeSlide = 0;
       }
+      if (!("folderId" in d)) d.folderId = null;
+    }
+    for (const f of s.folders) {
+      if (!f.id) f.id = uid();
+      if (typeof f.name !== "string") f.name = "Folder";
+      if (!("parentId" in f)) f.parentId = null;
+      if (!f.color) f.color = "#6b7280";
+      if (typeof f.order !== "number") f.order = 0;
     }
     // backfill task completion flag
     for (const a of s.activities) if (typeof a.done !== "boolean") a.done = false;
@@ -2589,6 +2788,11 @@
     for (const a of s.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
     // panel layouts (per-view section order + minimized state)
     if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
+    for (const k of Object.keys(s.panelLayouts)) {
+      const l = s.panelLayouts[k];
+      if (!l.sizes) l.sizes = {};
+      if (!l.flow) l.flow = "column";
+    }
     // application logs (detailed user activity trace)
     if (!Array.isArray(s.appLogs)) s.appLogs = [];
     // user preferences (merge defaults so new keys appear on old data)
@@ -2724,6 +2928,27 @@
   function portfolioById(id){ return state.portfolios.find(p => p.id === id); }
   function projectsOfPortfolio(pid) { return state.projects.filter(p => p.portfolioId === pid); }
   function activitiesOfProject(pid) { return state.activities.filter(a => a.projectId === pid); }
+  function sortedProjectsForDisplay(projects) {
+    const mode = (state.settings && state.settings.defaultSort) || "manual";
+    if (mode === "alpha") return [...projects].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    if (mode === "due") {
+      return [...projects].sort((a, b) => {
+        const ad = a.deadline ? new Date(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+        const bd = b.deadline ? new Date(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+        return ad - bd || (a.name || "").localeCompare(b.name || "");
+      });
+    }
+    return projects;
+  }
+  function sortedActivitiesForDisplay(activities) {
+    const mode = (state.settings && state.settings.defaultSort) || "manual";
+    if (mode === "alpha") return [...activities].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    if (mode === "priority") {
+      const order = { high: 0, medium: 1, low: 2, none: 3 };
+      return [...activities].sort((a, b) => (order[a.priority] ?? 99) - (order[b.priority] ?? 99) || (a.name || "").localeCompare(b.name || ""));
+    }
+    return activities;
+  }
   function projectOfActivity(aid) {
     const a = activityById(aid); return a ? projectById(a.projectId) : null;
   }
@@ -3252,11 +3477,13 @@
   }
   function ensurePanelLayout(viewName) {
     if (!state.panelLayouts[viewName]) {
-      state.panelLayouts[viewName] = { order: [], minimized: {} };
+      state.panelLayouts[viewName] = { order: [], minimized: {}, sizes: {}, flow: "column" };
     } else {
       const l = state.panelLayouts[viewName];
       if (!Array.isArray(l.order)) l.order = [];
       if (!l.minimized || typeof l.minimized !== "object") l.minimized = {};
+      if (!l.sizes || typeof l.sizes !== "object") l.sizes = {};
+      if (!l.flow) l.flow = "column";
     }
     return state.panelLayouts[viewName];
   }
@@ -3275,17 +3502,33 @@
     save();
   }
   function applyPanelLayout(viewName, container) {
-    const layout = state.panelLayouts && state.panelLayouts[viewName];
+    const layout = ensurePanelLayout(viewName);
     const sections = [...container.querySelectorAll(":scope > section[data-panel-id]")];
-    if (!layout || !layout.order || layout.order.length === 0 || sections.length === 0) return;
-    const inDom = new Set(sections.map(s => s.dataset.panelId));
-    const finalOrder = [];
-    for (const id of layout.order) if (inDom.has(id)) finalOrder.push(id);
-    for (const s of sections) if (!finalOrder.includes(s.dataset.panelId)) finalOrder.push(s.dataset.panelId);
-    for (const id of finalOrder) {
-      const sec = container.querySelector(`:scope > section[data-panel-id="${id}"]`);
-      if (sec) container.appendChild(sec);
+    if (sections.length > 0) {
+      const inDom = new Set(sections.map(s => s.dataset.panelId));
+      const finalOrder = [];
+      for (const id of layout.order) if (inDom.has(id)) finalOrder.push(id);
+      for (const s of sections) if (!finalOrder.includes(s.dataset.panelId)) finalOrder.push(s.dataset.panelId);
+      for (const id of finalOrder) {
+        const sec = container.querySelector(`:scope > section[data-panel-id="${id}"]`);
+        if (sec) container.appendChild(sec);
+      }
     }
+    const orderedSections = container.querySelectorAll(":scope > section[data-panel-id]");
+    orderedSections.forEach(sec => {
+      const sz = layout.sizes[sec.dataset.panelId];
+      if (layout.flow === "grid") {
+        if (sz) { sec.style.flexBasis = sz + "%"; sec.style.width = sz + "%"; }
+        else { sec.style.flexBasis = ""; sec.style.width = ""; }
+        sec.style.height = "";
+      } else {
+        sec.style.flexBasis = "";
+        sec.style.width = "";
+        if (sz) sec.style.height = sz + "px";
+        else sec.style.height = "";
+      }
+    });
+    container.classList.toggle("view-panels-grid", layout.flow === "grid");
   }
   function decoratePanels(viewName, container) {
     const sections = container.querySelectorAll(":scope > section[data-panel-id]");
@@ -3348,6 +3591,93 @@
       },
     });
   }
+  function addLayoutToggle(viewName, container) {
+    if (container.querySelector(":scope > .layout-toggle-btn")) return;
+    const layout = ensurePanelLayout(viewName);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "layout-toggle-btn";
+    btn.title = "Toggle grid/column layout";
+    btn.innerHTML = layout.flow === "grid" ? "⊞ Grid" : "☰ Column";
+    btn.onclick = () => {
+      layout.flow = layout.flow === "grid" ? "column" : "grid";
+      layout.sizes = {};
+      save();
+      render();
+    };
+    const first = container.querySelector(":scope > section[data-panel-id]");
+    if (first) container.insertBefore(btn, first);
+  }
+  function addResetLayoutBtn(viewName, container) {
+    if (container.querySelector(":scope > .reset-layout-btn")) return;
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "layout-toggle-btn reset-layout-btn";
+    btn.title = "Reset panel layout";
+    btn.innerHTML = "↺ Reset";
+    btn.onclick = () => {
+      delete state.panelLayouts[viewName];
+      save();
+      render();
+    };
+    const first = container.querySelector(":scope > section[data-panel-id]");
+    const layoutBtn = container.querySelector(":scope > .layout-toggle-btn");
+    if (layoutBtn) layoutBtn.insertAdjacentElement("afterend", btn);
+    else if (first) container.insertBefore(btn, first);
+  }
+  function initPanelResizeHandles(viewName, container) {
+    container.querySelectorAll(".panel-resize-handle").forEach(h => h.remove());
+    const layout = ensurePanelLayout(viewName);
+    const sections = [...container.querySelectorAll(":scope > section[data-panel-id]")];
+    sections.forEach((sec, i) => {
+      if (i === sections.length - 1) return;
+      const nextSec = sections[i + 1];
+      const handle = document.createElement("div");
+      handle.className = "panel-resize-handle" + (layout.flow === "grid" ? " horizontal" : "");
+      sec.insertAdjacentElement("afterend", handle);
+      let startCoord = 0;
+      let startSizeA = 0;
+      let totalSize = 0;
+      handle.addEventListener("pointerdown", (e) => {
+        handle.classList.add("dragging");
+        handle.classList.toggle("horizontal", layout.flow === "grid");
+        handle.setPointerCapture(e.pointerId);
+        const aRect = sec.getBoundingClientRect();
+        const bRect = nextSec.getBoundingClientRect();
+        startCoord = layout.flow === "grid" ? e.clientX : e.clientY;
+        startSizeA = layout.flow === "grid" ? aRect.width : aRect.height;
+        totalSize = startSizeA + (layout.flow === "grid" ? bRect.width : bRect.height);
+      });
+      handle.addEventListener("pointermove", (e) => {
+        if (!handle.classList.contains("dragging")) return;
+        const delta = (layout.flow === "grid" ? e.clientX : e.clientY) - startCoord;
+        const minSize = 120;
+        const newA = Math.max(minSize, Math.min(totalSize - minSize, startSizeA + delta));
+        const newB = totalSize - newA;
+        if (layout.flow === "grid") {
+          const containerW = Math.max(container.getBoundingClientRect().width, 1);
+          const pctA = Math.max(10, (newA / containerW) * 100);
+          const pctB = Math.max(10, (newB / containerW) * 100);
+          layout.sizes[sec.dataset.panelId] = pctA;
+          layout.sizes[nextSec.dataset.panelId] = pctB;
+          sec.style.flexBasis = pctA + "%"; sec.style.width = pctA + "%";
+          nextSec.style.flexBasis = pctB + "%"; nextSec.style.width = pctB + "%";
+        } else {
+          layout.sizes[sec.dataset.panelId] = newA;
+          layout.sizes[nextSec.dataset.panelId] = newB;
+          sec.style.height = newA + "px";
+          nextSec.style.height = newB + "px";
+        }
+      });
+      const finish = () => {
+        if (!handle.classList.contains("dragging")) return;
+        handle.classList.remove("dragging");
+        save();
+      };
+      handle.addEventListener("pointerup", finish);
+      handle.addEventListener("pointercancel", finish);
+    });
+  }
   function reorderInGroup(arr, predicate, newGroupOrder) {
     const positions = [];
     arr.forEach((item, i) => { if (predicate(item)) positions.push(i); });
@@ -3362,6 +3692,7 @@
     const lists = container.querySelectorAll("[data-sortable-list]");
     for (const list of lists) {
       const key = list.dataset.sortableList;
+      if ((key.startsWith("projects:") || key.startsWith("activities:")) && ((state.settings && state.settings.defaultSort) || "manual") !== "manual") continue;
       Sortable.create(list, {
         handle: ".element-handle",
         animation: 160,
@@ -3395,6 +3726,9 @@
     applyPanelLayout(viewName, container);
   }
   function initSortablesAfterAttach(viewName, container) {
+    addLayoutToggle(viewName, container);
+    addResetLayoutBtn(viewName, container);
+    initPanelResizeHandles(viewName, container);
     if (!window.Sortable) return;
     initPanelSortable(viewName, container);
     initElementSortables(container);
@@ -3414,6 +3748,7 @@
   function render() {
     renderCrumbs();
     renderRunningBar();
+    document.querySelectorAll(".multi-select-bar").forEach(el => el.remove());
 
     // resolve view, falling back to home if id missing
     if (view.name === "portfolio" && !portfolioById(view.id)) view = { name: "home" };
@@ -4197,12 +4532,28 @@
         const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.type === v) o.selected = true; typeSel.appendChild(o);
       });
       typeSel.addEventListener("change", () => { documentsState.type = typeSel.value; render(); });
+      const folderSel = document.createElement("select");
+      [["current","Current location"],["all","All folders"],["root","Root only"]].forEach(([v,l]) => {
+        const o = document.createElement("option");
+        o.value = v;
+        o.textContent = l;
+        if ((documentsState.folder || "current") === v) o.selected = true;
+        folderSel.appendChild(o);
+      });
+      (state.folders || []).forEach((folder) => {
+        const o = document.createElement("option");
+        o.value = folder.id;
+        o.textContent = folderLabel(folder.id);
+        if (documentsState.folder === folder.id) o.selected = true;
+        folderSel.appendChild(o);
+      });
+      folderSel.addEventListener("change", () => { documentsState.folder = folderSel.value; render(); });
       const sortSel = document.createElement("select");
       [["updated","Recently updated"],["name","Name"],["created","Recently created"]].forEach(([v,l]) => {
         const o = document.createElement("option"); o.value = v; o.textContent = l; if (documentsState.sort === v) o.selected = true; sortSel.appendChild(o);
       });
       sortSel.addEventListener("change", () => { documentsState.sort = sortSel.value; render(); });
-      row.append(q, typeSel, sortSel);
+      row.append(q, typeSel, folderSel, sortSel);
       controls.appendChild(row);
       root.appendChild(controls);
 
@@ -4214,9 +4565,40 @@
       listSec.innerHTML = `<div class="section-head"><h2>Library</h2></div>`;
       const list = document.createElement("div");
       list.className = "entry-list";
+      const newFolderBtn = document.createElement("button");
+      newFolderBtn.type = "button";
+      newFolderBtn.textContent = "+ New folder";
+      newFolderBtn.addEventListener("click", () => showNewFolderForm(list));
+      list.appendChild(newFolderBtn);
+      if (currentFolderId) {
+        const crumb = document.createElement("div");
+        crumb.className = "folder-breadcrumb";
+        const rootLink = document.createElement("a");
+        rootLink.textContent = "Documents";
+        rootLink.onclick = () => { currentFolderId = null; selectedDocIds.clear(); render(); };
+        crumb.appendChild(rootLink);
+        folderPath(currentFolderId).forEach((folder) => {
+          crumb.appendChild(document.createTextNode(" / "));
+          const part = document.createElement(folder.id === currentFolderId ? "span" : "a");
+          part.textContent = folder.name;
+          if (folder.id !== currentFolderId) part.onclick = () => { currentFolderId = folder.id; selectedDocIds.clear(); render(); };
+          crumb.appendChild(part);
+        });
+        list.appendChild(crumb);
+      }
+      const folderTree = document.createElement("div");
+      renderFolderTree(currentFolderId, folderTree);
+      list.appendChild(folderTree);
       const docs = state.documents
         .filter(d => (documentsState.type === "all" || d.type === documentsState.type))
         .filter(d => !documentsState.query || d.name.toLowerCase().includes(documentsState.query.toLowerCase()))
+        .filter(d => {
+          const mode = documentsState.folder || "current";
+          if (mode === "all") return true;
+          if (mode === "root") return (d.folderId || null) === null;
+          if (mode === "current") return (d.folderId || null) === (currentFolderId || null);
+          return (d.folderId || null) === mode;
+        })
         .sort((a, b) => {
           if (documentsState.sort === "name") return a.name.localeCompare(b.name);
           if (documentsState.sort === "created") return new Date(b.createdAt) - new Date(a.createdAt);
@@ -4229,12 +4611,50 @@
         list.appendChild(empty);
       } else {
         docs.forEach((doc) => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "entry" + (documentsState.openId === doc.id ? " running" : "");
-          b.innerHTML = `<div class="name">${escapeHtml(doc.name)}</div><div class="meta">${escapeHtml(doc.type.toUpperCase())} · updated ${new Date(doc.updatedAt).toLocaleString()}</div>`;
-          b.addEventListener("click", () => { documentsState.openId = doc.id; render(); });
-          list.appendChild(b);
+          const rowEl = document.createElement("div");
+          rowEl.className = "entry" + (documentsState.openId === doc.id ? " running" : "");
+          rowEl.setAttribute("draggable", "true");
+          rowEl.style.gridTemplateColumns = "18px 1fr auto auto";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.className = "doc-checkbox";
+          checkbox.checked = selectedDocIds.has(doc.id);
+          checkbox.addEventListener("click", (e) => e.stopPropagation());
+          checkbox.addEventListener("change", () => {
+            if (checkbox.checked) selectedDocIds.add(doc.id);
+            else selectedDocIds.delete(doc.id);
+            render();
+          });
+          const info = document.createElement("div");
+          const name = document.createElement("div");
+          name.className = "name";
+          name.textContent = doc.name;
+          const metaEl = document.createElement("div");
+          metaEl.className = "meta";
+          const updatedLabel = state.settings.relativeTime ? syncRelAgo(doc.updatedAt) : new Date(doc.updatedAt).toLocaleString();
+          metaEl.textContent = `${doc.type.toUpperCase()} · updated ${updatedLabel}`;
+          info.append(name, metaEl);
+          const folderMove = document.createElement("select");
+          folderMove.className = "doc-move-select";
+          renderFolderOptions(folderMove, "Root");
+          folderMove.value = doc.folderId || "__root__";
+          folderMove.addEventListener("click", (e) => e.stopPropagation());
+          folderMove.addEventListener("change", () => moveDocsToFolder(new Set([doc.id]), folderMove.value === "__root__" ? null : folderMove.value));
+          const openBtn = document.createElement("button");
+          openBtn.type = "button";
+          openBtn.textContent = "Open";
+          openBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            documentsState.openId = doc.id;
+            render();
+          });
+          rowEl.addEventListener("click", () => { documentsState.openId = doc.id; render(); });
+          rowEl.addEventListener("dragstart", (e) => {
+            e.dataTransfer.effectAllowed = "move";
+            e.dataTransfer.setData("text/doc-id", doc.id);
+          });
+          rowEl.append(checkbox, info, folderMove, openBtn);
+          list.appendChild(rowEl);
         });
       }
       listSec.appendChild(list);
@@ -4242,7 +4662,7 @@
 
       const editorSec = document.createElement("section");
       editorSec.dataset.panelId = "documents-editor";
-      const openDoc = documentById(documentsState.openId) || docs[0] || null;
+      const openDoc = docs.find(d => d.id === documentsState.openId) || docs[0] || null;
       if (openDoc && !documentsState.openId) documentsState.openId = openDoc.id;
       if (!openDoc) {
         editorSec.innerHTML = `<h2>Editor</h2><div class="empty">Create a document to begin.</div>`;
@@ -4640,6 +5060,30 @@
       }
       layout.appendChild(editorSec);
       root.appendChild(layout);
+      document.querySelectorAll(".multi-select-bar").forEach(el => el.remove());
+      if (selectedDocIds.size > 0) {
+        const bar = document.createElement("div");
+        bar.className = "multi-select-bar";
+        const lbl = document.createElement("span");
+        lbl.textContent = `${selectedDocIds.size} selected`;
+        const moveSel = document.createElement("select");
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Move to…";
+        moveSel.appendChild(placeholder);
+        renderFolderOptions(moveSel, "Root (no folder)");
+        moveSel.onchange = () => {
+          if (!moveSel.value) return;
+          moveDocsToFolder(new Set([...selectedDocIds]), moveSel.value === "__root__" ? null : moveSel.value);
+          moveSel.value = "";
+        };
+        const clearBtn = document.createElement("button");
+        clearBtn.type = "button";
+        clearBtn.textContent = "✕ Clear";
+        clearBtn.onclick = () => { selectedDocIds.clear(); render(); };
+        bar.append(lbl, moveSel, clearBtn);
+        document.body.appendChild(bar);
+      }
     }
 
     function renderHome(root) {
@@ -4708,7 +5152,7 @@
     const pf = portfolioById(portfolioId);
     if (!pf) return;
 
-    const projs = projectsOfPortfolio(portfolioId);
+    const projs = sortedProjectsForDisplay(projectsOfPortfolio(portfolioId));
     const weekStart = startOfWeek(new Date()).getTime();
     const weekEnd = weekStart + 7 * MS_DAY;
     const weekMs = totalForFilterInRange(e => isActivityInPortfolio(e.activityId, pf.id), weekStart, weekEnd);
@@ -4890,7 +5334,7 @@
     const proj = projectById(projectId);
     if (!proj) return;
     const pf = portfolioById(proj.portfolioId);
-    const acts = activitiesOfProject(projectId);
+    const acts = sortedActivitiesForDisplay(activitiesOfProject(projectId));
     const actIds = new Set(acts.map(a => a.id));
     const weekStart = startOfWeek(new Date()).getTime();
     const weekEnd = weekStart + 7 * MS_DAY;
@@ -7094,7 +7538,9 @@
   // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
   // -------------------------------------------------------------------------
   const planState = { scope: "all", scopeId: "", searchQuery: "", viewMode: "moderate" };
-  const documentsState = { query: "", type: "all", sort: "updated", openId: null };
+  const documentsState = { query: "", type: "all", sort: "updated", folder: "current", openId: null };
+  let currentFolderId = null;
+  let selectedDocIds = new Set();
 
   const scheduleState = {
     view: "week",   // day | week | month
@@ -7244,6 +7690,7 @@
       name: `${baseName} ${state.documents.length + 1}`,
       createdAt: now,
       updatedAt: now,
+      folderId: currentFolderId,
       content: defaultDocumentContent(type),
     };
     state.documents.unshift(doc);
@@ -7263,6 +7710,7 @@
     const doc = documentById(id);
     if (!doc) return;
     state.documents = state.documents.filter(d => d.id !== id);
+    selectedDocIds.delete(id);
     const clear = (arr) => { for (const item of arr) item.docLinks = (item.docLinks || []).filter(x => x !== id); };
     clear(state.portfolios); clear(state.projects); clear(state.activities); clear(state.events);
     if (documentsState.openId === id) documentsState.openId = null;
@@ -7278,6 +7726,7 @@
     copy.name = `${src.name} (copy)`;
     copy.createdAt = now;
     copy.updatedAt = now;
+    copy.folderId = src.folderId || null;
     state.documents.unshift(copy);
     logEvent("duplicateDocument", { from: id, to: copy.id });
     save();
@@ -7322,6 +7771,188 @@
     const ent = entityByKind(kind, id);
     if (!ent || !Array.isArray(ent.docLinks) || ent.docLinks.length === 0) return [];
     return ent.docLinks.map(documentById).filter(Boolean);
+  }
+  function getFolders(parentId) {
+    return (state.folders || []).filter(f => f.parentId === (parentId ?? null)).sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+  }
+  function getFolderById(id) {
+    return (state.folders || []).find(f => f.id === id) || null;
+  }
+  function getDocsInFolder(folderId) {
+    return (state.documents || []).filter(d => (d.folderId || null) === (folderId || null));
+  }
+  function folderPath(folderId) {
+    const out = [];
+    let cur = getFolderById(folderId);
+    const seen = new Set();
+    while (cur && !seen.has(cur.id)) {
+      out.unshift(cur);
+      seen.add(cur.id);
+      cur = cur.parentId ? getFolderById(cur.parentId) : null;
+    }
+    return out;
+  }
+  function folderLabel(folderId) {
+    const path = folderPath(folderId);
+    return path.length ? path.map(f => f.name).join(" / ") : "Root";
+  }
+  function renderFolderOptions(select, includeRootLabel) {
+    const rootOpt = document.createElement("option");
+    rootOpt.value = "__root__";
+    rootOpt.textContent = includeRootLabel || "Root (no folder)";
+    select.appendChild(rootOpt);
+    (state.folders || []).forEach(f => {
+      const o = document.createElement("option");
+      o.value = f.id;
+      o.textContent = folderLabel(f.id);
+      select.appendChild(o);
+    });
+  }
+  function createFolder(name, color, parentId) {
+    if (!Array.isArray(state.folders)) state.folders = [];
+    const siblings = getFolders(parentId);
+    const f = { id: uid(), name, parentId: parentId || null, color: color || "#6b7280", order: siblings.length };
+    state.folders.push(f);
+    save();
+    render();
+  }
+  function renameFolder(id, name) {
+    const f = getFolderById(id);
+    if (f) {
+      f.name = name;
+      save();
+      render();
+    }
+  }
+  function deleteFolder(id) {
+    const docsInside = getDocsInFolder(id);
+    if (docsInside.length > 0) {
+      if (!confirm(`This folder contains ${docsInside.length} document(s). Move them to root and delete the folder?`)) return;
+      docsInside.forEach(d => { d.folderId = null; });
+    }
+    getFolders(id).forEach(sf => deleteFolder(sf.id));
+    state.folders = state.folders.filter(f => f.id !== id);
+    if (currentFolderId === id) currentFolderId = null;
+    save();
+    render();
+  }
+  function moveDocsToFolder(docIds, folderId) {
+    (state.documents || []).forEach(d => {
+      if (docIds.has(d.id)) d.folderId = folderId || null;
+    });
+    selectedDocIds.clear();
+    save();
+    render();
+  }
+  function showNewFolderForm(container) {
+    if (container.querySelector(".folder-new-form")) return;
+    const form = document.createElement("div");
+    form.className = "folder-new-form";
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Folder name…";
+    const colorInput = document.createElement("input");
+    colorInput.type = "color";
+    colorInput.value = "#6b7280";
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "primary";
+    saveBtn.textContent = "Create";
+    saveBtn.onclick = () => {
+      const name = nameInput.value.trim();
+      if (!name) return nameInput.focus();
+      createFolder(name, colorInput.value, currentFolderId);
+      form.remove();
+    };
+    const cancelBtn = document.createElement("button");
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    cancelBtn.onclick = () => form.remove();
+    form.append(nameInput, colorInput, saveBtn, cancelBtn);
+    container.insertBefore(form, container.firstChild);
+    nameInput.focus();
+  }
+  function renderFolderRow(folder) {
+    const row = document.createElement("div");
+    row.className = "folder-row";
+    row.dataset.folderId = folder.id;
+    row.setAttribute("draggable", "true");
+
+    const swatch = document.createElement("span");
+    swatch.className = "folder-swatch";
+    swatch.style.background = folder.color;
+
+    const chevron = document.createElement("span");
+    chevron.className = "folder-chevron";
+    chevron.textContent = "▶";
+    chevron.style.visibility = getFolders(folder.id).length ? "" : "hidden";
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "folder-name";
+    nameEl.textContent = folder.name;
+
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "folder-delete-btn";
+    delBtn.textContent = "✕";
+    delBtn.title = "Delete folder";
+    delBtn.onclick = (e) => { e.stopPropagation(); deleteFolder(folder.id); };
+
+    nameEl.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      const input = document.createElement("input");
+      input.className = "folder-name-input";
+      input.value = folder.name;
+      nameEl.replaceWith(input);
+      const commit = () => renameFolder(folder.id, input.value.trim() || folder.name);
+      input.addEventListener("keydown", (ke) => { if (ke.key === "Enter") commit(); });
+      input.addEventListener("blur", commit);
+      input.focus();
+      input.select();
+    });
+
+    row.addEventListener("click", () => {
+      currentFolderId = folder.id;
+      selectedDocIds.clear();
+      render();
+    });
+    row.addEventListener("dragstart", (e) => {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/folder-id", folder.id);
+    });
+    row.addEventListener("dragover", (e) => { e.preventDefault(); row.classList.add("drag-over"); });
+    row.addEventListener("dragleave", () => row.classList.remove("drag-over"));
+    row.addEventListener("drop", (e) => {
+      e.preventDefault();
+      row.classList.remove("drag-over");
+      const docId = e.dataTransfer.getData("text/doc-id");
+      if (docId) moveDocsToFolder(new Set([docId]), folder.id);
+    });
+
+    row.append(swatch, chevron, nameEl, delBtn);
+    return row;
+  }
+  function renderFolderTree(parentId, container) {
+    getFolders(parentId).forEach(folder => {
+      const row = renderFolderRow(folder);
+      container.appendChild(row);
+      const children = getFolders(folder.id);
+      if (children.length) {
+        const subContainer = document.createElement("div");
+        subContainer.style.paddingLeft = "1rem";
+        subContainer.style.display = "none";
+        children.forEach(child => subContainer.appendChild(renderFolderRow(child)));
+        container.appendChild(subContainer);
+        const chevron = row.querySelector(".folder-chevron");
+        chevron.style.visibility = "visible";
+        chevron.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isOpen = subContainer.style.display !== "none";
+          subContainer.style.display = isOpen ? "none" : "";
+          chevron.classList.toggle("open", !isOpen);
+        });
+      }
+    });
   }
   function buildDocumentSelector(initialIds) {
     const selected = new Set((initialIds || []).filter(Boolean));
@@ -8881,6 +9512,11 @@
     root.setAttribute("data-scale", s.uiScale || "medium");
     root.setAttribute("data-motion", s.reduceMotion ? "reduced" : "full");
     root.setAttribute("data-pulse", s.activePulse === false ? "off" : "on");
+    root.dataset.animation = s.animationLevel === "high" ? "high" : "low";
+    root.dataset.radius = s.borderRadius || "rounded";
+    root.dataset.header = s.headerScheme || "theme";
+    root.style.setProperty("--font-scale", ((s.fontScale || 100) / 100).toString());
+    root.style.setProperty("--panel-bg-opacity", ((s.panelOpacity ?? 100) / 100).toString());
     applyTheme(s.theme || "system");
   }
   function updateSetting(key, value) {
@@ -8888,7 +9524,7 @@
     applySettings(state.settings);   // visual prefs apply immediately via CSS
     save();
     // only these change rendered content (week boundaries / clock labels)
-    if (key === "weekStart" || key === "timeFormat") render();
+    if (key === "weekStart" || key === "timeFormat" || key === "relativeTime" || key === "defaultSort") render();
     renderSettingsBody();            // reflect the new value in the open modal
   }
 
@@ -8917,40 +9553,140 @@
   function openUserMenu() {
     const btn = document.getElementById("authLink");
     if (!btn) return;
+    closeUserMenu();
     const menu = document.createElement("div");
-    menu.className = "user-menu";
+    menu.id = "userMenu";
+    menu.className = "user-menu dropdown-menu";
+    menu.setAttribute("role", "menu");
+    menu.setAttribute("aria-label", "Account menu");
 
-    if (currentUser && currentUser.email) {
-      const em = document.createElement("div");
-      em.className = "menu-email";
-      em.textContent = currentUser.email;
-      menu.appendChild(em);
+    if (currentUser) {
+      const meta = currentUser.user_metadata || {};
+      const avatarUrl = meta.avatar_url || "";
+      const displayName = (state.settings && state.settings.displayName) || meta.user_name || meta.full_name || "";
+      const email = currentUser.email || "";
+
+      const info = document.createElement("div");
+      info.className = "user-menu-info";
+      if (avatarUrl) {
+        const img = document.createElement("img");
+        img.src = avatarUrl;
+        img.className = "user-menu-avatar";
+        img.alt = "Avatar";
+        info.appendChild(img);
+      }
+      const nameBlock = document.createElement("div");
+      nameBlock.style.flex = "1";
+      const nameEl = document.createElement("div");
+      nameEl.className = "user-menu-name";
+      nameEl.textContent = displayName || email || "User";
+      const emailEl = document.createElement("div");
+      emailEl.className = "user-menu-email";
+      emailEl.textContent = email;
+      const editInput = document.createElement("input");
+      editInput.type = "text";
+      editInput.className = "user-menu-edit-name";
+      editInput.value = displayName;
+      editInput.placeholder = "Set display name…";
+      editInput.setAttribute("aria-label", "Display name");
+      editInput.addEventListener("change", () => {
+        const val = editInput.value.trim();
+        if (!val) return;
+        state.settings.displayName = val;
+        save();
+        renderAuthUI();
+        nameEl.textContent = val;
+      });
+      nameBlock.append(nameEl, emailEl, editInput);
+      info.appendChild(nameBlock);
+      menu.appendChild(info);
+
+      const settingsItem = document.createElement("button");
+      settingsItem.type = "button";
+      settingsItem.className = "menu-item dropdown-item";
+      settingsItem.setAttribute("role", "menuitem");
+      settingsItem.innerHTML = gearIconSvg() + "<span>Settings</span>";
+      settingsItem.onclick = () => { closeUserMenu(); openSettings(); };
+      menu.appendChild(settingsItem);
+
+      let confirmMode = false;
+      const signOutItem = document.createElement("div");
+      signOutItem.className = "menu-item dropdown-item";
+      signOutItem.setAttribute("role", "menuitem");
+      signOutItem.tabIndex = 0;
+      signOutItem.style.cursor = "pointer";
+      signOutItem.textContent = "Sign out";
+      const confirmArea = document.createElement("div");
+      confirmArea.className = "user-menu-signout-confirm";
+      confirmArea.style.display = "none";
+      const msg = document.createElement("p");
+      msg.textContent = "Sign out? Your local data is safe.";
+      const btnRow = document.createElement("div");
+      btnRow.className = "btn-row";
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.textContent = "Cancel";
+      cancelBtn.onclick = (e) => {
+        e.stopPropagation();
+        confirmMode = false;
+        confirmArea.style.display = "none";
+        signOutItem.style.display = "";
+      };
+      const confirmBtn = document.createElement("button");
+      confirmBtn.type = "button";
+      confirmBtn.className = "danger";
+      confirmBtn.textContent = "Sign out";
+      confirmBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeUserMenu();
+        signOut();
+      };
+      btnRow.append(cancelBtn, confirmBtn);
+      confirmArea.append(msg, btnRow);
+      signOutItem.onclick = () => {
+        if (confirmMode) return;
+        confirmMode = true;
+        signOutItem.style.display = "none";
+        confirmArea.style.display = "";
+      };
+      signOutItem.onkeydown = (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          signOutItem.onclick();
+        }
+      };
+      menu.append(signOutItem, confirmArea);
+    } else {
+      const signInItem = document.createElement("button");
+      signInItem.type = "button";
+      signInItem.className = "menu-item dropdown-item";
+      signInItem.setAttribute("role", "menuitem");
+      signInItem.textContent = "Sign in";
+      signInItem.onclick = () => { closeUserMenu(); signIn(); };
+      menu.appendChild(signInItem);
+
+      const settingsItem = document.createElement("button");
+      settingsItem.type = "button";
+      settingsItem.className = "menu-item dropdown-item";
+      settingsItem.setAttribute("role", "menuitem");
+      settingsItem.innerHTML = gearIconSvg() + "<span>Settings</span>";
+      settingsItem.onclick = () => { closeUserMenu(); openSettings(); };
+      menu.appendChild(settingsItem);
     }
 
-    const settingsItem = document.createElement("button");
-    settingsItem.type = "button";
-    settingsItem.className = "menu-item";
-    settingsItem.innerHTML = gearIconSvg() + "<span>Settings</span>";
-    settingsItem.addEventListener("click", () => { closeUserMenu(); openSettings(); });
-    menu.appendChild(settingsItem);
-
-    const authItem = document.createElement("button");
-    authItem.type = "button";
-    authItem.className = "menu-item" + (currentUser ? " danger" : "");
-    authItem.innerHTML = `<span>${currentUser ? "Logout" : "Sign in"}</span>`;
-    authItem.addEventListener("click", () => {
-      closeUserMenu();
-      if (currentUser) signOut(); else signIn();
+    menu.addEventListener("keydown", (e) => {
+      const items = [...menu.querySelectorAll("[role=menuitem]")];
+      const idx = items.indexOf(document.activeElement);
+      if (e.key === "ArrowDown") { e.preventDefault(); items[(idx + 1) % items.length]?.focus(); }
+      if (e.key === "ArrowUp") { e.preventDefault(); items[(idx - 1 + items.length) % items.length]?.focus(); }
+      if (e.key === "Escape") { closeUserMenu(); document.getElementById("authLink")?.focus(); }
     });
-    menu.appendChild(authItem);
 
     document.body.appendChild(menu);
-    // anchor under the button, right edges aligned
     const r = btn.getBoundingClientRect();
-    menu.style.top = (r.bottom + 6 + window.scrollY) + "px";
-    let left = r.right - menu.offsetWidth + window.scrollX;
-    if (left < 8) left = 8;
-    menu.style.left = left + "px";
+    menu.style.position = "fixed";
+    menu.style.top = (r.bottom + 4) + "px";
+    menu.style.right = (window.innerWidth - r.right) + "px";
 
     userMenuEl = menu;
     btn.classList.add("menu-open");
@@ -9169,6 +9905,53 @@
         { value: "comfortable", label: "Comfortable" },
         { value: "compact", label: "Compact" },
       ], v => updateSetting("density", v))));
+    const animSel = document.createElement("select");
+    [["low","Low (default)"],["high","High (bombastic!)"]].forEach(([v, l]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = l;
+      if ((s.animationLevel || "low") === v) o.selected = true;
+      animSel.appendChild(o);
+    });
+    animSel.onchange = () => updateSetting("animationLevel", animSel.value);
+    appearance.appendChild(settingsRow("Animation level", "Low = subtle fades • High = bouncy & fun", animSel));
+    const radSel = document.createElement("select");
+    [["sharp","Sharp"],["rounded","Rounded (default)"],["pill","Pill"]].forEach(([v, l]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = l;
+      if ((s.borderRadius || "rounded") === v) o.selected = true;
+      radSel.appendChild(o);
+    });
+    radSel.onchange = () => updateSetting("borderRadius", radSel.value);
+    appearance.appendChild(settingsRow("Border radius", "Shape of cards and buttons", radSel));
+    const hdSel = document.createElement("select");
+    [["theme","Match theme"],["accent","Accent-tinted"],["dark","Always dark"]].forEach(([v, l]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = l;
+      if ((s.headerScheme || "theme") === v) o.selected = true;
+      hdSel.appendChild(o);
+    });
+    hdSel.onchange = () => updateSetting("headerScheme", hdSel.value);
+    appearance.appendChild(settingsRow("Header style", "Color scheme for the top bar", hdSel));
+    const fsWrap = document.createElement("div");
+    fsWrap.style.display = "flex"; fsWrap.style.gap = "0.5rem"; fsWrap.style.alignItems = "center";
+    const fsRange = document.createElement("input");
+    fsRange.type = "range"; fsRange.min = "90"; fsRange.max = "130"; fsRange.step = "5";
+    fsRange.value = String(s.fontScale || 100);
+    const fsLabel = document.createElement("span");
+    fsLabel.textContent = (s.fontScale || 100) + "%";
+    fsRange.oninput = () => { fsLabel.textContent = fsRange.value + "%"; updateSetting("fontScale", Number(fsRange.value)); };
+    fsWrap.append(fsRange, fsLabel);
+    appearance.appendChild(settingsRow("Font size", "Scale the entire UI text (90–130%)", fsWrap));
+    const opWrap = document.createElement("div");
+    opWrap.style.display = "flex"; opWrap.style.gap = "0.5rem"; opWrap.style.alignItems = "center";
+    const opRange = document.createElement("input");
+    opRange.type = "range"; opRange.min = "60"; opRange.max = "100"; opRange.step = "5";
+    opRange.value = String(s.panelOpacity ?? 100);
+    const opLabel = document.createElement("span");
+    opLabel.textContent = (s.panelOpacity ?? 100) + "%";
+    opRange.oninput = () => { opLabel.textContent = opRange.value + "%"; updateSetting("panelOpacity", Number(opRange.value)); };
+    opWrap.append(opRange, opLabel);
+    appearance.appendChild(settingsRow("Panel opacity", "Transparency of cards and panels (60–100%)", opWrap));
     body.appendChild(appearance);
 
     // Typography & scale
@@ -9206,6 +9989,20 @@
         { value: "24h", label: "24-hour" },
         { value: "12h", label: "12-hour" },
       ], v => updateSetting("timeFormat", v))));
+    const relCheck = document.createElement("input");
+    relCheck.type = "checkbox";
+    relCheck.checked = !!s.relativeTime;
+    relCheck.onchange = () => updateSetting("relativeTime", relCheck.checked);
+    behavior.appendChild(settingsRow("Relative time", "Show \"3 hours ago\" instead of exact time", relCheck));
+    const sortSel = document.createElement("select");
+    [["manual","Manual (drag order)"],["alpha","Alphabetical"],["priority","Priority"],["due","Due date"]].forEach(([v, l]) => {
+      const o = document.createElement("option");
+      o.value = v; o.textContent = l;
+      if ((s.defaultSort || "manual") === v) o.selected = true;
+      sortSel.appendChild(o);
+    });
+    sortSel.onchange = () => updateSetting("defaultSort", sortSel.value);
+    behavior.appendChild(settingsRow("Default sort", "Default order for tasks and projects", sortSel));
     body.appendChild(behavior);
 
     // Motion & indicators
@@ -9531,13 +10328,15 @@
     if (!sb || !currentUser) return;
     cloudPulling = true;
     startLoading();
+    const localDisplayName = state && state.settings ? state.settings.displayName : "";
     try {
       const { data, error } = await sb.from("user_state")
         .select("state, updated_at").eq("user_id", currentUser.id).maybeSingle();
       if (error) throw error;
       if (data && data.state) {
         const localHasData = state.portfolios.length || state.projects.length || state.entries.length ||
-          (state.events && state.events.length) || (state.documents && state.documents.length);
+          (state.events && state.events.length) || (state.documents && state.documents.length) ||
+          (state.folders && state.folders.length);
         const differs = !statesEquivalent(state, data.state);
         if (localHasData && differs) {
           const choice = await showSyncConflict(state, data.state, data.updated_at);
@@ -9558,6 +10357,7 @@
           // choice === "cloud" falls through to replace local with cloud
         }
         state = backfillState(data.state);
+        if (!state.settings.displayName && localDisplayName) state.settings.displayName = localDisplayName;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         try { localStorage.setItem(PREFS_KEY, JSON.stringify(state.settings)); } catch (e) {}
         applySettings(state.settings);
@@ -9598,13 +10398,12 @@
       // pre-existing hash mangles the fragment so the session can't be parsed back.
       options: { redirectTo: window.location.origin + window.location.pathname },
       });
-      if (error) { logEvent('signInError', { err: error.message }); alert("Sign-in failed: " + error.message); }
+      if (error) { logEvent('signInError', { err: error.message }); showAuthBanner("Sign-in failed: " + error.message); }
     } finally { stopLoading(); }
   }
 
   async function signOut() {
     if (!sb) return;
-    if (!confirm("Sign out? Your data is saved in the cloud and will be restored when you sign back in.")) return;
     await sb.auth.signOut();
     logEvent('signOut', {});
   }
@@ -9614,6 +10413,8 @@
   function resetToSignedOut() {
     clearTimeout(cloudPushTimer);          // cancel any pending debounced push
     cloudPulling = false;
+    currentFolderId = null;
+    selectedDocIds.clear();
     // wipe data but keep current device appearance prefs so the UI doesn't flip
     state = { ...freshState(), settings: state.settings };
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
@@ -9624,20 +10425,68 @@
     renderAuthUI();
   }
 
+  function showAuthBanner(msg) {
+    const existing = document.getElementById("authBanner");
+    if (existing) existing.remove();
+    const banner = document.createElement("div");
+    banner.id = "authBanner";
+    banner.className = "auth-banner";
+    banner.setAttribute("role", "alert");
+    const txt = document.createElement("span");
+    txt.textContent = msg;
+    txt.style.flex = "1";
+    const close = document.createElement("button");
+    close.textContent = "✕";
+    close.setAttribute("aria-label", "Dismiss");
+    close.onclick = () => banner.remove();
+    banner.append(txt, close);
+    document.body.prepend(banner);
+    setTimeout(() => banner.remove(), 8000);
+  }
+  function showDisplayNameModal(defaultName, onSave) {
+    const overlay = document.createElement("div");
+    overlay.className = "display-name-modal-overlay";
+    const modal = document.createElement("div");
+    modal.className = "display-name-modal";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.innerHTML = `<h2>Welcome! Set your display name</h2><p style="margin:0;font-size:0.875rem;color:var(--muted,#6b7280)">This is how you'll appear in the app.</p>`;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = defaultName || "";
+    input.placeholder = "Your name…";
+    input.setAttribute("aria-label", "Display name");
+    const btnRow = document.createElement("div");
+    btnRow.className = "btn-row";
+    const skipBtn = document.createElement("button");
+    skipBtn.type = "button";
+    skipBtn.textContent = "Skip";
+    skipBtn.onclick = () => { onSave(defaultName); overlay.remove(); };
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "primary";
+    saveBtn.textContent = "Save";
+    saveBtn.onclick = () => { onSave(input.value.trim() || defaultName); overlay.remove(); };
+    btnRow.append(skipBtn, saveBtn);
+    modal.append(input, btnRow);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    setTimeout(() => input.focus(), 50);
+  }
   function renderAuthUI() {
     const btn = document.getElementById("authLink");
     if (!btn) return;
     if (currentUser) {
-      const email = currentUser.email || "Signed in";
-      btn.textContent = email.length > 20 ? email.slice(0, 18) + "…" : email;
-      btn.title = "Account & settings";
+      const meta = currentUser.user_metadata || {};
+      const name = (state.settings && state.settings.displayName) || meta.user_name || meta.full_name || currentUser.email || "User";
+      btn.textContent = name;
+      btn.title = "Account menu";
       btn.classList.add("active");
     } else {
-      btn.textContent = cloudEnabled ? "Sign in" : "Sign in (setup needed)";
-      btn.title = "Account & settings";
+      btn.textContent = "Sign in";
+      btn.title = "Sign in to sync your data";
       btn.classList.remove("active");
     }
-    // clicking the name opens a small dropdown (Settings + sign in/out)
     btn.onclick = (e) => { e.stopPropagation(); toggleUserMenu(); };
   }
 
@@ -9651,7 +10500,18 @@
       const wasUser = currentUser;
       currentUser = session ? session.user : null;
       renderAuthUI();
-      if (currentUser && !wasUser) cloudPull();
+      if (currentUser && !wasUser) {
+        cloudPull();
+        const meta = currentUser.user_metadata || {};
+        const derived = meta.user_name || meta.full_name || "";
+        if (!(state.settings && state.settings.displayName)) {
+          showDisplayNameModal(derived, (name) => {
+            state.settings.displayName = name || derived;
+            save();
+            renderAuthUI();
+          });
+        }
+      }
       else if (!currentUser && wasUser) resetToSignedOut();
     });
   }
