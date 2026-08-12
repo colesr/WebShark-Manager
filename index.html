@@ -727,6 +727,11 @@
     70%  { transform: scaleY(1.04); }
     100% { transform: scaleY(1); }
   }
+  @keyframes floatIn {
+    0%   { transform: translateY(14px) scale(0.96); opacity: 0; }
+    65%  { transform: translateY(-3px) scale(1.01); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
   html[data-animation="high"] .card.new-row { animation: bouncePop 420ms cubic-bezier(0.34,1.56,0.64,1) both !important; }
   html[data-animation="high"] .activity.new-row { animation: wiggleIn 380ms cubic-bezier(0.34,1.56,0.64,1) both !important; }
   html[data-animation="high"] button:active { animation: rubberBand 400ms ease both; }
@@ -740,6 +745,19 @@
   html[data-animation="high"] .dropdown-menu,
   html[data-animation="high"] .user-menu { animation: wiggleIn 250ms cubic-bezier(0.34,1.56,0.64,1) both; }
   html[data-animation="high"] .panel-min-btn:hover { animation: glowPulse 600ms ease; }
+  html[data-animation="high"] .hero,
+  html[data-animation="high"] .plan-card,
+  html[data-animation="high"] .plan-check-item,
+  html[data-animation="high"] .range-label-wrap { animation: floatIn 440ms cubic-bezier(0.34,1.56,0.64,1) both; }
+  html[data-animation="high"] .sched-event:hover,
+  html[data-animation="high"] .sched-month .mev:hover,
+  html[data-animation="high"] .plan-card:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+  }
+  html[data-animation="high"] .header-link:hover,
+  html[data-animation="high"] .ai-link:hover,
+  html[data-animation="high"] .sched-icon-btn:hover { animation: glowPulse 700ms ease; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -1820,6 +1838,147 @@
     flex-wrap: wrap;
   }
   .plan-scope .lbl { font-size: 0.82rem; color: var(--muted); }
+  .plan-form,
+  .plan-detail-grid {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .plan-form {
+    grid-template-columns: minmax(180px, 1.4fr) auto minmax(220px, 1.6fr) auto;
+    align-items: start;
+    margin: 0.9rem 0 1rem;
+  }
+  .plan-form input,
+  .plan-form select,
+  .plan-form textarea,
+  .plan-detail-grid input,
+  .plan-detail-grid select,
+  .plan-detail-grid textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+  }
+  .plan-form textarea,
+  .plan-detail-grid textarea { min-height: 2.8rem; resize: vertical; }
+  .plan-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 0.8rem;
+  }
+  .plan-card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0.9rem;
+    background: color-mix(in srgb, var(--card) 92%, var(--accent-soft));
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  }
+  .plan-card:hover { border-color: var(--border-strong); }
+  .plan-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 16%, transparent);
+  }
+  .plan-card-head,
+  .plan-check-item,
+  .plan-custom-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .plan-card-title {
+    display: inline-flex;
+    gap: 0.55rem;
+    align-items: center;
+    font-weight: 700;
+  }
+  .plan-card-title .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .plan-card-meta,
+  .plan-card-desc,
+  .plan-period,
+  .plan-item-meta {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+  .plan-card-meta,
+  .plan-card-desc { margin-top: 0.45rem; }
+  .plan-current { margin-bottom: 0.9rem; }
+  .plan-detail-grid {
+    grid-template-columns: minmax(180px, 1.4fr) minmax(150px, 0.8fr);
+    margin: 0.9rem 0;
+  }
+  .plan-detail-grid label { display: grid; gap: 0.35rem; font-size: 0.82rem; color: var(--muted); }
+  .plan-detail-grid .wide { grid-column: 1 / -1; }
+  .plan-checklist { display: grid; gap: 0.55rem; margin-top: 0.85rem; }
+  .plan-check-item {
+    padding: 0.7rem 0.8rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 88%, var(--subtle));
+    align-items: flex-start;
+  }
+  .plan-check-item.done {
+    border-color: color-mix(in srgb, var(--ok) 45%, var(--border));
+    background: color-mix(in srgb, var(--ok) 10%, var(--card));
+  }
+  .plan-check-main {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    min-width: 0;
+  }
+  .plan-check-box {
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--border-strong);
+    background: var(--card);
+    color: transparent;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .plan-check-box.done {
+    background: var(--ok);
+    border-color: var(--ok);
+    color: #fff;
+  }
+  .plan-item-actions {
+    display: inline-flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .plan-adders {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+  .plan-adder {
+    border: 1px dashed var(--border-strong);
+    border-radius: 12px;
+    padding: 0.85rem;
+    display: grid;
+    gap: 0.55rem;
+    background: color-mix(in srgb, var(--card) 92%, var(--subtle));
+  }
+  .plan-adder select,
+  .plan-custom-row input { min-width: 0; }
+  .plan-empty {
+    padding: 1rem;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    background: color-mix(in srgb, var(--card) 88%, var(--subtle));
+  }
   .plan-row {
     display: grid;
     grid-template-columns: 10px 1fr auto;
@@ -1850,6 +2009,12 @@
     transition: background var(--t-fast) var(--ease);
   }
   .plan-name:hover { background: var(--subtle); }
+  .plan-check-item .plan-name {
+    cursor: default;
+    margin-left: 0;
+    padding: 0;
+  }
+  .plan-check-item .plan-name:hover { background: transparent; }
   .plan-meta {
     margin-top: 0.2rem;
     font-size: 0.78rem;
@@ -2273,6 +2438,17 @@
     min-width: 9.5rem; text-align: center;
     font-size: 0.92rem; font-weight: 600;
   }
+  .range-label-wrap {
+    min-width: 16rem;
+    text-align: center;
+    padding: 0.15rem 0.2rem;
+  }
+  .range-label-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+    line-height: 1.3;
+  }
   .sched-toolbar .spacer { flex: 1; min-width: 0.5rem; }
   .sched-icon-btn {
     font: inherit; cursor: pointer;
@@ -2310,16 +2486,17 @@
     position: sticky; top: 0; z-index: 3;
     background: var(--card); border-bottom: 1px solid var(--border);
     border-left: 1px solid var(--border);
-    height: 42px; padding: 0.35rem 0.4rem;
+    min-height: 50px; padding: 0.35rem 0.4rem;
     text-align: center; font-size: 0.78rem; color: var(--muted);
   }
+  .sched-day-head .dow { display: block; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
   .sched-day-head.today { color: var(--accent); font-weight: 600; }
   .sched-day-head .dnum {
-    display: block; font-size: 0.95rem; font-weight: 600; color: var(--text);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.92rem; font-weight: 700; color: var(--text);
+    border-radius: 999px; padding: 0.15rem 0.55rem; margin-top: 0.2rem;
   }
   .sched-day-head.today .dnum {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 1.6rem; height: 1.6rem; border-radius: 50%;
     background: var(--accent); color: #fff;
   }
   .sched-hour-label {
@@ -2441,14 +2618,30 @@
   }
   .sched-month .mcell:nth-child(7n+1) { border-left: none; }
   .sched-month .mcell.out { background: color-mix(in srgb, var(--subtle) 70%, transparent); opacity: 0.72; }
-  .sched-month .mcell.today .mday {
+  .sched-month .mcell.today .mday-date {
     background: var(--accent); color: #fff;
-    border-radius: 50%; width: 1.45rem; height: 1.45rem;
-    display: inline-flex; align-items: center; justify-content: center;
   }
   .sched-month .mday {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
     font-size: 0.78rem; font-weight: 600; color: var(--muted);
-    margin-bottom: 0.15rem;
+    margin-bottom: 0.25rem;
+  }
+  .sched-month .mday-weekday {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+  .sched-month .mday-date {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.55rem;
+    padding: 0.05rem 0.35rem;
+    border-radius: 999px;
   }
   .sched-month .mev {
     display: block; width: 100%; text-align: left;
@@ -2527,8 +2720,7 @@
   .sched-month .mday {
     font-size: 0.7rem;
     font-weight: 700;
-    text-align: right;
-    padding: 1px 3px;
+    padding: 1px 0;
   }
   .sched-month .mev {
     font-size: 0.7rem;
@@ -2571,6 +2763,12 @@
   .schedule-thumbnail .sched-month .mev,
   .schedule-thumbnail .sched-month .more {
     display: none;
+  }
+  @media (max-width: 860px) {
+    .plan-form { grid-template-columns: 1fr; }
+    .plan-detail-grid { grid-template-columns: 1fr; }
+    .schedule-layout { grid-template-columns: 1fr; }
+    .range-label-wrap { min-width: 12rem; }
   }
   .doc-editor-fullscreen { grid-template-columns: 1fr !important; }
   .doc-editor-fullscreen .schedule-side { display: none; }
@@ -2891,7 +3089,7 @@
           <span class="ai-dot"></span>AI
         </button>
         <a class="header-link" id="reportsLink" href="#/reports">Reports</a>
-        <a class="header-link" id="planLink" href="#/plan">Plan</a>
+        <a class="header-link" id="planLink" href="#/plan">Plans</a>
         <a class="header-link" id="scheduleLink" href="#/schedule">Schedule</a>
         <a class="header-link" id="documentsLink" href="#/documents">Documents</a>
       </div>
@@ -2931,6 +3129,7 @@
   const PORTFOLIO_PALETTE = ["#2563eb","#7c3aed","#0891b2","#16a34a","#ca8a04","#dc2626"];
   const PROJECT_PALETTE   = ["#2563eb","#16a34a","#dc2626","#ea580c","#9333ea","#0891b2","#ca8a04","#db2777","#0d9488","#65a30d"];
   const ACTIVITY_PALETTE  = ["#2563eb","#16a34a","#dc2626","#ea580c","#9333ea","#0891b2","#ca8a04","#db2777"];
+  const PLAN_PALETTE      = ["#7c3aed","#2563eb","#16a34a","#ea580c","#0891b2","#db2777","#ca8a04","#0d9488"];
 
   const STATUSES = [
     { value: "planning", label: "Planning", cls: "s-planning" },
@@ -2991,6 +3190,7 @@
       portfolios: [],
       projects: [],
       activities: [],
+      plans: [],
       entries: [],
       events: [],
       documents: [],
@@ -3005,7 +3205,7 @@
   // so the two stay in lockstep — see CLAUDE.md "Persistence & migrations".
   function backfillState(s) {
     if (!s || typeof s !== "object") return freshState();
-    for (const k of ["portfolios", "projects", "activities", "entries", "events", "documents", "folders"]) {
+    for (const k of ["portfolios", "projects", "activities", "plans", "entries", "events", "documents", "folders"]) {
       if (!Array.isArray(s[k])) s[k] = [];
     }
     // schedule events (calendar module)
@@ -3122,6 +3322,25 @@
     for (const a of s.activities) if (typeof a.done !== "boolean") a.done = false;
     // backfill task priority
     for (const a of s.activities) if (!PRIORITY_BY[a.priority]) a.priority = "none";
+    // recurring plans
+    for (const p of s.plans) {
+      if (!p.id) p.id = uid();
+      if (typeof p.name !== "string" || !p.name.trim()) p.name = "Untitled plan";
+      if (!["daily", "weekly", "monthly"].includes(p.cadence)) p.cadence = "daily";
+      if (typeof p.description !== "string") p.description = "";
+      if (typeof p.color !== "string" || !p.color) p.color = PLAN_PALETTE[0];
+      if (!Array.isArray(p.items)) p.items = [];
+      if (typeof p.createdAt !== "string") p.createdAt = new Date().toISOString();
+      if (typeof p.updatedAt !== "string") p.updatedAt = p.createdAt;
+      for (const item of p.items) {
+        if (!item.id) item.id = uid();
+        if (typeof item.name !== "string" || !item.name.trim()) item.name = "Plan item";
+        if (!("activityId" in item) || (item.activityId != null && typeof item.activityId !== "string")) item.activityId = null;
+        if (!Array.isArray(item.donePeriods)) item.donePeriods = [];
+        item.donePeriods = [...new Set(item.donePeriods.filter(v => typeof v === "string"))];
+        if (typeof item.createdAt !== "string") item.createdAt = p.createdAt;
+      }
+    }
     // panel layouts (per-view section order + minimized state)
     if (!s.panelLayouts || typeof s.panelLayouts !== "object") s.panelLayouts = {};
     for (const k of Object.keys(s.panelLayouts)) {
@@ -3218,6 +3437,15 @@
     }
     return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
+  function fmtTimeInput(iso) {
+    const d = new Date(iso);
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+  function fmtClockParts(hour, minute) {
+    const d = new Date();
+    d.setHours(hour, minute, 0, 0);
+    return fmtClock(d.toISOString());
+  }
   function startOfDay(d) {
     const x = new Date(d); x.setHours(0, 0, 0, 0); return x;
   }
@@ -3245,9 +3473,21 @@
   function fmtDateLong(d) {
     return d.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
   }
+  function fmtDateLongWithYear(d) {
+    return new Date(d).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  }
   function fmtDateShort(iso) {
     const d = new Date(iso);
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function fmtMonthDayYear(d) {
+    return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+  function fmtWeekdayShortMonthDay(d) {
+    return new Date(d).toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  }
+  function startOfMonth(d) {
+    const x = new Date(d); x.setDate(1); x.setHours(0, 0, 0, 0); return x;
   }
   function daysUntil(iso) {
     const target = startOfDay(new Date(iso)).getTime();
@@ -4164,7 +4404,7 @@
       parts.push({ label: "Reports", current: true });
     } else if (view.name === "plan") {
       parts.push({ label: "All", href: "#/" });
-      parts.push({ label: "Plan", current: true });
+      parts.push({ label: "Plans", current: true });
     } else if (view.name === "schedule") {
       parts.push({ label: "All", href: "#/" });
       parts.push({ label: "Schedule", current: true });
@@ -4305,13 +4545,13 @@
     startLabel.textContent = "Start";
     const startInput = document.createElement("input");
     startInput.type = "time";
-    startInput.value = ev ? fmtClock(ev.start) : "09:00";
+    startInput.value = ev ? fmtTimeInput(ev.start) : "09:00";
     startLabel.appendChild(startInput);
     const endLabel = document.createElement("label");
     endLabel.textContent = "End";
     const endInput = document.createElement("input");
     endInput.type = "time";
-    endInput.value = ev ? fmtClock(ev.end) : "10:00";
+    endInput.value = ev ? fmtTimeInput(ev.end) : "10:00";
     endLabel.appendChild(endInput);
     timesWrap.append(startLabel, endLabel);
 
@@ -4499,9 +4739,12 @@
   }
 
   function scheduleHourLabel(hour, minute = 0) {
-    const suffix = hour < 12 ? "am" : "pm";
-    const base = hour % 12 || 12;
-    return minute ? `${base}:${pad(minute)}${suffix}` : `${base}${suffix}`;
+    const clock = fmtClockParts(hour, minute);
+    if ((state.settings && state.settings.timeFormat) === "12h") {
+      if (hour === 0 && minute === 0) return "Midnight";
+      if (hour === 12 && minute === 0) return "Noon";
+    }
+    return clock;
   }
   function scheduleWeekNumber(date) {
     const d = startOfDay(new Date(date));
@@ -4538,13 +4781,13 @@
     prevBtn.type = "button";
     prevBtn.className = "sched-icon-btn";
     prevBtn.textContent = "←";
-    prevBtn.title = "Previous";
+    prevBtn.title = `Previous ${scheduleState.view}`;
     prevBtn.addEventListener("click", () => scheduleAdjustCursor(-1));
     const todayBtn = document.createElement("button");
     todayBtn.type = "button";
     todayBtn.className = "sched-icon-btn today-btn";
     todayBtn.textContent = "Today";
-    todayBtn.title = "Go to today";
+    todayBtn.title = "Jump back to today";
     todayBtn.addEventListener("click", () => {
       scheduleSaveCursor(new Date());
       render();
@@ -4553,18 +4796,24 @@
     nextBtn.type = "button";
     nextBtn.className = "sched-icon-btn";
     nextBtn.textContent = "→";
-    nextBtn.title = "Next";
+    nextBtn.title = `Next ${scheduleState.view}`;
     nextBtn.addEventListener("click", () => scheduleAdjustCursor(1));
+    const rangeWrap = document.createElement("div");
+    rangeWrap.className = "range-label-wrap";
     const rangeLabel = document.createElement("div");
     rangeLabel.className = "range-label";
     rangeLabel.textContent = scheduleRangeLabel();
+    const rangeSub = document.createElement("div");
+    rangeSub.className = "range-label-sub";
+    rangeSub.textContent = scheduleRangeContextLabel();
+    rangeWrap.append(rangeLabel, rangeSub);
     const jumpDate = document.createElement("input");
     jumpDate.type = "date";
     jumpDate.className = "sched-date-jump";
     jumpDate.title = "Jump to date";
     jumpDate.value = isoToDateInput(cursor.toISOString());
     jumpDate.addEventListener("change", () => scheduleJumpToDate(jumpDate.value));
-    nav.append(prevBtn, todayBtn, rangeLabel, nextBtn, jumpDate);
+    nav.append(prevBtn, todayBtn, rangeWrap, nextBtn, jumpDate);
 
     const viewSwitcher = segControl(scheduleState.view, [
       { value: "day", label: "Day" },
@@ -4727,9 +4976,9 @@
     days.forEach((day) => {
       const head = document.createElement("div");
       head.className = "sched-day-head" + (startOfDay(day).getTime() === todayKey ? " today" : "");
-      const dow = day.toLocaleDateString(undefined, { weekday: "short" });
+      const dow = day.toLocaleDateString(undefined, { weekday: scheduleState.view === "day" ? "long" : "short" });
       const count = scheduleEventsForDay(day).length;
-      head.innerHTML = `<span>${escapeHtml(dow)}</span><span class="dnum">${day.getDate()}</span><small>${count} event${count === 1 ? "" : "s"}</small>`;
+      head.innerHTML = `<span class="dow">${escapeHtml(dow)}</span><span class="dnum">${escapeHtml(day.toLocaleDateString(undefined, { month: "short", day: "numeric" }))}</span><small>${count} event${count === 1 ? "" : "s"}</small>`;
       grid.appendChild(head);
     });
 
@@ -4818,7 +5067,13 @@
         if (startOfDay(day).getTime() === todayKey) cell.classList.add("today");
         const label = document.createElement("div");
         label.className = "mday";
-        label.textContent = day.getDate() === 1 ? day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : String(day.getDate());
+        const weekday = document.createElement("span");
+        weekday.className = "mday-weekday";
+        weekday.textContent = day.toLocaleDateString(undefined, { weekday: "short" });
+        const date = document.createElement("span");
+        date.className = "mday-date";
+        date.textContent = day.getDate() === 1 ? day.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : String(day.getDate());
+        label.append(weekday, date);
         cell.appendChild(label);
         const events = scheduleEventsForDay(day);
         cell.addEventListener("click", () => openScheduleEditor(null, day));
@@ -8427,7 +8682,7 @@
   // -------------------------------------------------------------------------
   // plan view — hierarchical breakdown + deadline timeline + CSV/XLS export
   // -------------------------------------------------------------------------
-  const planState = { scope: "all", scopeId: "", searchQuery: "", viewMode: "moderate" };
+  const planState = { scope: "all", scopeId: "", searchQuery: "", viewMode: "moderate", selectedPlanId: "" };
   const documentsState = { query: "", type: "all", sort: "updated", folder: "current", openId: null, fullscreen: false, codeWrap: true, shareOpenId: null };
   let currentFolderId = null;
   let selectedDocIds = new Set();
@@ -8519,7 +8774,7 @@
   function scheduleRangeLabel() {
     const cursor = scheduleCursorDate();
     if (scheduleState.view === "day") {
-      return fmtDateLong(cursor);
+      return fmtDateLongWithYear(cursor);
     }
     if (scheduleState.view === "week") {
       const start = startOfWeek(cursor);
@@ -8528,9 +8783,25 @@
       if (start.getMonth() === end.getMonth()) {
         return `${start.toLocaleDateString(undefined, { month: "short" })} ${start.getDate()}–${end.getDate()}, ${end.getFullYear()}`;
       }
-      return `${fmtDateShort(start.toISOString())} – ${fmtDateShort(end.toISOString())}`;
+      return `${fmtMonthDayYear(start)} – ${fmtMonthDayYear(end)}`;
     }
     return cursor.toLocaleDateString(undefined, { month: "long", year: "numeric" });
+  }
+  function scheduleRangeContextLabel() {
+    const cursor = scheduleCursorDate();
+    if (scheduleState.view === "day") {
+      return `Focused day view · ${scheduleEventsForDay(cursor).length} event${scheduleEventsForDay(cursor).length === 1 ? "" : "s"}`;
+    }
+    if (scheduleState.view === "week") {
+      const start = startOfWeek(cursor);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      return `Week ${scheduleWeekNumber(start)} · ${fmtWeekdayShortMonthDay(start)} to ${fmtWeekdayShortMonthDay(end)}`;
+    }
+    const start = startOfWeek(startOfMonth(cursor));
+    const end = new Date(start);
+    end.setDate(start.getDate() + 41);
+    return `6-week grid · ${fmtWeekdayShortMonthDay(start)} to ${fmtWeekdayShortMonthDay(end)}`;
   }
   function scheduleWeekDays(cursor) {
     const start = startOfWeek(cursor);
@@ -9150,10 +9421,494 @@
     return rows;
   }
 
+  function planById(id) {
+    return state.plans.find(p => p.id === id) || null;
+  }
+  function plansForDisplay() {
+    return [...state.plans].sort((a, b) => {
+      const ta = new Date(a.updatedAt || a.createdAt || 0).getTime();
+      const tb = new Date(b.updatedAt || b.createdAt || 0).getTime();
+      return tb - ta || a.name.localeCompare(b.name);
+    });
+  }
+  function planCadenceLabel(cadence) {
+    return cadence === "weekly" ? "Weekly" : cadence === "monthly" ? "Monthly" : "Daily";
+  }
+  function planPeriodInfo(plan, now = new Date()) {
+    const cadence = plan && plan.cadence || "daily";
+    if (cadence === "weekly") {
+      const from = startOfWeek(now);
+      const to = new Date(from);
+      to.setDate(from.getDate() + 6);
+      return {
+        key: `weekly:${isoToDateInput(from.toISOString())}`,
+        from: from.getTime(),
+        to: startOfDay(new Date(to.getTime() + MS_DAY)).getTime(),
+        label: `This week · ${fmtWeekdayShortMonthDay(from)} to ${fmtWeekdayShortMonthDay(to)}`,
+        shortLabel: "This week",
+      };
+    }
+    if (cadence === "monthly") {
+      const from = startOfMonth(now);
+      const to = new Date(from.getFullYear(), from.getMonth() + 1, 0);
+      return {
+        key: `monthly:${from.getFullYear()}-${pad(from.getMonth() + 1)}`,
+        from: from.getTime(),
+        to: new Date(from.getFullYear(), from.getMonth() + 1, 1).getTime(),
+        label: `This month · ${from.toLocaleDateString(undefined, { month: "long", year: "numeric" })}`,
+        shortLabel: "This month",
+      };
+    }
+    const from = startOfDay(now);
+    return {
+      key: `daily:${isoToDateInput(from.toISOString())}`,
+      from: from.getTime(),
+      to: from.getTime() + MS_DAY,
+      label: `Today · ${fmtDateLongWithYear(from)}`,
+      shortLabel: "Today",
+    };
+  }
+  function planItemDoneForPeriod(plan, item, period) {
+    const info = period || planPeriodInfo(plan);
+    return !!(item && Array.isArray(item.donePeriods) && item.donePeriods.includes(info.key));
+  }
+  function planProgress(plan, period) {
+    const info = period || planPeriodInfo(plan);
+    const total = Array.isArray(plan.items) ? plan.items.length : 0;
+    const done = total ? plan.items.filter(item => planItemDoneForPeriod(plan, item, info)).length : 0;
+    return {
+      period: info,
+      total,
+      done,
+      pct: total ? Math.round((done / total) * 100) : 0,
+    };
+  }
+  function ensurePlanSelection() {
+    const plans = plansForDisplay();
+    if (!plans.length) {
+      planState.selectedPlanId = "";
+      return null;
+    }
+    if (!planState.selectedPlanId || !planById(planState.selectedPlanId)) {
+      planState.selectedPlanId = plans[0].id;
+    }
+    return planById(planState.selectedPlanId);
+  }
+  function createPlan(fields) {
+    const name = (fields.name || "").trim();
+    if (!name) return null;
+    const id = uid();
+    const now = new Date().toISOString();
+    state.plans.push({
+      id,
+      name,
+      cadence: ["daily", "weekly", "monthly"].includes(fields.cadence) ? fields.cadence : "daily",
+      description: (fields.description || "").trim(),
+      color: pickColor(PLAN_PALETTE, state.plans.map(p => p.color)),
+      items: [],
+      createdAt: now,
+      updatedAt: now,
+    });
+    planState.selectedPlanId = id;
+    logEvent("addPlan", { id, name });
+    save();
+    return id;
+  }
+  function updatePlanEntity(id, patch) {
+    const plan = planById(id);
+    if (!plan) return;
+    if ("name" in patch) patch.name = (patch.name || "").trim() || plan.name;
+    if ("description" in patch) patch.description = (patch.description || "").trim();
+    if ("cadence" in patch && !["daily", "weekly", "monthly"].includes(patch.cadence)) delete patch.cadence;
+    Object.assign(plan, patch);
+    plan.updatedAt = new Date().toISOString();
+    logEvent("updatePlan", { id, patch });
+    save();
+  }
+  function deletePlanEntity(id) {
+    const plan = planById(id);
+    if (!plan) return;
+    if (!confirm(`Delete plan "${plan.name}" and its checklist history?`)) return;
+    state.plans = state.plans.filter(p => p.id !== id);
+    if (planState.selectedPlanId === id) planState.selectedPlanId = "";
+    logEvent("deletePlan", { id, name: plan.name });
+    save();
+    render();
+  }
+  function addPlanItem(planId, fields) {
+    const plan = planById(planId);
+    if (!plan) return null;
+    const linked = fields.activityId ? activityById(fields.activityId) : null;
+    const name = ((fields.name || "") || (linked && linked.name) || "").trim();
+    if (!name) return null;
+    const item = {
+      id: uid(),
+      name,
+      activityId: linked ? linked.id : null,
+      donePeriods: [],
+      createdAt: new Date().toISOString(),
+    };
+    plan.items.push(item);
+    plan.updatedAt = new Date().toISOString();
+    logEvent("addPlanItem", { planId, itemId: item.id, activityId: item.activityId, name: item.name });
+    save();
+    return item.id;
+  }
+  function updatePlanItem(planId, itemId, patch) {
+    const plan = planById(planId);
+    if (!plan) return;
+    const item = plan.items.find(it => it.id === itemId);
+    if (!item) return;
+    if ("name" in patch) patch.name = (patch.name || "").trim() || item.name;
+    if ("activityId" in patch && patch.activityId != null && !activityById(patch.activityId)) patch.activityId = null;
+    Object.assign(item, patch);
+    plan.updatedAt = new Date().toISOString();
+    logEvent("updatePlanItem", { planId, itemId, patch });
+    save();
+  }
+  function deletePlanItem(planId, itemId) {
+    const plan = planById(planId);
+    if (!plan) return;
+    const item = plan.items.find(it => it.id === itemId);
+    if (!item) return;
+    plan.items = plan.items.filter(it => it.id !== itemId);
+    plan.updatedAt = new Date().toISOString();
+    logEvent("deletePlanItem", { planId, itemId, name: item.name });
+    save();
+    render();
+  }
+  function togglePlanItemDone(planId, itemId) {
+    const plan = planById(planId);
+    if (!plan) return;
+    const item = plan.items.find(it => it.id === itemId);
+    if (!item) return;
+    const key = planPeriodInfo(plan).key;
+    const set = new Set(item.donePeriods || []);
+    if (set.has(key)) set.delete(key);
+    else set.add(key);
+    item.donePeriods = [...set];
+    plan.updatedAt = new Date().toISOString();
+    logEvent("togglePlanItemDone", { planId, itemId, key, done: item.donePeriods.includes(key) });
+    save();
+    render();
+  }
+  function buildPlanCard(plan) {
+    const progress = planProgress(plan);
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "plan-card" + (plan.id === planState.selectedPlanId ? " selected" : "");
+    card.addEventListener("click", () => {
+      planState.selectedPlanId = plan.id;
+      render();
+    });
+    const head = document.createElement("div");
+    head.className = "plan-card-head";
+    const title = document.createElement("div");
+    title.className = "plan-card-title";
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    dot.style.background = plan.color;
+    const text = document.createElement("span");
+    text.textContent = plan.name;
+    title.append(dot, text);
+    const cadence = document.createElement("span");
+    cadence.className = "meta-pill";
+    cadence.textContent = planCadenceLabel(plan.cadence);
+    head.append(title, cadence);
+    card.appendChild(head);
+    const meta = document.createElement("div");
+    meta.className = "plan-card-meta";
+    meta.textContent = `${progress.done}/${progress.total} done · ${progress.period.shortLabel}`;
+    card.appendChild(meta);
+    if (plan.description) {
+      const desc = document.createElement("div");
+      desc.className = "plan-card-desc";
+      desc.textContent = plan.description;
+      card.appendChild(desc);
+    }
+    return card;
+  }
+  function buildPlanChecklistRow(plan, item, period) {
+    const row = document.createElement("div");
+    const done = planItemDoneForPeriod(plan, item, period);
+    row.className = "plan-check-item" + (done ? " done" : "");
+    const left = document.createElement("div");
+    left.className = "plan-check-main";
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "plan-check-box" + (done ? " done" : "");
+    toggle.textContent = done ? "✓" : "";
+    toggle.title = done ? "Mark as not done for this cadence" : "Mark as done for this cadence";
+    toggle.addEventListener("click", () => togglePlanItemDone(plan.id, item.id));
+    const textWrap = document.createElement("div");
+    const name = document.createElement("div");
+    name.className = "plan-name";
+    name.textContent = item.name;
+    const meta = document.createElement("div");
+    meta.className = "plan-item-meta";
+    const linked = item.activityId ? activityById(item.activityId) : null;
+    meta.textContent = linked
+      ? `Linked task · ${projectById(linked.projectId)?.name || "Unknown project"}`
+      : "Plan-only item";
+    if (item.activityId && !linked) meta.textContent = "Linked task missing";
+    textWrap.append(name, meta);
+    left.append(toggle, textWrap);
+    const actions = document.createElement("div");
+    actions.className = "plan-item-actions";
+    if (linked) {
+      const openBtn = document.createElement("button");
+      openBtn.type = "button";
+      openBtn.className = "icon-btn";
+      openBtn.textContent = "Open task";
+      openBtn.addEventListener("click", () => navigate({ name: "project", id: linked.projectId }));
+      actions.appendChild(openBtn);
+    }
+    const renameBtn = document.createElement("button");
+    renameBtn.type = "button";
+    renameBtn.className = "icon-btn";
+    renameBtn.textContent = "Rename";
+    renameBtn.addEventListener("click", () => {
+      const next = prompt("Rename item:", item.name);
+      if (next !== null) {
+        updatePlanItem(plan.id, item.id, { name: next });
+        render();
+      }
+    });
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "icon-btn danger";
+    removeBtn.textContent = "Remove";
+    removeBtn.addEventListener("click", () => deletePlanItem(plan.id, item.id));
+    actions.append(renameBtn, removeBtn);
+    row.append(left, actions);
+    return row;
+  }
+  function renderRecurringPlansSection(root) {
+    const sec = document.createElement("section");
+    sec.dataset.panelId = "plans-recurring";
+    const head = document.createElement("div");
+    head.className = "section-head";
+    head.innerHTML = `<h2>Recurring plans</h2><span class="head-meta">${state.plans.length}</span>`;
+    sec.appendChild(head);
+    const hint = document.createElement("div");
+    hint.className = "empty";
+    hint.textContent = "Create daily, weekly, or monthly plans so repeating checklists reset automatically each cadence.";
+    sec.appendChild(hint);
+    const form = document.createElement("form");
+    form.className = "plan-form";
+    const name = document.createElement("input");
+    name.type = "text";
+    name.placeholder = "New plan name…";
+    const cadence = document.createElement("select");
+    [["daily","Daily"],["weekly","Weekly"],["monthly","Monthly"]].forEach(([value, label]) => {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      cadence.appendChild(o);
+    });
+    const desc = document.createElement("textarea");
+    desc.placeholder = "What should this plan help you stay on top of?";
+    const submit = document.createElement("button");
+    submit.type = "submit";
+    submit.className = "primary";
+    submit.textContent = "Create plan";
+    form.append(name, cadence, desc, submit);
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = createPlan({ name: name.value, cadence: cadence.value, description: desc.value });
+      if (!id) {
+        toast("Give the plan a name first");
+        return;
+      }
+      render();
+    });
+    sec.appendChild(form);
+    const cards = document.createElement("div");
+    cards.className = "plan-card-grid";
+    const plans = plansForDisplay();
+    if (!plans.length) {
+      const empty = document.createElement("div");
+      empty.className = "plan-empty";
+      empty.textContent = "No recurring plans yet. Try a daily to-do list, a weekly review, or a monthly maintenance checklist.";
+      cards.appendChild(empty);
+    } else {
+      plans.forEach(plan => cards.appendChild(buildPlanCard(plan)));
+    }
+    sec.appendChild(cards);
+    root.appendChild(sec);
+  }
+  function renderPlanWorkspaceSection(root, plan) {
+    const sec = document.createElement("section");
+    sec.dataset.panelId = "plans-workspace";
+    const head = document.createElement("div");
+    head.className = "section-head";
+    head.innerHTML = `<h2>Plan workspace</h2><span class="head-meta">${plan ? planCadenceLabel(plan.cadence) : "Pick a plan"}</span>`;
+    sec.appendChild(head);
+    if (!plan) {
+      const empty = document.createElement("div");
+      empty.className = "plan-empty";
+      empty.textContent = "Select a recurring plan to edit its cadence, manage checklist items, and track progress.";
+      sec.appendChild(empty);
+      root.appendChild(sec);
+      return;
+    }
+    const progress = planProgress(plan);
+    const meta = document.createElement("div");
+    meta.className = "plan-current";
+    const pills = document.createElement("div");
+    pills.className = "plan-meta";
+    [planCadenceLabel(plan.cadence), progress.period.shortLabel, `${progress.done}/${progress.total} done`].forEach(label => {
+      const pill = document.createElement("span");
+      pill.className = "meta-pill";
+      pill.textContent = label;
+      pills.appendChild(pill);
+    });
+    const period = document.createElement("div");
+    period.className = "plan-period";
+    period.textContent = progress.period.label;
+    meta.append(pills, period);
+    sec.appendChild(meta);
+    const progressWrap = document.createElement("div");
+    progressWrap.className = "progress-wrap";
+    progressWrap.innerHTML = `<div class="progress-meta"><span>${plan.name}</span><span>${progress.total ? progress.pct : 0}%</span></div>`;
+    const bar = document.createElement("div");
+    bar.className = "progress";
+    const inner = document.createElement("div");
+    requestAnimationFrame(() => { inner.style.width = `${progress.total ? progress.pct : 0}%`; });
+    bar.appendChild(inner);
+    progressWrap.appendChild(bar);
+    sec.appendChild(progressWrap);
+
+    const form = document.createElement("div");
+    form.className = "plan-detail-grid";
+    const nameField = document.createElement("label");
+    nameField.innerHTML = `<span>Name</span>`;
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.value = plan.name;
+    nameField.appendChild(nameInput);
+    const cadenceField = document.createElement("label");
+    cadenceField.innerHTML = `<span>Cadence</span>`;
+    const cadenceSel = document.createElement("select");
+    [["daily","Daily"],["weekly","Weekly"],["monthly","Monthly"]].forEach(([value, label]) => {
+      const o = document.createElement("option");
+      o.value = value;
+      o.textContent = label;
+      if (plan.cadence === value) o.selected = true;
+      cadenceSel.appendChild(o);
+    });
+    cadenceField.appendChild(cadenceSel);
+    const descField = document.createElement("label");
+    descField.className = "wide";
+    descField.innerHTML = `<span>Description</span>`;
+    const descInput = document.createElement("textarea");
+    descInput.value = plan.description || "";
+    descInput.placeholder = "Optional notes for how this plan should be used";
+    descField.appendChild(descInput);
+    form.append(nameField, cadenceField, descField);
+    sec.appendChild(form);
+    const actionRow = document.createElement("div");
+    actionRow.className = "export-row";
+    const saveBtn = document.createElement("button");
+    saveBtn.type = "button";
+    saveBtn.className = "primary";
+    saveBtn.textContent = "Save changes";
+    saveBtn.addEventListener("click", () => {
+      updatePlanEntity(plan.id, { name: nameInput.value, cadence: cadenceSel.value, description: descInput.value });
+      render();
+    });
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "icon-btn danger";
+    deleteBtn.textContent = "Delete plan";
+    deleteBtn.addEventListener("click", () => deletePlanEntity(plan.id));
+    actionRow.append(saveBtn, deleteBtn);
+    sec.appendChild(actionRow);
+
+    const checklistHead = document.createElement("div");
+    checklistHead.className = "section-head";
+    checklistHead.innerHTML = `<h3>Checklist items</h3><span class="head-meta">${plan.items.length}</span>`;
+    sec.appendChild(checklistHead);
+    const list = document.createElement("div");
+    list.className = "plan-checklist";
+    if (!plan.items.length) {
+      const empty = document.createElement("div");
+      empty.className = "plan-empty";
+      empty.textContent = "Add existing tasks from the app, or create plan-only checklist items for this cadence.";
+      list.appendChild(empty);
+    } else {
+      plan.items.forEach(item => list.appendChild(buildPlanChecklistRow(plan, item, progress.period)));
+    }
+    sec.appendChild(list);
+
+    const adders = document.createElement("div");
+    adders.className = "plan-adders";
+    const existingWrap = document.createElement("div");
+    existingWrap.className = "plan-adder";
+    const existingTitle = document.createElement("div");
+    existingTitle.className = "td-label";
+    existingTitle.textContent = "Add an existing app task";
+    const taskSel = document.createElement("select");
+    const emptyOpt = document.createElement("option");
+    emptyOpt.value = "";
+    emptyOpt.textContent = state.activities.length ? "Choose a task…" : "No tasks available yet";
+    taskSel.appendChild(emptyOpt);
+    sortedActivitiesForDisplay([...state.activities]).forEach(a => {
+      const o = document.createElement("option");
+      o.value = a.id;
+      o.textContent = `${a.name} · ${projectById(a.projectId)?.name || "Unknown project"}`;
+      taskSel.appendChild(o);
+    });
+    const taskBtn = document.createElement("button");
+    taskBtn.type = "button";
+    taskBtn.className = "icon-btn";
+    taskBtn.textContent = "Add task";
+    taskBtn.disabled = !state.activities.length;
+    taskBtn.addEventListener("click", () => {
+      if (!taskSel.value) return;
+      const existing = plan.items.find(item => item.activityId === taskSel.value);
+      if (existing) {
+        toast("That task is already in this plan");
+        return;
+      }
+      addPlanItem(plan.id, { activityId: taskSel.value });
+      render();
+    });
+    existingWrap.append(existingTitle, taskSel, taskBtn);
+
+    const customWrap = document.createElement("div");
+    customWrap.className = "plan-adder";
+    const customTitle = document.createElement("div");
+    customTitle.className = "td-label";
+    customTitle.textContent = "Create a new plan-only item";
+    const customRow = document.createElement("div");
+    customRow.className = "plan-custom-row";
+    const customInput = document.createElement("input");
+    customInput.type = "text";
+    customInput.placeholder = "New checklist item…";
+    const customBtn = document.createElement("button");
+    customBtn.type = "button";
+    customBtn.className = "icon-btn";
+    customBtn.textContent = "Add item";
+    customBtn.addEventListener("click", () => {
+      const id = addPlanItem(plan.id, { name: customInput.value });
+      if (!id) {
+        toast("Give the item a name first");
+        return;
+      }
+      render();
+    });
+    customRow.append(customInput, customBtn);
+    customWrap.append(customTitle, customRow);
+    adders.append(existingWrap, customWrap);
+    sec.appendChild(adders);
+    root.appendChild(sec);
+  }
   function renderPlanView(root) {
     // validate scope id
     if (planState.scope === "portfolio" && !portfolioById(planState.scopeId)) { planState.scope = "all"; planState.scopeId = ""; }
     if (planState.scope === "project"   && !projectById(planState.scopeId))   { planState.scope = "all"; planState.scopeId = ""; }
+    const selectedPlan = ensurePlanSelection();
 
     // hero
     const hero = document.createElement("div");
@@ -9161,7 +9916,7 @@
     const top = document.createElement("div");
     top.className = "hero-top";
     const title = document.createElement("h1");
-    title.textContent = "Plan";
+    title.textContent = "Plans";
     title.style.flex = "1";
     title.style.cursor = "default";
     top.appendChild(title);
@@ -9169,7 +9924,7 @@
 
     const meta = document.createElement("div");
     meta.className = "meta-row";
-    meta.innerHTML = `<span>A structured breakdown of your work — portfolios, projects, tasks, with deadlines and dependencies.</span>`;
+    meta.innerHTML = `<span>Manage recurring plans and keep a structured breakdown of your work in one place.</span><span>${state.plans.length} recurring plan${state.plans.length === 1 ? "" : "s"}</span>`;
     hero.appendChild(meta);
 
     // scope selector
@@ -9214,7 +9969,7 @@
     scopeRow.append(lbl, sel);
     // add plan search and view mode selector
     const searchWrap = document.createElement('div'); searchWrap.className = 'plan-search';
-    const searchInp = document.createElement('input'); searchInp.type = 'search'; searchInp.placeholder = 'Search plans…'; searchInp.className = 'plan-keyword'; searchInp.value = planState.searchQuery || '';
+    const searchInp = document.createElement('input'); searchInp.type = 'search'; searchInp.placeholder = 'Search work breakdown…'; searchInp.className = 'plan-keyword'; searchInp.value = planState.searchQuery || '';
     const searchBtn = document.createElement('button'); searchBtn.type='button'; searchBtn.className='file-btn'; searchBtn.textContent='Search';
     const viewSel = document.createElement('select'); viewSel.className='plan-viewsel'; ['compact','moderate','detail'].forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent = v[0].toUpperCase()+v.slice(1); viewSel.appendChild(o); }); viewSel.value = planState.viewMode || 'moderate';
     searchWrap.append(searchInp, searchBtn, viewSel);
@@ -9225,6 +9980,9 @@
     searchInp.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') searchBtn.click(); });
     viewSel.addEventListener('change', ()=> { planState.viewMode = viewSel.value; render(); });
     root.appendChild(hero);
+
+    renderRecurringPlansSection(root);
+    renderPlanWorkspaceSection(root, selectedPlan);
 
     // breakdown
     const data = planScopeItems();
@@ -9247,29 +10005,26 @@
       }
     }
     const totalCount = data.portfolios.reduce((s, b) => s + 1 + b.projects.length + b.projects.reduce((ss, pb) => ss + pb.activities.length, 0), 0);
-    if (totalCount === 0) {
-      const empty = document.createElement("section");
-      const e = document.createElement("div");
-      e.className = "plan-empty";
-      e.textContent = "Nothing to show — create a portfolio and a project to get started.";
-      empty.appendChild(e);
-      root.appendChild(empty);
-      return;
-    }
-
     const breakdownSec = document.createElement("section");
     breakdownSec.dataset.panelId = "plan-breakdown";
     const h = document.createElement("h2");
-    h.textContent = "Breakdown";
+    h.textContent = "Work breakdown";
     breakdownSec.appendChild(h);
     // apply viewMode classes for styling
     breakdownSec.classList.add('plan-view-' + (planState.viewMode || 'moderate'));
-    for (const pfBlock of filteredData.portfolios) {
-      breakdownSec.appendChild(buildPlanPortfolioRow(pfBlock.pf));
-      for (const pBlock of pfBlock.projects) {
-        breakdownSec.appendChild(buildPlanProjectRow(pBlock.p));
-        for (const a of pBlock.activities) {
-          breakdownSec.appendChild(buildPlanActivityRow(a));
+    if (totalCount === 0) {
+      const e = document.createElement("div");
+      e.className = "plan-empty";
+      e.textContent = "Nothing to show yet — create a portfolio, project, or task to populate the work breakdown.";
+      breakdownSec.appendChild(e);
+    } else {
+      for (const pfBlock of filteredData.portfolios) {
+        breakdownSec.appendChild(buildPlanPortfolioRow(pfBlock.pf));
+        for (const pBlock of pfBlock.projects) {
+          breakdownSec.appendChild(buildPlanProjectRow(pBlock.p));
+          for (const a of pBlock.activities) {
+            breakdownSec.appendChild(buildPlanActivityRow(a));
+          }
         }
       }
     }
@@ -9284,7 +10039,7 @@
       const tlSec = document.createElement("section");
       tlSec.dataset.panelId = "plan-timeline";
       const th = document.createElement("h2");
-      th.textContent = "Timeline";
+      th.textContent = "Work timeline";
       tlSec.appendChild(th);
       renderPlanTimeline(tlSec, dated);
       root.appendChild(tlSec);
@@ -9294,17 +10049,19 @@
     const exSec = document.createElement("section");
     exSec.dataset.panelId = "plan-export";
     const eh = document.createElement("h2");
-    eh.textContent = "Export plan";
+    eh.textContent = "Export work breakdown";
     exSec.appendChild(eh);
     const row = document.createElement("div");
     row.className = "export-row";
     const csvBtn = document.createElement("button");
     csvBtn.className = "file-btn";
     csvBtn.textContent = "Export CSV";
+    csvBtn.disabled = totalCount === 0;
     csvBtn.addEventListener("click", exportPlanCsv);
     const xlsBtn = document.createElement("button");
     xlsBtn.className = "file-btn";
     xlsBtn.textContent = "Export XLS";
+    xlsBtn.disabled = totalCount === 0;
     xlsBtn.addEventListener("click", exportPlanXls);
     row.append(csvBtn, xlsBtn);
     exSec.appendChild(row);
@@ -11082,14 +11839,14 @@
         { value: "compact", label: "Compact" },
       ], v => updateSetting("density", v))));
     const animSel = document.createElement("select");
-    [["low","Low (default)"],["high","High (bombastic!)"]].forEach(([v, l]) => {
+    [["low","Low (default)"],["high","High (party mode!)"]].forEach(([v, l]) => {
       const o = document.createElement("option");
       o.value = v; o.textContent = l;
       if ((s.animationLevel || "low") === v) o.selected = true;
       animSel.appendChild(o);
     });
     animSel.onchange = () => updateSetting("animationLevel", animSel.value);
-    appearance.appendChild(settingsRow("Animation level", "Low = subtle fades • High = bouncy & fun", animSel));
+    appearance.appendChild(settingsRow("Animation level", "Low = subtle fades • High = extra lively, playful, and energetic", animSel));
     const radSel = document.createElement("select");
     [["sharp","Sharp"],["rounded","Rounded (default)"],["pill","Pill"]].forEach(([v, l]) => {
       const o = document.createElement("option");
@@ -11151,7 +11908,7 @@
     behavior.appendChild(settingsRow("Default view", "Where the app opens",
       segControl(s.landingView, [
         { value: "home", label: "Home" },
-        { value: "plan", label: "Plan" },
+        { value: "plan", label: "Plans" },
         { value: "schedule", label: "Schedule" },
         { value: "reports", label: "Reports" },
       ], v => updateSetting("landingView", v))));
@@ -11512,6 +12269,7 @@
       if (data && data.state) {
         const localHasData = state.portfolios.length || state.projects.length || state.entries.length ||
           (state.events && state.events.length) || (state.documents && state.documents.length) ||
+          (state.plans && state.plans.length) ||
           (state.folders && state.folders.length);
         const differs = !statesEquivalent(state, data.state);
         if (localHasData && differs) {
